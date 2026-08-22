@@ -75,10 +75,10 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
 
     function ticketMarkup(number) {
         return `
-            <span class="relative flex min-h-16 items-center justify-center overflow-hidden rounded-2xl bg-amber-400 px-4 py-3 text-2xl font-black tracking-wide text-slate-950 shadow-lg shadow-amber-900/10 ring-1 ring-amber-500/30">
-                <span class="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-slate-50"></span>
-                <span class="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-slate-50"></span>
-                <svg class="mr-3 h-7 w-7 text-amber-900/65" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <span class="relative flex min-h-12 items-center justify-center overflow-hidden rounded-xl bg-amber-400 px-3 py-2 text-lg font-black tracking-wide text-slate-950 shadow-lg shadow-amber-900/10 ring-1 ring-amber-500/30">
+                <span class="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-slate-50"></span>
+                <span class="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-slate-50"></span>
+                <svg class="mr-2 h-5 w-5 text-amber-900/65" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5v2a2 2 0 0 0 0 3v2A2.5 2.5 0 0 1 17.5 18h-11A2.5 2.5 0 0 1 4 15.5v-2a2 2 0 0 0 0-3v-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                     <path d="M9 8v8M15 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3"/>
                 </svg>
@@ -97,7 +97,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
                 : 'cursor-not-allowed border-slate-200 bg-slate-200 text-slate-400 opacity-60');
 
         return `
-            <button type="button" class="min-h-11 min-w-16 rounded-xl border px-2 py-2 text-center text-sm font-black tracking-wide transition ${stateClass}" data-number-button="${item.number}" ${disabled ? 'disabled' : ''}>
+            <button type="button" class="min-h-10 min-w-14 rounded-lg border px-2 py-1.5 text-center text-[0.82rem] font-black tracking-wide transition ${stateClass}" data-number-button="${item.number}" ${disabled ? 'disabled' : ''}>
                 ${item.number}
             </button>
         `;
@@ -131,7 +131,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         numberGrid.innerHTML = '<p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">Cargando numeros...</p>';
         const url = new URL(numbersUrl, window.location.origin);
         url.searchParams.set('page', page);
-        url.searchParams.set('per_page', 100);
+        url.searchParams.set('per_page', 50);
 
         const response = await fetch(url, { headers: { Accept: 'application/json' } });
         if (!response.ok) {

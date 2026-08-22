@@ -3,7 +3,7 @@
         $soldPercent = $raffle->total_numbers > 0 ? min(100, round(($raffle->sold_count / $raffle->total_numbers) * 100)) : 0;
     @endphp
 
-    <section class="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_460px]">
+    <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_410px]">
         <div class="min-w-0 space-y-6">
             <header class="overflow-hidden rounded-2xl bg-[#f72f3f] text-white shadow-2xl shadow-red-500/15">
                 <div class="grid gap-6 p-6 lg:grid-cols-[1fr_280px] lg:p-8">
@@ -102,23 +102,23 @@
             </article>
         </div>
 
-        <form class="surface sticky top-6 h-fit p-5 xl:p-6" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}" data-numbers-url="{{ route('raffles.numbers', $raffle) }}">
+        <form class="surface sticky top-4 h-fit p-4 xl:p-5" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}" data-numbers-url="{{ route('raffles.numbers', $raffle) }}">
             @csrf
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <p class="text-xs font-black uppercase tracking-wide text-slate-500">Compra segura</p>
-                    <h3 class="text-3xl font-black tracking-tight">Tus numeros</h3>
+                    <h3 class="text-2xl font-black tracking-tight">Tus numeros</h3>
                 </div>
                 <span class="rounded-full bg-emerald-50 px-3 py-2 text-sm font-black text-emerald-700">{{ $raffle->sale_enabled ? 'Venta activa' : 'Pausada' }}</span>
             </div>
 
-            <div class="mt-5 grid gap-3">
+            <div class="mt-4 grid gap-3">
                 <label class="grid gap-1 text-sm font-black text-slate-600">Nombre completo<input class="field" name="buyer_name" value="{{ old('buyer_name') }}" autocomplete="name" required></label>
                 <label class="grid gap-1 text-sm font-black text-slate-600">Telefono<input class="field" name="buyer_phone" value="{{ old('buyer_phone') }}" inputmode="tel" autocomplete="tel" required></label>
                 <label class="grid gap-1 text-sm font-black text-slate-600">Correo<input class="field" type="email" name="buyer_email" value="{{ old('buyer_email') }}" autocomplete="email"></label>
             </div>
 
-            <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div class="flex items-center justify-between gap-3">
                     <p class="font-black">Paquetes</p>
                     <span class="text-xs font-black uppercase text-slate-400">Hasta 5</span>
@@ -134,7 +134,7 @@
                 <p class="mt-3 text-sm leading-6 text-slate-600" data-package-help>Selecciona un paquete o escoge manualmente en la cuadricula.</p>
             </div>
             @if ($raffle->assignment_mode === 'manual')
-                <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
+                <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
                     <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <p class="font-black">Cuadricula manual</p>
@@ -147,7 +147,7 @@
                         <strong class="text-sm font-black text-slate-600" data-number-page-label>Pagina 1</strong>
                         <button class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xl font-black text-slate-800 shadow-sm transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-35" type="button" data-number-page-next aria-label="Pagina siguiente">›</button>
                     </div>
-                    <div class="mt-3 grid max-h-none grid-cols-4 gap-2 min-[420px]:grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 xl:grid-cols-5" data-number-grid>
+                    <div class="mt-3 grid max-h-[22rem] grid-cols-4 gap-1.5 overflow-auto pr-1 min-[420px]:grid-cols-5 sm:grid-cols-5 xl:grid-cols-5" data-number-grid>
                         <p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">Cargando numeros...</p>
                     </div>
                     <div class="mt-3 flex flex-wrap gap-3 text-xs font-bold text-slate-500">
@@ -157,15 +157,15 @@
                 </div>
             @endif
 
-            <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4">
+            <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4">
                 <p class="text-sm font-black text-slate-500">Seleccion actual</p>
-                <div class="mt-3 grid min-h-12 grid-cols-1 gap-3 sm:grid-cols-2" data-selected-list>Ninguno</div>
+                <div class="mt-3 grid min-h-10 grid-cols-2 gap-2" data-selected-list>Ninguno</div>
                 <div data-hidden-numbers></div>
                 <div class="mt-4 grid gap-2 sm:grid-cols-2">
                     <button class="rounded-xl bg-amber-400 px-3 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:bg-amber-300" type="button" data-reroll-selection hidden>Cambiar numeros (5 restantes)</button>
                     <button class="rounded-xl bg-red-50 px-3 py-3 text-sm font-black text-red-700 transition hover:bg-red-100" type="button" data-clear-selection hidden>Eliminar seleccion</button>
                 </div>
-                <p class="mt-3 text-2xl font-black text-teal-700" data-total>Total: ₡0</p>
+                <p class="mt-3 text-xl font-black text-teal-700" data-total>Total: ₡0</p>
             </div>
 
             <label class="mt-5 grid gap-1 text-sm font-black text-slate-600">Comprobante<input class="field" type="file" name="receipt" accept="image/*,.pdf" required></label>
