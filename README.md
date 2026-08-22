@@ -4,7 +4,7 @@ Prototipo web estático para administrar rifas digitales.
 
 ## Incluye
 
-- Paginas separadas para venta publica, confirmacion, panel administrativo, validacion de pagos y reportes.
+- Paginas separadas para venta publica, confirmacion, panel administrativo, validacion de pagos, reportes y control de numeros.
 - Crear diferentes sorteos desde el panel.
 - Pausar o reactivar la venta de cada sorteo sin eliminarlo.
 - Configurar cantidad total de números: 5, 10,000, 100,000, etc.
@@ -18,6 +18,7 @@ Prototipo web estático para administrar rifas digitales.
 - Mostrar confirmacion de compra con estado pendiente.
 - Aprobar o rechazar compras desde el panel de pagos.
 - Ver historial completo de ordenes por estado.
+- Controlar numeros vendidos, reservados y disponibles con busqueda y filtros.
 - Simular envio de correo al comprador cuando administracion aprueba el pago.
 - Estados de números: disponible, reservado y vendido.
 - Datos guardados en `localStorage` del navegador.
@@ -33,5 +34,6 @@ Abre `index.html` en el navegador para ver la pagina publica.
 - `admin.html`: configuracion de rifas.
 - `pagos.html`: validacion de comprobantes.
 - `reportes.html`: historial y resumen de ventas.
+- `numeros.html`: inventario administrativo de numeros.
 
 Este prototipo no usa servidor ni base de datos todavia. Para produccion conviene migrar la logica a backend con base de datos indexada, autenticacion de administradores, almacenamiento real de comprobantes y envio real de correos.

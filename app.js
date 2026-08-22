@@ -1121,8 +1121,181 @@ function statusText(status) {
     pending: "Pendiente",
     approved: "Aprobado",
     rejected: "Rechazado",
+    available: "Disponible",
+    reserved: "Reservado",
+    sold: "Vendido",
   };
   return labels[status] || status;
+}
+
+function initNumbersPage() {
+  const pageSizeNumbers = 100;
+  let pageNumber = 1;
+  const els = {
+    summary: $("#numbersSummary"),
+    raffleFilter: $("#numbersRaffleFilter"),
+    statusFilter: $("#numbersStatusFilter"),
+    search: $("#numbersSearch"),
+    table: $("#numbersTable"),
+    prev: $("#numbersPrevPage"),
+    next: $("#numbersNextPage"),
+    pageInfo: $("#numbersPageInfo"),
+  };
+
+  function renderRaffleOptions() {
+    els.raffleFilter.innerHTML = state.raffles
+      .map((raffle) => `<option value="${escapeHTML(raffle.id)}">${escapeHTML(raffle.name)}</option>`)
+      .join("");
+    els.raffleFilter.value = state.activeRaffleId;
+  }
+
+  function selectedRaffle() {
+    return state.raffles.find((raffle) => raffle.id === els.raffleFilter.value) || activeRaffle();
+  }
+
+  function orderForNumber(raffle, number) {
+    return state.orders.find(
+      (order) =>
+        order.raffleId === raffle.id &&
+        order.numbers.includes(number) &&
+        ["pending", "approved"].includes(order.status),
+    );
+  }
+
+  function buildRows() {
+    const raffle = selectedRaffle();
+    const sold = new Set(raffle.numbers.sold);
+    const reserved = new Set(raffle.numbers.reserved);
+    const status = els.statusFilter.value;
+    const search = els.search.value.trim();
+
+    const rows = [];
+    if (search) {
+      const number = search.padStart(numberWidth(raffle), "0");
+      if (Number(search) >= 1 && Number(search) <= raffle.totalNumbers) {
+        rows.push(rowForNumber(raffle, number, sold, reserved));
+      }
+      return rows.filter((row) => status === "all" || row.status === status);
+    }
+
+    for (let value = 1; value <= raffle.totalNumbers; value += 1) {
+      const number = formatNumber(value, raffle);
+      const row = rowForNumber(raffle, number, sold, reserved);
+      if (status === "all" || row.status === status) rows.push(row);
+    }
+
+    return rows;
+  }
+
+  function rowForNumber(raffle, number, sold, reserved) {
+    const status = sold.has(number) ? "sold" : reserved.has(number) ? "reserved" : "available";
+    const order = status === "available" ? null : orderForNumber(raffle, number);
+    return {
+      number,
+      status,
+      buyerName: order?.buyerName || "",
+      buyerPhone: order?.buyerPhone || "",
+      orderId: order?.id || "",
+      createdAt: order?.createdAt || "",
+    };
+  }
+
+  function renderSummary(rows) {
+    const raffle = selectedRaffle();
+    const sold = raffle.numbers.sold.length;
+    const reserved = raffle.numbers.reserved.length;
+    const available = Math.max(0, raffle.totalNumbers - sold - reserved);
+    const soldPercent = Math.round((sold / raffle.totalNumbers) * 100);
+    els.summary.innerHTML = `
+      <article>
+        <span>Vendidos</span>
+        <strong>${sold.toLocaleString("es-CR")}</strong>
+      </article>
+      <article>
+        <span>Reservados</span>
+        <strong>${reserved.toLocaleString("es-CR")}</strong>
+      </article>
+      <article>
+        <span>Disponibles</span>
+        <strong>${available.toLocaleString("es-CR")}</strong>
+      </article>
+      <article>
+        <span>Resultado filtro</span>
+        <strong>${rows.length.toLocaleString("es-CR")}</strong>
+      </article>
+      <article>
+        <span>Avance vendido</span>
+        <strong>${soldPercent}%</strong>
+      </article>
+    `;
+  }
+
+  function renderTable() {
+    const rows = buildRows();
+    const totalPages = Math.max(1, Math.ceil(rows.length / pageSizeNumbers));
+    pageNumber = Math.min(pageNumber, totalPages);
+    const visible = rows.slice((pageNumber - 1) * pageSizeNumbers, pageNumber * pageSizeNumbers);
+    renderSummary(rows);
+
+    if (!visible.length) {
+      els.table.innerHTML = `<div class="empty">No hay números para este filtro.</div>`;
+    } else {
+      els.table.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Estado</th>
+              <th>Comprador</th>
+              <th>Teléfono</th>
+              <th>Orden</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${visible
+              .map(
+                (row) => `
+                  <tr>
+                    <td><strong>${escapeHTML(row.number)}</strong></td>
+                    <td><span class="status-badge ${escapeHTML(row.status)}">${statusText(row.status)}</span></td>
+                    <td>${escapeHTML(row.buyerName || "-")}</td>
+                    <td>${escapeHTML(row.buyerPhone || "-")}</td>
+                    <td>${row.orderId ? `#${escapeHTML(row.orderId.slice(0, 8))}` : "-"}</td>
+                    <td>${row.createdAt ? new Date(row.createdAt).toLocaleString("es-CR") : "-"}</td>
+                  </tr>
+                `,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    els.pageInfo.textContent = `Página ${pageNumber} de ${totalPages}`;
+    els.prev.disabled = pageNumber <= 1;
+    els.next.disabled = pageNumber >= totalPages;
+  }
+
+  function resetAndRender() {
+    pageNumber = 1;
+    renderTable();
+  }
+
+  els.raffleFilter.addEventListener("change", resetAndRender);
+  els.statusFilter.addEventListener("change", resetAndRender);
+  els.search.addEventListener("input", resetAndRender);
+  els.prev.addEventListener("click", () => {
+    pageNumber = Math.max(1, pageNumber - 1);
+    renderTable();
+  });
+  els.next.addEventListener("click", () => {
+    pageNumber += 1;
+    renderTable();
+  });
+
+  renderRaffleOptions();
+  renderTable();
 }
 
 if (page === "public") initPublicPage();
@@ -1130,3 +1303,4 @@ if (page === "admin") initAdminPage();
 if (page === "payments") initPaymentsPage();
 if (page === "confirmation") initConfirmationPage();
 if (page === "reports") initReportsPage();
+if (page === "numbers") initNumbersPage();

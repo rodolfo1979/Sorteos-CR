@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rifas CR - Control de números</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="numbers">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">Administración</p>
+        <h1>Rifas CR</h1>
+      </div>
+      <nav>
+        <a class="nav-button" href="index.html">Venta</a>
+        <a class="nav-button" href="admin.html">Panel admin</a>
+        <a class="nav-button" href="pagos.html">Pagos</a>
+        <a class="nav-button" href="reportes.html">Reportes</a>
+        <a class="nav-button active" href="numeros.html">Números</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Inventario</p>
+          <h2>Control de números</h2>
+        </div>
+      </section>
+
+      <section id="numbersSummary" class="summary-grid"></section>
+
+      <section class="panel">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Búsqueda</p>
+            <h3>Vendidos, reservados y disponibles</h3>
+          </div>
+        </div>
+
+        <div class="number-filters">
+          <label>
+            Rifa
+            <select id="numbersRaffleFilter"></select>
+          </label>
+          <label>
+            Estado
+            <select id="numbersStatusFilter">
+              <option value="all">Todos</option>
+              <option value="sold">Vendidos</option>
+              <option value="reserved">Reservados</option>
+              <option value="available">Disponibles</option>
+            </select>
+          </label>
+          <label>
+            Buscar número
+            <input id="numbersSearch" placeholder="Ej. 07228" inputmode="numeric" />
+          </label>
+        </div>
+
+        <div id="numbersTable" class="numbers-table"></div>
+        <div class="pagination">
+          <button id="numbersPrevPage" type="button">Anterior</button>
+          <span id="numbersPageInfo">Página 1</span>
+          <button id="numbersNextPage" type="button">Siguiente</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
