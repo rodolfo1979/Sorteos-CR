@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rifas CR - Validación de pagos</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="payments">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">Administración</p>
+        <h1>Rifas CR</h1>
+      </div>
+      <nav>
+        <a class="nav-button" href="index.html">Venta</a>
+        <a class="nav-button" href="admin.html">Panel admin</a>
+        <a class="nav-button active" href="pagos.html">Pagos</a>
+        <a class="nav-button" href="reportes.html">Reportes</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Verificación</p>
+          <h2>Comprobantes pendientes</h2>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div id="paymentsList" class="payments-list"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

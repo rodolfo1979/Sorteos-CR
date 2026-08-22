@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rifas CR - Panel administrativo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="admin">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">Administración</p>
+        <h1>Rifas CR</h1>
+      </div>
+      <nav>
+        <a class="nav-button" href="index.html">Venta</a>
+        <a class="nav-button active" href="admin.html">Panel admin</a>
+        <a class="nav-button" href="pagos.html">Pagos</a>
+        <a class="nav-button" href="reportes.html">Reportes</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Panel</p>
+          <h2>Configurar sorteos</h2>
+        </div>
+      </section>
+
+      <section class="admin-hero">
+        <div>
+          <p class="eyebrow">Centro de control</p>
+          <h2>Dashboard en tiempo real</h2>
+          <p>Ventas, ocupación de números, comprobantes y estado operativo de las rifas.</p>
+        </div>
+        <span id="livePulse" class="live-pill">Actualizando</span>
+      </section>
+
+      <section class="admin-kpis">
+        <article>
+          <span>Ventas aprobadas</span>
+          <strong id="adminRevenue">₡0</strong>
+        </article>
+        <article>
+          <span>Comprobantes pendientes</span>
+          <strong id="adminPending">0</strong>
+        </article>
+        <article>
+          <span>Números vendidos</span>
+          <strong id="adminSold">0</strong>
+        </article>
+        <article>
+          <span>Disponibles</span>
+          <strong id="adminAvailable">0</strong>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel chart-panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Ingresos</p>
+              <h3>Ventas por rifa</h3>
+            </div>
+          </div>
+          <canvas id="salesChart" width="680" height="280"></canvas>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Ordenes</p>
+              <h3>Estados</h3>
+            </div>
+          </div>
+          <canvas id="statusChart" width="360" height="280"></canvas>
+        </article>
+
+        <article class="panel activity-panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Movimiento</p>
+              <h3>Actividad reciente</h3>
+            </div>
+          </div>
+          <div id="adminActivityList" class="activity-list"></div>
+        </article>
+      </section>
+
+      <div class="workspace two-columns">
+        <section class="panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Rifa</p>
+              <h3>Crear o editar</h3>
+            </div>
+          </div>
+
+          <form id="raffleForm">
+            <input id="raffleId" type="hidden" />
+            <label>
+              Nombre de la rifa
+              <input id="raffleName" required placeholder="Ej. Rifa Moto 2026" />
+            </label>
+            <div class="form-grid">
+              <label>
+                Cantidad de números
+                <input id="totalNumbers" required type="number" min="5" max="100000" step="1" />
+              </label>
+              <label>
+                Precio por compra
+                <input id="price" required type="number" min="1" step="100" />
+              </label>
+            </div>
+            <div class="form-grid">
+              <label>
+                Números por compra
+                <input id="numbersPerOrder" required type="number" min="1" max="100" step="1" />
+              </label>
+              <label>
+                Cambios permitidos al azar
+                <input id="maxRandomChanges" required type="number" min="0" max="20" step="1" />
+              </label>
+            </div>
+            <div class="form-grid">
+              <label>
+                Minutos de reserva
+                <input id="reservationMinutes" required type="number" min="5" max="240" step="5" />
+              </label>
+              <label>
+                Fecha del sorteo
+                <input id="drawDate" type="date" />
+              </label>
+            </div>
+            <label>
+              Modo de asignación
+              <select id="assignmentMode">
+                <option value="manual">El comprador escoge sus números</option>
+                <option value="random">El sistema asigna números al azar</option>
+              </select>
+            </label>
+            <label>
+              Premio
+              <textarea id="prize" rows="3" placeholder="Ej. Moto, efectivo, pantalla, canasta..."></textarea>
+            </label>
+            <div class="form-grid">
+              <label>
+                Organizador
+                <input id="organizerName" placeholder="Ej. AutoSorteos 506" />
+              </label>
+              <label>
+                WhatsApp
+                <input id="organizerWhatsapp" placeholder="Ej. 8842-9658" />
+              </label>
+            </div>
+            <label>
+              Información de pago
+              <textarea id="paymentInfo" rows="3" placeholder="Ej. SINPE: 8842-9658 a nombre de..." ></textarea>
+            </label>
+            <label>
+              Condiciones / cómo participar
+              <textarea id="rulesText" rows="5" placeholder="Una condición por línea"></textarea>
+            </label>
+            <label>
+              Fotografía del premio
+              <input id="raffleImageInput" type="file" accept="image/png,image/jpeg,image/webp" />
+            </label>
+            <div id="adminImagePreview" class="admin-image-preview"></div>
+            <button class="primary-button" type="submit">Guardar rifa</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Sorteos</p>
+              <h3>Rifas creadas</h3>
+            </div>
+          </div>
+          <div id="raffleList" class="raffle-list"></div>
+        </section>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

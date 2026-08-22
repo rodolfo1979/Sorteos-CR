@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rifas CR - Comprar números</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="public">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">Sitio público</p>
+        <h1>Rifas CR</h1>
+      </div>
+      <nav>
+        <a class="nav-button active" href="index.html">Venta</a>
+        <a class="nav-button" href="admin.html">Panel admin</a>
+        <a class="nav-button" href="pagos.html">Pagos</a>
+        <a class="nav-button" href="reportes.html">Reportes</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="public-brand-strip">
+        <div class="brand-mark">RS</div>
+        <div class="brand-progress">
+          <div class="progress-track"><span id="saleProgressBar"></span></div>
+          <strong id="saleProgressText">0%</strong>
+        </div>
+        <a id="topWhatsappLink" class="square-link" href="#" target="_blank" rel="noreferrer">WA</a>
+      </section>
+
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Rifa activa</p>
+          <h2 id="activeRaffleName">Cargando...</h2>
+        </div>
+        <select id="activeRaffleSelect" aria-label="Seleccionar rifa"></select>
+      </section>
+
+      <section class="product-showcase">
+        <div class="product-image-wrap">
+          <img id="raffleImage" alt="Imagen del premio de la rifa" />
+        </div>
+        <div class="product-copy">
+          <p class="eyebrow">Premio</p>
+          <h3 id="publicPrize">Premio por definir</h3>
+          <p id="publicDrawDate" class="meta">Fecha por definir</p>
+        </div>
+      </section>
+
+      <section class="public-info">
+        <article class="organizer-card">
+          <div class="brand-mark small">RS</div>
+          <div>
+            <span>Organizador</span>
+            <strong id="publicOrganizerName">Rifas CR</strong>
+          </div>
+          <a id="organizerWhatsappLink" class="action-button approve" href="#" target="_blank" rel="noreferrer">WhatsApp</a>
+        </article>
+        <article class="rules-card">
+          <h3>Cómo participar</h3>
+          <ul id="publicRulesList"></ul>
+        </article>
+      </section>
+
+      <div class="summary-grid">
+        <article>
+          <span>Precio</span>
+          <strong id="publicPrice">₡0</strong>
+        </article>
+        <article>
+          <span>Números por compra</span>
+          <strong id="publicNumbersPerOrder">0</strong>
+        </article>
+        <article>
+          <span>Modo</span>
+          <strong id="publicMode">Manual</strong>
+        </article>
+        <article>
+          <span>Disponibles</span>
+          <strong id="publicAvailable">0</strong>
+        </article>
+      </div>
+
+      <section class="payment-info-card">
+        <h3>Información de pago</h3>
+        <p id="publicPaymentInfo">Sube el comprobante para validar tu participación.</p>
+      </section>
+
+      <div class="workspace">
+        <section class="panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Comprador</p>
+              <h3>Datos y comprobante</h3>
+            </div>
+            <span id="selectionHint" class="pill">Escoge números</span>
+          </div>
+
+          <form id="purchaseForm">
+            <label>
+              Nombre completo
+              <input id="buyerName" required placeholder="Ej. María Rodríguez" />
+            </label>
+            <label>
+              Teléfono
+              <input id="buyerPhone" required placeholder="Ej. 8888-8888" />
+            </label>
+            <label>
+              Correo electrónico
+              <input id="buyerEmail" required type="email" placeholder="correo@ejemplo.com" />
+            </label>
+            <label>
+              Comprobante de pago
+              <input id="paymentReceipt" required type="file" accept="image/*,.pdf" />
+            </label>
+            <div class="selected-box">
+              <span>Números de esta compra</span>
+              <strong id="selectedNumbersText">Ninguno</strong>
+              <small id="purchaseTotalText">Total: ₡0</small>
+            </div>
+            <button class="primary-button" type="submit">Enviar comprobante</button>
+          </form>
+        </section>
+
+        <section id="manualPanel" class="panel number-panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Numeración</p>
+              <h3>Escoge tus números</h3>
+            </div>
+            <div class="toolbar">
+              <input id="numberSearch" placeholder="Buscar número" inputmode="numeric" />
+            </div>
+          </div>
+          <div id="numberGrid" class="number-grid"></div>
+          <div class="pagination">
+            <button id="prevPage" type="button">Anterior</button>
+            <span id="pageInfo">Página 1</span>
+            <button id="nextPage" type="button">Siguiente</button>
+          </div>
+        </section>
+
+        <section id="randomPanel" class="panel random-panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Asignación al azar</p>
+              <h3>Tus números</h3>
+            </div>
+            <span id="randomChangesPill" class="pill">0 cambios</span>
+          </div>
+          <div class="random-box">
+            <div id="randomNumbers" class="random-numbers">Presiona generar para recibir tus números.</div>
+            <div id="inverseOffer" class="inverse-offer" hidden></div>
+            <div class="card-actions">
+              <button id="generateRandomButton" class="primary-button" type="button">Generar números</button>
+              <button id="changeRandomButton" class="action-button" type="button">Cambiar números</button>
+            </div>
+            <p class="meta" id="randomHelp"></p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="sticky-contact">
+      <div>
+        <strong id="stickyOrganizerName">Rifas CR</strong>
+        <span id="stickyOrganizerPhone">WhatsApp</span>
+      </div>
+      <a id="stickyWhatsappLink" href="#" target="_blank" rel="noreferrer">WhatsApp</a>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
