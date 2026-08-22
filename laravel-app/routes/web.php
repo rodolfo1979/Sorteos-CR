@@ -15,7 +15,7 @@ Route::post('/rifas/{raffle}/random', [PurchaseController::class, 'random'])->na
 Route::post('/rifas/{raffle}/comprar', [PurchaseController::class, 'store'])->name('purchases.store');
 Route::get('/confirmacion/{uuid}', [ConfirmationController::class, 'show'])->name('purchase.confirmation');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('/pagos', [PaymentController::class, 'index'])->name('payments.index');
     Route::post('/pagos/{order}/aprobar', [PaymentController::class, 'approve'])->name('payments.approve');
@@ -23,3 +23,4 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reportes', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/numeros', [NumberController::class, 'index'])->name('numbers.index');
 });
+
