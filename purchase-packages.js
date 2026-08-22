@@ -21,7 +21,7 @@
 
     .package-options {
       display: grid;
-      grid-template-columns: repeat(5, minmax(72px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
       gap: 8px;
     }
 
@@ -32,7 +32,9 @@
       color: var(--ink);
       cursor: pointer;
       font-weight: 900;
+      min-height: 54px;
       padding: 10px 8px;
+      white-space: normal;
     }
 
     .package-option.active {
@@ -130,7 +132,9 @@
       )
       .join("");
 
-    els.packageHelp.textContent = `Esta rifa vende paquetes de ${raffle.numbersPerOrder} número(s). Total actual: ${money.format(raffle.price * packageCount)}.`;
+        els.packageHelp.textContent = raffle.assignmentMode === "random"
+      ? `Al escoger una opción, el sistema asigna automáticamente ${expectedSelectionCount(raffle)} número(s). Total actual: ${money.format(raffle.price * packageCount)}.`
+      : `Escoge ${expectedSelectionCount(raffle)} número(s) manualmente. Si seleccionas una cantidad incompleta, el sistema te indicará cuántos faltan.`;
   }
 
   function renderSelection() {
@@ -423,3 +427,4 @@
   attachPatchedHandlers();
   renderPatchedPublic();
 })();
+
