@@ -24,6 +24,7 @@ class AdminProtectionTest extends TestCase
         $this->withBasicAuth('admin-test', 'secure-test-password')
             ->get('/admin')
             ->assertStatus(200)
-            ->assertSee('Dashboard en tiempo real');
+            ->assertSee('Dashboard operativo');
     }
 }
+
