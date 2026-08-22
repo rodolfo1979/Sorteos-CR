@@ -102,7 +102,7 @@
             </article>
         </div>
 
-        <form class="surface sticky top-6 h-fit p-5 xl:p-6" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}">
+        <form class="surface sticky top-6 h-fit p-5 xl:p-6" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}">
             @csrf
             <div class="flex items-start justify-between gap-4">
                 <div>
@@ -133,10 +133,6 @@
                 <input type="hidden" name="package_count" value="1" data-package-count>
                 <p class="mt-3 text-sm leading-6 text-slate-600" data-package-help>Selecciona un paquete o escoge manualmente en la cuadricula.</p>
             </div>
-
-            @if ($raffle->assignmentMode === 'manual')
-            @endif
-
             @if ($raffle->assignment_mode === 'manual')
                 <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
                     <div class="mb-3 flex items-center justify-between gap-3">
@@ -153,9 +149,12 @@
 
             <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4">
                 <p class="text-sm font-black text-slate-500">Seleccion actual</p>
-                <div class="mt-2 flex min-h-12 flex-wrap gap-2 text-lg font-black" data-selected-list>Ninguno</div>
+                <div class="mt-3 grid min-h-12 grid-cols-1 gap-3 sm:grid-cols-2" data-selected-list>Ninguno</div>
                 <div data-hidden-numbers></div>
-                <button class="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-black text-red-700 transition hover:bg-red-100" type="button" data-clear-selection hidden>Eliminar seleccion</button>
+                <div class="mt-4 grid gap-2 sm:grid-cols-2">
+                    <button class="rounded-xl bg-amber-400 px-3 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:bg-amber-300" type="button" data-reroll-selection hidden>Cambiar numeros (5 restantes)</button>
+                    <button class="rounded-xl bg-red-50 px-3 py-3 text-sm font-black text-red-700 transition hover:bg-red-100" type="button" data-clear-selection hidden>Eliminar seleccion</button>
+                </div>
                 <p class="mt-3 text-2xl font-black text-teal-700" data-total>Total: ₡0</p>
             </div>
 
@@ -164,4 +163,3 @@
         </form>
     </section>
 </x-layouts.app>
-
