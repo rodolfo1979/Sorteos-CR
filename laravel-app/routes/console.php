@@ -9,7 +9,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command('raffles:rebuild-numbers {raffle_id} {--force}', function (int $raffleId): int {
+Artisan::command('raffles:rebuild-numbers {raffle_id} {--force}', function (): int {
+    $raffleId = (int) $this->argument('raffle_id');
     $raffle = Raffle::find($raffleId);
 
     if (! $raffle) {
