@@ -71,6 +71,31 @@
                 </article>
             </section>
 
+            @if ($raffle->public_sales_text)
+                <article class="overflow-hidden rounded-2xl border border-red-900/35 bg-[#090303] text-white shadow-2xl shadow-red-950/10">
+                    <div class="border-b border-red-900/40 bg-gradient-to-r from-red-950 to-[#090303] p-5 sm:p-6">
+                        <p class="text-xs font-black uppercase tracking-[0.22em] text-red-300">Evento relacionado</p>
+                        <h3 class="mt-2 text-3xl font-black tracking-tight">{{ $raffle->prize_title ?? $raffle->name }}</h3>
+                    </div>
+                    <div class="p-5 sm:p-6">
+                        <p class="whitespace-pre-line text-lg leading-9 text-slate-300">{{ $raffle->public_sales_text }}</p>
+                    </div>
+                    <div class="grid gap-3 border-t border-red-900/40 p-5 sm:grid-cols-3 sm:p-6">
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-wide text-slate-500">Disponibles</p>
+                            <strong class="mt-1 block text-3xl font-black">{{ number_format($raffle->available_count) }}</strong>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-wide text-slate-500">Precio</p>
+                            <strong class="mt-1 block text-3xl font-black text-red-400">₡{{ number_format($raffle->price_per_package, 0, ',', ' ') }}</strong>
+                        </div>
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-wide text-slate-500">Sorteo</p>
+                            <strong class="mt-1 block text-xl font-black">{{ $raffle->draw_date ? $raffle->draw_date->format('d/m/Y') : 'Por definir' }}</strong>
+                        </div>
+                    </div>
+                </article>
+            @endif
             <article class="surface p-6">
                 <h3 class="text-2xl font-black tracking-tight">Como participar</h3>
                 <p class="mt-4 whitespace-pre-line leading-7 text-slate-600">{{ $raffle->rules_text }}</p>

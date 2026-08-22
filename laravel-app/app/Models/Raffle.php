@@ -14,7 +14,7 @@ class Raffle extends Model
         'name', 'slug', 'total_numbers', 'number_width', 'price_per_package',
         'numbers_per_package', 'max_random_changes', 'reservation_minutes',
         'assignment_mode', 'sale_enabled', 'is_featured', 'draw_date',
-        'prize_title', 'prize_description', 'image_path', 'organizer_name',
+        'prize_title', 'prize_description', 'public_sales_text', 'image_path', 'organizer_name',
         'organizer_whatsapp', 'payment_instructions', 'rules_text',
     ];
 

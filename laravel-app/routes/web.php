@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NumberController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\RaffleController as AdminRaffleController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Public\ConfirmationController;
 use App\Http\Controllers\Public\PurchaseController;
@@ -17,6 +18,8 @@ Route::get('/confirmacion/{uuid}', [ConfirmationController::class, 'show'])->nam
 
 Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/rifas/{raffle}/editar', [AdminRaffleController::class, 'edit'])->name('raffles.edit');
+    Route::put('/rifas/{raffle}', [AdminRaffleController::class, 'update'])->name('raffles.update');
     Route::get('/pagos', [PaymentController::class, 'index'])->name('payments.index');
     Route::post('/pagos/{order}/aprobar', [PaymentController::class, 'approve'])->name('payments.approve');
     Route::post('/pagos/{order}/rechazar', [PaymentController::class, 'reject'])->name('payments.reject');

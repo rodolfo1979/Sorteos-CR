@@ -45,7 +45,10 @@
                             <span class="text-sm font-black text-teal-700">{{ $progress }}%</span>
                         </div>
                         <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full bg-teal-600" style="width: {{ $progress }}%"></div></div>
-                        <p class="mt-2 text-sm text-slate-500">{{ number_format($raffle->sold_numbers_count) }} vendidos · {{ number_format($raffle->reserved_numbers_count) }} reservados</p>
+                        <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+                            <p class="text-sm text-slate-500">{{ number_format($raffle->sold_numbers_count) }} vendidos · {{ number_format($raffle->reserved_numbers_count) }} reservados</p>
+                            <a class="rounded-lg bg-white px-3 py-2 text-xs font-black text-teal-700 shadow-sm transition hover:bg-teal-50" href="{{ route('admin.raffles.edit', $raffle) }}">Editar venta</a>
+                        </div>
                     </div>
                 @endforeach
             </div>
