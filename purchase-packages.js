@@ -2,6 +2,7 @@
   if (document.body.dataset.page !== "public") return;
 
   const maxPackages = 5;
+  let selectionSource = "manual";
   const packageStyles = document.createElement("style");
   packageStyles.textContent = `
     .package-selector {
@@ -48,6 +49,20 @@
       line-height: 1.45;
     }
 
+    .clear-selection-button {
+      border: 1px solid rgba(185, 50, 50, 0.22);
+      border-radius: 8px;
+      background: #ffe4e4;
+      color: var(--danger);
+      cursor: pointer;
+      font-weight: 900;
+      padding: 10px 12px;
+    }
+
+    .clear-selection-button[hidden] {
+      display: none !important;
+    }
+
     @media (max-width: 560px) {
       .package-options {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -72,6 +87,7 @@
       pageInfo: document.querySelector("#pageInfo"),
       packageOptions: document.querySelector("#packageOptions"),
       packageHelp: document.querySelector("#packageHelp"),
+      clearSelectionButton: document.querySelector("#clearSelectionButton"),
       randomChangesPill: document.querySelector("#randomChangesPill"),
       randomNumbers: document.querySelector("#randomNumbers"),
       inverseOffer: document.querySelector("#inverseOffer"),
@@ -89,7 +105,16 @@
     node.replaceWith(clone);
   }
 
-  function detachOriginalPublicHandlers() {
+    function installClearSelectionButton() {
+    const help = document.querySelector("#packageHelp");
+    if (!help || document.querySelector("#clearSelectionButton")) return;
+    help.insertAdjacentHTML(
+      "afterend",
+      `<button id="clearSelectionButton" class="clear-selection-button" type="button" hidden>Eliminar selección</button>`,
+    );
+  }
+function detachOriginalPublicHandlers() {
+    installClearSelectionButton();
     [
       "#purchaseForm",
       "#numberGrid",
@@ -126,7 +151,7 @@
       .map(
         (count) => `
           <button class="package-option ${count === packageCount ? "active" : ""}" data-package-count="${count}" type="button">
-            ${packageLabel(raffle, count)}
+            ${raffle.assignmentMode === "manual" ? `Azar ${packageLabel(raffle, count)}` : packageLabel(raffle, count)}
           </button>
         `,
       )
@@ -134,7 +159,7 @@
 
         els.packageHelp.textContent = raffle.assignmentMode === "random"
       ? `Al escoger una opción, el sistema asigna automáticamente ${expectedSelectionCount(raffle)} número(s). Total actual: ${money.format(raffle.price * packageCount)}.`
-      : `Escoge ${expectedSelectionCount(raffle)} número(s) manualmente. Si seleccionas una cantidad incompleta, el sistema te indicará cuántos faltan.`;
+      : `Puedes escoger en la cuadrícula o tomar ${expectedSelectionCount(raffle)} número(s) al azar. Total actual: ${money.format(raffle.price * packageCount)}.`;
   }
 
   function renderSelection() {
@@ -145,6 +170,7 @@
       ? `${selectedNumbers.join(", ")} (${selectedNumbers.length}/${expected})`
       : "Ninguno";
     els.purchaseTotalText.textContent = `Total: ${money.format(raffle.price * packageCount)}`;
+    if (els.clearSelectionButton) els.clearSelectionButton.hidden = !selectedNumbers.length;
   }
 
   function renderNumberGrid() {
@@ -286,6 +312,7 @@
     }
 
     selectedNumbers = picks;
+    selectionSource = "random";
     inverseOffer = null;
     if (countAsChange) randomChangesUsed += 1;
     renderPackageOptions();
@@ -304,14 +331,9 @@
       packageCount = Number(button.dataset.packageCount);
       inverseOffer = null;
 
-      if (raffle.assignmentMode === "random") {
-        assignRandomNumbers(false);
-        return;
-      }
-
-      const expected = expectedSelectionCount(raffle);
-      if (selectedNumbers.length > expected) selectedNumbers = selectedNumbers.slice(0, expected);
-      renderPatchedPublic();
+      assignRandomNumbers(false);
+      if (raffle.assignmentMode === "manual") renderNumberGrid();
+      return;
     });
 
     els.numberGrid.addEventListener("click", (event) => {
@@ -326,6 +348,7 @@
         selectedNumbers = selectedNumbers.filter((number) => number !== value);
       } else if (selectedNumbers.length < maxNumbers) {
         selectedNumbers.push(value);
+        selectionSource = "manual";
         normalizePackageForSelection(raffle);
       } else {
         alert(`Esta compra permite hasta ${maxNumbers} número(s).`);
@@ -361,7 +384,13 @@
       renderPatchedPublic();
     });
 
-    els.form.addEventListener("submit", async (event) => {
+        els.clearSelectionButton?.addEventListener("click", () => {
+      selectedNumbers = [];
+      inverseOffer = null;
+      selectionSource = "manual";
+      renderPatchedPublic();
+    });
+els.form.addEventListener("submit", async (event) => {
       event.preventDefault();
       const raffle = activeRaffle();
       if (!raffle.saleEnabled) {
@@ -412,6 +441,7 @@
       saveState();
       els.form.reset();
       selectedNumbers = [];
+      selectionSource = "manual";
       randomChangesUsed = 0;
       packageCount = 1;
       inverseOffer = null;
@@ -427,4 +457,5 @@
   attachPatchedHandlers();
   renderPatchedPublic();
 })();
+
 
