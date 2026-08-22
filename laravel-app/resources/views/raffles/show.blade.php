@@ -139,9 +139,9 @@
                         <p class="font-black">Cuadricula manual</p>
                         <span class="text-sm font-black text-slate-500">{{ number_format($raffle->available_count) }} disp.</span>
                     </div>
-                    <div class="grid max-h-72 grid-cols-5 gap-2 overflow-auto pr-1 sm:grid-cols-6">
+                    <div class="grid max-h-80 grid-cols-4 gap-1.5 overflow-auto pr-1 min-[420px]:grid-cols-5 sm:grid-cols-6 lg:grid-cols-7">
                         @foreach ($raffle->numbers()->where('status', 'available')->orderBy('number')->limit(180)->get() as $number)
-                            <button type="button" class="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-sm font-black transition hover:border-red-400 hover:bg-red-50" data-number-button="{{ $number->number }}">{{ $number->number }}</button>
+                            <button type="button" class="relative min-h-10 overflow-hidden rounded-xl border border-slate-200 bg-white px-1.5 py-2 text-[0.78rem] font-black tracking-wide text-slate-900 shadow-sm transition before:absolute before:-left-2 before:top-1/2 before:h-4 before:w-4 before:-translate-y-1/2 before:rounded-full before:bg-white after:absolute after:-right-2 after:top-1/2 after:h-4 after:w-4 after:-translate-y-1/2 after:rounded-full after:bg-white hover:border-amber-400 hover:bg-amber-50" data-number-button="{{ $number->number }}">{{ $number->number }}</button>
                         @endforeach
                     </div>
                 </div>

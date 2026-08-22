@@ -18,6 +18,8 @@ Route::get('/confirmacion/{uuid}', [ConfirmationController::class, 'show'])->nam
 
 Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/rifas/crear', [AdminRaffleController::class, 'create'])->name('raffles.create');
+    Route::post('/rifas', [AdminRaffleController::class, 'store'])->name('raffles.store');
     Route::get('/rifas/{raffle}/editar', [AdminRaffleController::class, 'edit'])->name('raffles.edit');
     Route::put('/rifas/{raffle}', [AdminRaffleController::class, 'update'])->name('raffles.update');
     Route::get('/pagos', [PaymentController::class, 'index'])->name('payments.index');

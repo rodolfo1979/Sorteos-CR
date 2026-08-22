@@ -10,6 +10,7 @@
                 <p class="text-sm font-black text-emerald-100">Estado del sistema</p>
                 <strong class="mt-2 block text-3xl font-black">En pruebas</strong>
                 <p class="mt-2 text-sm text-emerald-100/80">Subdominio activo antes del dominio oficial.</p>
+                <a class="mt-4 inline-flex rounded-xl bg-white px-4 py-3 text-sm font-black text-[#063d32] transition hover:bg-emerald-50" href="{{ route('admin.raffles.create') }}">Crear sorteo</a>
             </div>
         </div>
     </section>

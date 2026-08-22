@@ -200,10 +200,10 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
             ? 'Selecciona un paquete al azar o escoge manualmente en la cuadricula.'
             : 'Selecciona una cantidad para asignar numeros automaticamente.';
         form.querySelectorAll('[data-number-button]').forEach((button) => {
-            button.classList.remove('border-red-500', 'bg-red-50', 'text-red-700');
+            button.classList.remove('border-amber-500', 'bg-amber-400', 'text-slate-950');
         });
         form.querySelectorAll('[data-package]').forEach((button) => {
-            button.classList.remove('border-red-500', 'bg-red-50', 'text-red-700');
+            button.classList.remove('border-amber-500', 'bg-amber-400', 'text-slate-950');
         });
         render();
     });

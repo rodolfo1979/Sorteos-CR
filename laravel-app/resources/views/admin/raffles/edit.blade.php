@@ -72,6 +72,10 @@
                         Venta activa
                         <input class="h-5 w-5 accent-teal-700" type="checkbox" name="sale_enabled" value="1" @checked(old('sale_enabled', $raffle->sale_enabled))>
                     </label>
+                    <label class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-black text-slate-700">
+                        Mostrar en venta principal
+                        <input class="h-5 w-5 accent-teal-700" type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $raffle->is_featured))>
+                    </label>
                     <label class="grid gap-1 text-sm font-black text-slate-600">Modo de asignacion
                         <select class="field" name="assignment_mode">
                             <option value="manual" @selected(old('assignment_mode', $raffle->assignment_mode) === 'manual')>Manual y al azar</option>
