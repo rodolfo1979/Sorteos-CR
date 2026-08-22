@@ -15,6 +15,7 @@ Prototipo web estático para administrar rifas digitales.
 - Subir fotografia del premio desde el panel admin.
 - Mostrar la fotografia del premio en la pagina publica de compra.
 - Registrar compradores con comprobante de pago.
+- Visualizar el comprobante en el panel de pagos antes de aprobar o rechazar.
 - Mostrar confirmacion de compra con estado pendiente.
 - Aprobar o rechazar compras desde el panel de pagos.
 - Ver historial completo de ordenes por estado.

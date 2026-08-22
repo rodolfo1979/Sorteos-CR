@@ -109,6 +109,64 @@ function readImageFile(file) {
   });
 }
 
+function readReceiptFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      resolve({ name: "", type: "", data: "" });
+      return;
+    }
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!allowedTypes.includes(file.type)) {
+      reject(new Error("El comprobante debe ser JPG, PNG, WebP o PDF."));
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      reject(new Error("El comprobante no debe superar 2 MB en este prototipo."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.addEventListener("load", () =>
+      resolve({
+        name: file.name,
+        type: file.type,
+        data: String(reader.result || ""),
+      }),
+    );
+    reader.addEventListener("error", () => reject(new Error("No se pudo leer el comprobante.")));
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderReceiptPreview(order) {
+  if (!order.receiptData) {
+    return `<div class="receipt-preview empty-receipt">Sin vista previa del comprobante</div>`;
+  }
+
+  if (String(order.receiptType || "").startsWith("image/")) {
+    return `
+      <figure class="receipt-preview">
+        <img src="${order.receiptData}" alt="Comprobante de ${escapeHTML(order.buyerName)}" />
+        <figcaption>${escapeHTML(order.receiptName || "Comprobante")}</figcaption>
+      </figure>
+    `;
+  }
+
+  if (order.receiptType === "application/pdf") {
+    return `
+      <div class="receipt-preview pdf-receipt">
+        <strong>PDF adjunto</strong>
+        <span>${escapeHTML(order.receiptName || "Comprobante.pdf")}</span>
+        <a class="action-button" href="${order.receiptData}" target="_blank" rel="noreferrer">Abrir PDF</a>
+      </div>
+    `;
+  }
+
+  return `<div class="receipt-preview empty-receipt">${escapeHTML(order.receiptName || "Comprobante adjunto")}</div>`;
+}
+
 function loadState() {
   const saved = localStorage.getItem(storageKey);
   const loaded = saved ? JSON.parse(saved) : defaultState;
@@ -129,6 +187,8 @@ function loadState() {
     buyerEmail: "",
     emailSent: false,
     packageCount: 1,
+    receiptType: "",
+    receiptData: "",
     ...order,
   }));
   return loaded;
@@ -625,7 +685,7 @@ function initPublicPage() {
     renderRandomPanel();
   });
 
-  els.purchaseForm.addEventListener("submit", (event) => {
+  els.purchaseForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const raffle = activeRaffle();
     if (!raffle.saleEnabled) {
@@ -638,6 +698,14 @@ function initPublicPage() {
       return;
     }
 
+    let receipt;
+    try {
+      receipt = await readReceiptFile(els.paymentReceipt.files[0]);
+    } catch (error) {
+      alert(error.message);
+      return;
+    }
+
     const orderId = crypto.randomUUID();
     raffle.numbers.reserved.push(...selectedNumbers);
     state.orders.push({
@@ -646,7 +714,9 @@ function initPublicPage() {
       buyerName: els.buyerName.value.trim(),
       buyerPhone: els.buyerPhone.value.trim(),
       buyerEmail: els.buyerEmail.value.trim(),
-      receiptName: els.paymentReceipt.files[0]?.name || "",
+      receiptName: receipt.name,
+      receiptType: receipt.type,
+      receiptData: receipt.data,
       numbers: [...selectedNumbers],
       price: raffle.price * packageCount,
       packageCount,
@@ -962,6 +1032,7 @@ function initPaymentsPage() {
             </header>
             <div>Números: <strong>${escapeHTML(order.numbers.join(", "))}</strong></div>
             <div class="meta">Modo: ${order.assignmentMode === "random" ? "Al azar" : "Manual"} · Comprobante: ${escapeHTML(order.receiptName || "No adjuntado")} · Rifa: ${escapeHTML(raffle?.name || "Rifa eliminada")}</div>
+            ${renderReceiptPreview(order)}
             <div class="card-actions">
               <button class="action-button approve" data-approve="${escapeHTML(order.id)}" type="button">Aprobar y enviar correo</button>
               <button class="action-button danger" data-reject="${escapeHTML(order.id)}" type="button">Rechazar</button>
