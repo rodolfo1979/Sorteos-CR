@@ -61,3 +61,9 @@ Antes de produccion final se debe reemplazar por login real con usuarios, roles,
 ## Importante
 
 No subir `.env`, `vendor/`, `node_modules/` ni archivos de comprobantes al repositorio. El servidor debe generar esos archivos localmente.
+
+## Assets frontend
+
+Los archivos compilados de Vite se suben en laravel-app/public/build para evitar depender de Node en Hostinger. No ejecutar 
+pm run build en el servidor si la version de Node es 18.x; solo usar los archivos desplegados por Git.
+
