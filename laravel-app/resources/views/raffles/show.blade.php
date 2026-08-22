@@ -1,6 +1,7 @@
 <x-layouts.app title="Comprar numeros - Sorteos CR" section="Sitio publico">
     @php
         $soldPercent = $raffle->total_numbers > 0 ? min(100, round(($raffle->sold_count / $raffle->total_numbers) * 100)) : 0;
+        $mediaItems = collect($raffle->media_paths ?? []);
     @endphp
 
     <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_410px]">
@@ -53,6 +54,30 @@
                 </div>
             </article>
 
+
+            @if ($mediaItems->isNotEmpty())
+                <section class="surface p-5 sm:p-6">
+                    <div class="flex flex-wrap items-end justify-between gap-3">
+                        <div>
+                            <p class="text-xs font-black uppercase tracking-[0.22em] text-teal-700">Galeria</p>
+                            <h3 class="mt-1 text-2xl font-black tracking-tight">Fotos y videos del premio</h3>
+                        </div>
+                        <span class="rounded-full bg-slate-100 px-3 py-2 text-xs font-black uppercase text-slate-500">{{ $mediaItems->count() }} archivo(s)</span>
+                    </div>
+                    <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        @foreach ($mediaItems as $mediaPath)
+                            @php $isVideo = in_array(strtolower(pathinfo($mediaPath, PATHINFO_EXTENSION)), ['mp4', 'mov', 'webm'], true); @endphp
+                            <figure class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+                                @if ($isVideo)
+                                    <video class="aspect-video w-full bg-black object-cover" src="{{ Storage::url($mediaPath) }}" controls preload="metadata"></video>
+                                @else
+                                    <img class="aspect-video w-full object-cover" src="{{ Storage::url($mediaPath) }}" alt="Galeria {{ $raffle->name }}">
+                                @endif
+                            </figure>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
             <section class="grid gap-4 md:grid-cols-3">
                 <article class="surface p-5">
                     <span class="text-sm font-black text-slate-500">1. Escoge</span>
@@ -173,3 +198,5 @@
         </form>
     </section>
 </x-layouts.app>
+
+

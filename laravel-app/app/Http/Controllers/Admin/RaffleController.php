@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Raffle;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -22,6 +23,7 @@ class RaffleController extends Controller
         $data['slug'] = $this->uniqueSlug($data['name']);
         $data['sale_enabled'] = $request->boolean('sale_enabled');
         $data['is_featured'] = $request->boolean('is_featured');
+        $data = $this->storeMedia($request, $data);
 
         if ($data['is_featured']) {
             Raffle::query()->update(['is_featured' => false]);
@@ -45,6 +47,7 @@ class RaffleController extends Controller
         $data = $this->validatedData($request, false);
         $data['sale_enabled'] = $request->boolean('sale_enabled');
         $data['is_featured'] = $request->boolean('is_featured');
+        $data = $this->storeMedia($request, $data, $raffle);
 
         if ($data['is_featured']) {
             Raffle::whereKeyNot($raffle->id)->update(['is_featured' => false]);
@@ -84,6 +87,9 @@ class RaffleController extends Controller
             'max_random_changes' => ['required', 'integer', 'min:0', 'max:50'],
             'reservation_minutes' => ['required', 'integer', 'min:1', 'max:10080'],
             'assignment_mode' => ['required', 'in:manual,random'],
+            'image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'media_files' => ['nullable', 'array', 'max:8'],
+            'media_files.*' => ['file', 'mimes:jpg,jpeg,png,webp,mp4,mov,webm', 'max:51200'],
         ];
 
         if ($creating) {
@@ -92,6 +98,31 @@ class RaffleController extends Controller
         }
 
         return $request->validate($rules);
+    }
+
+    private function storeMedia(Request $request, array $data, ?Raffle $raffle = null): array
+    {
+        unset($data['image'], $data['media_files']);
+
+        if ($request->hasFile('image')) {
+            if ($raffle?->image_path) {
+                Storage::disk('public')->delete($raffle->image_path);
+            }
+
+            $data['image_path'] = $request->file('image')->store('raffles/featured', 'public');
+        }
+
+        if ($request->hasFile('media_files')) {
+            $mediaPaths = $raffle->media_paths ?? [];
+
+            foreach ($request->file('media_files') as $file) {
+                $mediaPaths[] = $file->store('raffles/gallery', 'public');
+            }
+
+            $data['media_paths'] = array_values($mediaPaths);
+        }
+
+        return $data;
     }
 
     private function uniqueSlug(string $name): string

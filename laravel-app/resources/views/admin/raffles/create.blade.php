@@ -8,7 +8,7 @@
         <a class="rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition hover:bg-slate-700" href="{{ route('admin.dashboard') }}">Volver</a>
     </div>
 
-    <form class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]" method="post" action="{{ route('admin.raffles.store') }}">
+    <form class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]" method="post" action="{{ route('admin.raffles.store') }}" enctype="multipart/form-data">
         @csrf
 
         <section class="space-y-6">
@@ -37,6 +37,21 @@
                 </div>
             </article>
 
+
+            <article class="surface p-5">
+                <p class="text-xs font-black uppercase tracking-wide text-slate-500">Fotos y videos</p>
+                <h3 class="mt-1 text-2xl font-black tracking-tight">Galeria del premio</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-600">La imagen principal se usa como portada en la pagina de venta. Tambien puedes subir fotos o videos adicionales para mostrar mejor el premio.</p>
+                <div class="mt-5 grid gap-4">
+                    <label class="grid gap-1 text-sm font-black text-slate-600">Imagen principal del premio
+                        <input class="field" type="file" name="image" accept="image/jpeg,image/png,image/webp">
+                    </label>
+                    <label class="grid gap-1 text-sm font-black text-slate-600">Fotos o videos adicionales opcionales
+                        <input class="field" type="file" name="media_files[]" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" multiple>
+                    </label>
+                    <p class="text-xs font-bold leading-5 text-slate-500">Formatos permitidos: JPG, PNG, WEBP, MP4, MOV y WEBM. Recomendado: imagenes horizontales y videos cortos.</p>
+                </div>
+            </article>
             <article class="surface p-5">
                 <p class="text-xs font-black uppercase tracking-wide text-slate-500">Contenido publico</p>
                 <h3 class="mt-1 text-2xl font-black tracking-tight">Lo que vera el cliente</h3>
@@ -103,3 +118,4 @@
         </aside>
     </form>
 </x-layouts.app>
+

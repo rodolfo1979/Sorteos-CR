@@ -14,7 +14,7 @@ class Raffle extends Model
         'name', 'slug', 'total_numbers', 'number_width', 'price_per_package',
         'numbers_per_package', 'max_random_changes', 'reservation_minutes',
         'assignment_mode', 'sale_enabled', 'is_featured', 'draw_date',
-        'prize_title', 'prize_description', 'public_sales_text', 'image_path', 'organizer_name',
+        'prize_title', 'prize_description', 'public_sales_text', 'image_path', 'media_paths', 'organizer_name',
         'organizer_whatsapp', 'payment_instructions', 'rules_text',
     ];
 
@@ -22,6 +22,7 @@ class Raffle extends Model
         'sale_enabled' => 'boolean',
         'is_featured' => 'boolean',
         'draw_date' => 'date',
+        'media_paths' => 'array',
     ];
 
     public function numbers(): HasMany
@@ -63,3 +64,4 @@ class Raffle extends Model
         return str_pad((string) $number, $this->effectiveNumberWidth(), '0', STR_PAD_LEFT);
     }
 }
+
