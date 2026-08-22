@@ -142,7 +142,12 @@ function readReceiptFile(file) {
 
 function renderReceiptPreview(order) {
   if (!order.receiptData) {
-    return `<div class="receipt-preview empty-receipt">Sin vista previa del comprobante</div>`;
+    return `
+      <div class="receipt-preview empty-receipt">
+        <strong>Sin vista previa del comprobante</strong>
+        <span>Esta orden solo guarda el nombre del archivo: ${escapeHTML(order.receiptName || "sin nombre")}. Para ver comprobantes en pantalla, registra una compra nueva después de esta actualización.</span>
+      </div>
+    `;
   }
 
   if (String(order.receiptType || "").startsWith("image/")) {
