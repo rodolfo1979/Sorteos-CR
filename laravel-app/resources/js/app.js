@@ -97,7 +97,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
                 : 'cursor-not-allowed border-slate-200 bg-slate-200 text-slate-400 opacity-60');
 
         return `
-            <button type="button" class="relative min-h-11 min-w-0 overflow-hidden rounded-xl border px-2 py-2 text-sm font-black tracking-wide transition before:absolute before:-left-2 before:top-1/2 before:h-4 before:w-4 before:-translate-y-1/2 before:rounded-full before:bg-white after:absolute after:-right-2 after:top-1/2 after:h-4 after:w-4 after:-translate-y-1/2 after:rounded-full after:bg-white ${stateClass}" data-number-button="${item.number}" ${disabled ? 'disabled' : ''}>
+            <button type="button" class="min-h-11 min-w-16 rounded-xl border px-2 py-2 text-center text-sm font-black tracking-wide transition ${stateClass}" data-number-button="${item.number}" ${disabled ? 'disabled' : ''}>
                 ${item.number}
             </button>
         `;
@@ -131,7 +131,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         numberGrid.innerHTML = '<p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">Cargando numeros...</p>';
         const url = new URL(numbersUrl, window.location.origin);
         url.searchParams.set('page', page);
-        url.searchParams.set('per_page', 1000);
+        url.searchParams.set('per_page', 100);
 
         const response = await fetch(url, { headers: { Accept: 'application/json' } });
         if (!response.ok) {

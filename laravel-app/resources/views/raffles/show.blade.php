@@ -147,7 +147,7 @@
                         <strong class="text-sm font-black text-slate-600" data-number-page-label>Pagina 1</strong>
                         <button class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xl font-black text-slate-800 shadow-sm transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-35" type="button" data-number-page-next aria-label="Pagina siguiente">›</button>
                     </div>
-                    <div class="mt-3 grid max-h-[26rem] grid-cols-4 gap-2 overflow-auto pr-1 min-[420px]:grid-cols-5 sm:grid-cols-6 lg:grid-cols-8" data-number-grid>
+                    <div class="mt-3 grid max-h-none grid-cols-4 gap-2 min-[420px]:grid-cols-5 sm:grid-cols-6 lg:grid-cols-5 xl:grid-cols-5" data-number-grid>
                         <p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">Cargando numeros...</p>
                     </div>
                     <div class="mt-3 flex flex-wrap gap-3 text-xs font-bold text-slate-500">
