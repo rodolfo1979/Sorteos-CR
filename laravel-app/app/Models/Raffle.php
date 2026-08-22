@@ -43,8 +43,23 @@ class Raffle extends Model
         ])->all();
     }
 
+    public function numberStart(): int
+    {
+        return 0;
+    }
+
+    public function numberEnd(): int
+    {
+        return max(0, $this->total_numbers - 1);
+    }
+
+    public function effectiveNumberWidth(): int
+    {
+        return max((int) $this->number_width, strlen((string) $this->numberEnd()));
+    }
+
     public function formatNumber(int $number): string
     {
-        return str_pad((string) $number, $this->number_width, '0', STR_PAD_LEFT);
+        return str_pad((string) $number, $this->effectiveNumberWidth(), '0', STR_PAD_LEFT);
     }
 }

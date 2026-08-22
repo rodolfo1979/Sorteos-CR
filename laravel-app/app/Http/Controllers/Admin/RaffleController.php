@@ -99,7 +99,7 @@ class RaffleController extends Controller
     private function createNumbers(Raffle $raffle): void
     {
         $batch = [];
-        for ($number = 1; $number <= $raffle->total_numbers; $number++) {
+        for ($number = $raffle->numberStart(); $number <= $raffle->numberEnd(); $number++) {
             $batch[] = [
                 'raffle_id' => $raffle->id,
                 'number' => $raffle->formatNumber($number),

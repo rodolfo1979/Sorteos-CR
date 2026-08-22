@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Rifa Moto 2026',
                 'total_numbers' => 10000,
-                'number_width' => 5,
+                'number_width' => 4,
                 'price_per_package' => 4000,
                 'numbers_per_package' => 2,
                 'max_random_changes' => 5,
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
 
         if ($raffle->numbers()->count() === 0) {
             $batch = [];
-            for ($number = 1; $number <= $raffle->total_numbers; $number++) {
+            for ($number = $raffle->numberStart(); $number <= $raffle->numberEnd(); $number++) {
                 $batch[] = [
                     'raffle_id' => $raffle->id,
                     'number' => $raffle->formatNumber($number),

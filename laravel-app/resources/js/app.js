@@ -15,18 +15,8 @@ document.querySelectorAll('[data-admin-sales-chart]').forEach((canvas) => {
         data: {
             labels: data.labels || [],
             datasets: [
-                {
-                    label: 'Vendidos',
-                    data: data.sold || [],
-                    backgroundColor: '#0f766e',
-                    borderRadius: 10,
-                },
-                {
-                    label: 'Reservados',
-                    data: data.reserved || [],
-                    backgroundColor: '#f59e0b',
-                    borderRadius: 10,
-                },
+                { label: 'Vendidos', data: data.sold || [], backgroundColor: '#0f766e', borderRadius: 10 },
+                { label: 'Reservados', data: data.reserved || [], backgroundColor: '#f59e0b', borderRadius: 10 },
             ],
         },
         options: {
@@ -47,6 +37,7 @@ document.querySelectorAll('[data-admin-sales-chart]').forEach((canvas) => {
 document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     const mode = form.dataset.mode;
     const randomUrl = form.dataset.randomUrl;
+    const numbersUrl = form.dataset.numbersUrl;
     const maxRandomChanges = Number(form.dataset.maxRandomChanges || 5);
     const packageCountInput = form.querySelector('[data-package-count]');
     const packageHelp = form.querySelector('[data-package-help]');
@@ -55,11 +46,19 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     const clearButton = form.querySelector('[data-clear-selection]');
     const rerollButton = form.querySelector('[data-reroll-selection]');
     const totalLabel = form.querySelector('[data-total]');
+    const numberGrid = form.querySelector('[data-number-grid]');
+    const numberRange = form.querySelector('[data-number-range]');
+    const pageLabel = form.querySelector('[data-number-page-label]');
+    const prevPageButton = form.querySelector('[data-number-page-prev]');
+    const nextPageButton = form.querySelector('[data-number-page-next]');
     let selectedNumbers = [];
     let expectedQuantity = 0;
     let amount = 0;
     let currentPackageCount = 1;
     let randomChangesUsed = 0;
+    let currentNumberPage = 1;
+    let totalNumberPages = 1;
+    let loadedNumbers = [];
 
     function remainingChanges() {
         return Math.max(0, maxRandomChanges - randomChangesUsed);
@@ -88,6 +87,68 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         `;
     }
 
+    function numberButtonMarkup(item) {
+        const selected = selectedNumbers.includes(item.number);
+        const disabled = !item.available && !selected;
+        const stateClass = selected
+            ? 'border-amber-500 bg-amber-400 text-slate-950 shadow-md shadow-amber-900/10'
+            : (item.available
+                ? 'border-amber-200 bg-amber-50 text-slate-950 hover:border-amber-500 hover:bg-amber-300'
+                : 'cursor-not-allowed border-slate-200 bg-slate-200 text-slate-400 opacity-60');
+
+        return `
+            <button type="button" class="relative min-h-11 min-w-0 overflow-hidden rounded-xl border px-2 py-2 text-sm font-black tracking-wide transition before:absolute before:-left-2 before:top-1/2 before:h-4 before:w-4 before:-translate-y-1/2 before:rounded-full before:bg-white after:absolute after:-right-2 after:top-1/2 after:h-4 after:w-4 after:-translate-y-1/2 after:rounded-full after:bg-white ${stateClass}" data-number-button="${item.number}" ${disabled ? 'disabled' : ''}>
+                ${item.number}
+            </button>
+        `;
+    }
+
+    function renderNumberGrid() {
+        if (!numberGrid) {
+            return;
+        }
+
+        numberGrid.innerHTML = loadedNumbers.length
+            ? loadedNumbers.map((item) => numberButtonMarkup(item)).join('')
+            : '<p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">No hay numeros en esta pagina.</p>';
+
+        if (pageLabel) {
+            pageLabel.textContent = `Pagina ${currentNumberPage} de ${totalNumberPages}`;
+        }
+        if (prevPageButton) {
+            prevPageButton.disabled = currentNumberPage <= 1;
+        }
+        if (nextPageButton) {
+            nextPageButton.disabled = currentNumberPage >= totalNumberPages;
+        }
+    }
+
+    async function loadNumberPage(page = 1) {
+        if (!numbersUrl || !numberGrid) {
+            return;
+        }
+
+        numberGrid.innerHTML = '<p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">Cargando numeros...</p>';
+        const url = new URL(numbersUrl, window.location.origin);
+        url.searchParams.set('page', page);
+        url.searchParams.set('per_page', 1000);
+
+        const response = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (!response.ok) {
+            numberGrid.innerHTML = '<p class="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 text-center text-sm font-black text-red-700">No se pudo cargar esta pagina de numeros.</p>';
+            return;
+        }
+
+        const data = await response.json();
+        loadedNumbers = data.numbers || [];
+        currentNumberPage = Number(data.page || page);
+        totalNumberPages = Number(data.total_pages || 1);
+        if (numberRange) {
+            numberRange.textContent = data.range || '';
+        }
+        renderNumberGrid();
+    }
+
     function render() {
         selectedList.innerHTML = selectedNumbers.length
             ? selectedNumbers.map((number) => ticketMarkup(number)).join('')
@@ -105,6 +166,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
             rerollButton.textContent = `Cambiar numeros (${remainingChanges()} restantes)`;
         }
         totalLabel.textContent = `Total: ${formatter.format(amount)}`;
+        renderNumberGrid();
     }
 
     async function takeRandom(packageCount, quantity, newAmount, options = {}) {
@@ -150,6 +212,26 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         render();
     }
 
+    function selectManualNumber(number) {
+        const baseQuantity = Number(form.querySelector('[data-package="1"]').dataset.quantity);
+        selectedNumbers = selectedNumbers.includes(number)
+            ? selectedNumbers.filter((selected) => selected !== number)
+            : [...selectedNumbers, number];
+
+        const packages = Math.min(5, Math.max(1, Math.ceil(selectedNumbers.length / baseQuantity)));
+        const activePackage = form.querySelector(`[data-package="${packages}"]`);
+        packageCountInput.value = packages;
+        currentPackageCount = packages;
+        expectedQuantity = Number(activePackage.dataset.quantity);
+        amount = Number(activePackage.dataset.amount);
+        setActivePackage(packages);
+        randomChangesUsed = 0;
+        packageHelp.textContent = selectedNumbers.length === expectedQuantity
+            ? `Seleccion completa de ${expectedQuantity} numeros. Puedes cambiarlos al azar hasta ${maxRandomChanges} vez/veces.`
+            : `Te falta ${expectedQuantity - selectedNumbers.length} numero(s) para completar la compra de ${expectedQuantity}.`;
+        render();
+    }
+
     form.querySelectorAll('[data-package]').forEach((button) => {
         button.addEventListener('click', () => {
             randomChangesUsed = 0;
@@ -164,31 +246,23 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         });
     }
 
-    form.querySelectorAll('[data-number-button]').forEach((button) => {
-        button.addEventListener('click', () => {
-            const number = button.dataset.numberButton;
-            const baseQuantity = Number(form.querySelector('[data-package="1"]').dataset.quantity);
-            selectedNumbers = selectedNumbers.includes(number)
-                ? selectedNumbers.filter((selected) => selected !== number)
-                : [...selectedNumbers, number];
-
-            const packages = Math.min(5, Math.max(1, Math.ceil(selectedNumbers.length / baseQuantity)));
-            const activePackage = form.querySelector(`[data-package="${packages}"]`);
-            packageCountInput.value = packages;
-            currentPackageCount = packages;
-            expectedQuantity = Number(activePackage.dataset.quantity);
-            amount = Number(activePackage.dataset.amount);
-            setActivePackage(packages);
-            randomChangesUsed = 0;
-            packageHelp.textContent = selectedNumbers.length === expectedQuantity
-                ? `Seleccion completa de ${expectedQuantity} numeros. Puedes cambiarlos al azar hasta ${maxRandomChanges} vez/veces.`
-                : `Te falta ${expectedQuantity - selectedNumbers.length} numero(s) para completar la compra de ${expectedQuantity}.`;
-            button.classList.toggle('border-red-500');
-            button.classList.toggle('bg-red-50');
-            button.classList.toggle('text-red-700');
-            render();
+    if (numberGrid) {
+        numberGrid.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-number-button]');
+            if (!button || button.disabled) {
+                return;
+            }
+            selectManualNumber(button.dataset.numberButton);
         });
-    });
+    }
+
+    if (prevPageButton) {
+        prevPageButton.addEventListener('click', () => loadNumberPage(currentNumberPage - 1));
+    }
+
+    if (nextPageButton) {
+        nextPageButton.addEventListener('click', () => loadNumberPage(currentNumberPage + 1));
+    }
 
     clearButton.addEventListener('click', () => {
         selectedNumbers = [];
@@ -199,11 +273,8 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         packageHelp.textContent = mode === 'manual'
             ? 'Selecciona un paquete al azar o escoge manualmente en la cuadricula.'
             : 'Selecciona una cantidad para asignar numeros automaticamente.';
-        form.querySelectorAll('[data-number-button]').forEach((button) => {
-            button.classList.remove('border-amber-500', 'bg-amber-400', 'text-slate-950');
-        });
         form.querySelectorAll('[data-package]').forEach((button) => {
-            button.classList.remove('border-amber-500', 'bg-amber-400', 'text-slate-950');
+            button.classList.remove('border-red-500', 'bg-red-50', 'text-red-700');
         });
         render();
     });
@@ -217,4 +288,5 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     });
 
     render();
+    loadNumberPage(1);
 });

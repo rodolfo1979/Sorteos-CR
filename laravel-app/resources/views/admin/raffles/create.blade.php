@@ -23,7 +23,7 @@
                         <input class="field" type="number" name="total_numbers" min="1" max="100000" value="{{ old('total_numbers', 10000) }}" required>
                     </label>
                     <label class="grid gap-1 text-sm font-black text-slate-600">Digitos visibles
-                        <input class="field" type="number" name="number_width" min="2" max="6" value="{{ old('number_width', 5) }}" required>
+                        <input class="field" type="number" name="number_width" min="2" max="6" value="{{ old('number_width', 4) }}" required>
                     </label>
                     <label class="grid gap-1 text-sm font-black text-slate-600">Fecha del sorteo
                         <input class="field" type="date" name="draw_date" value="{{ old('draw_date') }}">

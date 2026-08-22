@@ -102,7 +102,7 @@
             </article>
         </div>
 
-        <form class="surface sticky top-6 h-fit p-5 xl:p-6" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}">
+        <form class="surface sticky top-6 h-fit p-5 xl:p-6" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}" data-numbers-url="{{ route('raffles.numbers', $raffle) }}">
             @csrf
             <div class="flex items-start justify-between gap-4">
                 <div>
@@ -135,14 +135,24 @@
             </div>
             @if ($raffle->assignment_mode === 'manual')
                 <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
-                    <div class="mb-3 flex items-center justify-between gap-3">
-                        <p class="font-black">Cuadricula manual</p>
+                    <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <p class="font-black">Cuadricula manual</p>
+                            <p class="text-xs font-black uppercase tracking-wide text-slate-400" data-number-range>Cargando numeros...</p>
+                        </div>
                         <span class="text-sm font-black text-slate-500">{{ number_format($raffle->available_count) }} disp.</span>
                     </div>
-                    <div class="grid max-h-80 grid-cols-4 gap-1.5 overflow-auto pr-1 min-[420px]:grid-cols-5 sm:grid-cols-6 lg:grid-cols-7">
-                        @foreach ($raffle->numbers()->where('status', 'available')->orderBy('number')->limit(180)->get() as $number)
-                            <button type="button" class="relative min-h-10 overflow-hidden rounded-xl border border-slate-200 bg-white px-1.5 py-2 text-[0.78rem] font-black tracking-wide text-slate-900 shadow-sm transition before:absolute before:-left-2 before:top-1/2 before:h-4 before:w-4 before:-translate-y-1/2 before:rounded-full before:bg-white after:absolute after:-right-2 after:top-1/2 after:h-4 after:w-4 after:-translate-y-1/2 after:rounded-full after:bg-white hover:border-amber-400 hover:bg-amber-50" data-number-button="{{ $number->number }}">{{ $number->number }}</button>
-                        @endforeach
+                    <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
+                        <button class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xl font-black text-slate-800 shadow-sm transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-35" type="button" data-number-page-prev aria-label="Pagina anterior">‹</button>
+                        <strong class="text-sm font-black text-slate-600" data-number-page-label>Pagina 1</strong>
+                        <button class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xl font-black text-slate-800 shadow-sm transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-35" type="button" data-number-page-next aria-label="Pagina siguiente">›</button>
+                    </div>
+                    <div class="mt-3 grid max-h-[26rem] grid-cols-4 gap-2 overflow-auto pr-1 min-[420px]:grid-cols-5 sm:grid-cols-6 lg:grid-cols-8" data-number-grid>
+                        <p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">Cargando numeros...</p>
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-3 text-xs font-bold text-slate-500">
+                        <span><span class="inline-block h-3 w-3 rounded bg-amber-400 align-middle"></span> Disponible</span>
+                        <span><span class="inline-block h-3 w-3 rounded bg-slate-200 align-middle"></span> No disponible</span>
                     </div>
                 </div>
             @endif

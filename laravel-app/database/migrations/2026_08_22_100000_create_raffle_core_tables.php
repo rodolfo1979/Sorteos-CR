@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->unsignedInteger('total_numbers');
-            $table->unsignedTinyInteger('number_width')->default(5);
+            $table->unsignedTinyInteger('number_width')->default(4);
             $table->unsignedInteger('price_per_package');
             $table->unsignedSmallInteger('numbers_per_package')->default(1);
             $table->unsignedTinyInteger('max_random_changes')->default(5);
