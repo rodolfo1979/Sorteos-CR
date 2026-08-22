@@ -116,6 +116,11 @@
               Comprobante de pago
               <input id="paymentReceipt" required type="file" accept="image/*,.pdf" />
             </label>
+            <div class="package-selector">
+              <span>Paquetes de compra</span>
+              <div id="packageOptions" class="package-options"></div>
+              <small id="packageHelp">Selecciona cuántos números quiere comprar el cliente.</small>
+            </div>
             <div class="selected-box">
               <span>Números de esta compra</span>
               <strong id="selectedNumbersText">Ninguno</strong>
@@ -173,5 +178,8 @@
     </footer>
 
     <script src="app.js?v=20260821-3"></script>
+    <script src="purchase-packages.js?v=20260822-1"></script>
   </body>
 </html>
+
+
