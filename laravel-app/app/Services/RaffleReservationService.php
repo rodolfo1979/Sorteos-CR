@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Order;
+use App\Models\Raffle;
+use App\Models\RaffleNumber;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use RuntimeException;
+
+class RaffleReservationService
+{
+    public function randomNumbers(Raffle $raffle, int $packageCount): array
+    {
+        $quantity = $this->quantityFor($raffle, $packageCount);
+
+        return RaffleNumber::query()
+            ->where('raffle_id', $raffle->id)
+            ->where('status', 'available')
+            ->inRandomOrder()
+            ->limit($quantity)
+            ->pluck('number')
+            ->all();
+    }
+
+    public function reserve(Raffle $raffle, array $buyer, array $numbers, array $receipt, int $packageCount, int $randomChangesUsed = 0): Order
+    {
+        $expectedQuantity = $this->quantityFor($raffle, $packageCount);
+        $numbers = array_values(array_unique($numbers));
+
+        if (! $raffle->sale_enabled) {
+            throw new RuntimeException('La venta de esta rifa esta pausada.');
+        }
+
+        if (count($numbers) !== $expectedQuantity) {
+            throw new RuntimeException("Esta compra debe tener {$expectedQuantity} numero(s).");
+        }
+
+        return DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed) {
+            $lockedNumbers = RaffleNumber::query()
+                ->where('raffle_id', $raffle->id)
+                ->whereIn('number', $numbers)
+                ->lockForUpdate()
+                ->get();
+
+            if ($lockedNumbers->count() !== count($numbers)) {
+                throw new RuntimeException('Uno o mas numeros no existen en esta rifa.');
+            }
+
+            if ($lockedNumbers->contains(fn (RaffleNumber $number) => $number->status !== 'available')) {
+                throw new RuntimeException('Uno o mas numeros ya no estan disponibles. Intenta con otra seleccion.');
+            }
+
+            $order = Order::create([
+                'public_uuid' => (string) Str::uuid(),
+                'raffle_id' => $raffle->id,
+                'buyer_name' => $buyer['name'],
+                'buyer_phone' => $buyer['phone'],
+                'buyer_email' => $buyer['email'] ?? null,
+                'package_count' => $packageCount,
+                'amount_total' => $raffle->price_per_package * $packageCount,
+                'assignment_mode' => $raffle->assignment_mode,
+                'random_changes_used' => $randomChangesUsed,
+                'status' => 'pending',
+                'receipt_path' => $receipt['path'] ?? null,
+                'receipt_original_name' => $receipt['original_name'] ?? null,
+                'receipt_mime' => $receipt['mime'] ?? null,
+            ]);
+
+            foreach ($lockedNumbers as $raffleNumber) {
+                $raffleNumber->update([
+                    'status' => 'reserved',
+                    'reserved_until' => now()->addMinutes($raffle->reservation_minutes),
+                ]);
+
+                $order->numbers()->attach($raffleNumber->id, ['number' => $raffleNumber->number]);
+            }
+
+            return $order->load('numbers', 'raffle');
+        });
+    }
+
+    private function quantityFor(Raffle $raffle, int $packageCount): int
+    {
+        if ($packageCount < 1 || $packageCount > 5) {
+            throw new RuntimeException('Selecciona una cantidad valida.');
+        }
+
+        return $raffle->numbers_per_package * $packageCount;
+    }
+}
