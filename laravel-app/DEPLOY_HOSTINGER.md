@@ -2,27 +2,33 @@
 
 Objetivo: usar `https://sorteoscr.morpho3d.com` como ambiente de pruebas de Laravel y dejar el dominio oficial para el lanzamiento final.
 
-## Ruta recomendada
+## Configuracion actual del repositorio
 
-La carpeta publica del subdominio debe apuntar a:
+El repositorio ya esta preparado para que Hostinger pueda desplegarlo en:
 
 ```text
-laravel-app/public
+public_html/sorteoscr
 ```
 
-En hosting compartido esto se logra de dos formas:
+La raiz del repositorio contiene:
 
-1. Configurar el Document Root del subdominio hacia `laravel-app/public` si el panel lo permite.
-2. Si el panel no permite apuntar fuera de `public_html`, subir el proyecto Laravel fuera de `public_html` y copiar el contenido de `laravel-app/public` en el folder publico, ajustando `index.php` para que cargue `../laravel-app/vendor/autoload.php` y `../laravel-app/bootstrap/app.php`.
+- `index.php`: carga Laravel desde `laravel-app`.
+- `.htaccess`: envia las rutas a Laravel, sirve assets de `laravel-app/public/build`, sirve `storage`, y bloquea carpetas internas.
+- `laravel-app/`: aplicacion Laravel real.
+- `legacy-static/`: respaldo del prototipo estatico, bloqueado por `.htaccess` para no confundirlo con el sistema nuevo.
 
-La opcion 1 es la mas limpia.
+## Pasos en Hostinger
 
-## Pasos en el servidor
+1. Confirmar que el Git deployment del subdominio siga apuntando a:
 
-1. Crear base MySQL para pruebas.
-2. Copiar `.env.production.example` como `.env`.
-3. Completar credenciales MySQL, SMTP y admin.
-4. Ejecutar:
+```text
+public_html/sorteoscr
+```
+
+2. Crear base MySQL para pruebas.
+3. Copiar `laravel-app/.env.production.example` como `laravel-app/.env` en el servidor.
+4. Completar credenciales MySQL, SMTP y admin.
+5. Desde terminal/SSH, dentro de `public_html/sorteoscr/laravel-app`, ejecutar:
 
 ```bash
 composer install --no-dev --optimize-autoloader
@@ -35,7 +41,7 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-5. Verificar:
+6. Verificar:
 
 ```bash
 php artisan route:list --except-vendor

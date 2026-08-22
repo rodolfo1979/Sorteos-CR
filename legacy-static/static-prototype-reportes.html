@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rifas CR - Reportes</title>
+    <link rel="stylesheet" href="styles.css?v=20260821-3" />
+  </head>
+  <body data-page="reports">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">Administración</p>
+        <h1>Rifas CR</h1>
+      </div>
+      <nav>
+        <a class="nav-button" href="index.html">Venta</a>
+        <a class="nav-button" href="admin.html">Panel admin</a>
+        <a class="nav-button" href="pagos.html">Pagos</a>
+        <a class="nav-button active" href="reportes.html">Reportes</a>
+        <a class="nav-button" href="numeros.html">Números</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Historial</p>
+          <h2>Ventas y comprobantes</h2>
+        </div>
+      </section>
+
+      <div id="reportSummary" class="summary-grid"></div>
+      <section class="panel">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Ordenes</p>
+            <h3>Historial completo</h3>
+          </div>
+          <select id="reportFilter" aria-label="Filtrar ordenes">
+            <option value="all">Todas</option>
+            <option value="pending">Pendientes</option>
+            <option value="approved">Aprobadas</option>
+            <option value="rejected">Rechazadas</option>
+          </select>
+        </div>
+        <div id="reportList" class="payments-list"></div>
+      </section>
+    </main>
+
+    <script src="app.js?v=20260821-3"></script>
+  </body>
+</html>
