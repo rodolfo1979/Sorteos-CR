@@ -19,4 +19,25 @@ class RaffleNumberFormatTest extends TestCase
         $this->assertSame('1000', $raffle->formatNumber(1000));
         $this->assertSame('9999', $raffle->formatNumber(9999));
     }
+
+    public function test_large_raffles_keep_the_width_needed_by_the_last_number(): void
+    {
+        $twentyThousand = new Raffle([
+            'total_numbers' => 20000,
+            'number_width' => 4,
+        ]);
+
+        $this->assertSame('00000', $twentyThousand->formatNumber(0));
+        $this->assertSame('09999', $twentyThousand->formatNumber(9999));
+        $this->assertSame('10000', $twentyThousand->formatNumber(10000));
+        $this->assertSame('19999', $twentyThousand->formatNumber(19999));
+
+        $hundredThousand = new Raffle([
+            'total_numbers' => 100000,
+            'number_width' => 4,
+        ]);
+
+        $this->assertSame('00000', $hundredThousand->formatNumber(0));
+        $this->assertSame('99999', $hundredThousand->formatNumber(99999));
+    }
 }

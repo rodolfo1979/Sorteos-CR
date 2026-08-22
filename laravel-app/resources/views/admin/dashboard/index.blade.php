@@ -48,7 +48,14 @@
                         <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full bg-teal-600" style="width: {{ $progress }}%"></div></div>
                         <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
                             <p class="text-sm text-slate-500">{{ number_format($raffle->sold_numbers_count) }} vendidos · {{ number_format($raffle->reserved_numbers_count) }} reservados</p>
-                            <a class="rounded-lg bg-white px-3 py-2 text-xs font-black text-teal-700 shadow-sm transition hover:bg-teal-50" href="{{ route('admin.raffles.edit', $raffle) }}">Editar venta</a>
+                            <div class="flex flex-wrap gap-2">
+                                <a class="rounded-lg bg-white px-3 py-2 text-xs font-black text-teal-700 shadow-sm transition hover:bg-teal-50" href="{{ route('admin.raffles.edit', $raffle) }}">Editar venta</a>
+                                <form method="post" action="{{ route('admin.raffles.destroy', $raffle) }}" onsubmit="return confirm('Eliminar este sorteo borrara sus numeros, ordenes y comprobantes asociados. ¿Deseas continuar?')">
+                                    @csrf
+                                    @method('delete')
+                                    <button class="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 shadow-sm transition hover:bg-red-100" type="submit">Eliminar</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 @endforeach

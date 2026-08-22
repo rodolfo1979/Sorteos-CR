@@ -23,6 +23,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
     Route::post('/rifas', [AdminRaffleController::class, 'store'])->name('raffles.store');
     Route::get('/rifas/{raffle}/editar', [AdminRaffleController::class, 'edit'])->name('raffles.edit');
     Route::put('/rifas/{raffle}', [AdminRaffleController::class, 'update'])->name('raffles.update');
+    Route::delete('/rifas/{raffle}', [AdminRaffleController::class, 'destroy'])->name('raffles.destroy');
     Route::get('/pagos', [PaymentController::class, 'index'])->name('payments.index');
     Route::post('/pagos/{order}/aprobar', [PaymentController::class, 'approve'])->name('payments.approve');
     Route::post('/pagos/{order}/rechazar', [PaymentController::class, 'reject'])->name('payments.reject');

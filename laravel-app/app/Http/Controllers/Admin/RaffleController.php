@@ -55,6 +55,18 @@ class RaffleController extends Controller
         return to_route('admin.raffles.edit', $raffle)->with('status', 'Rifa actualizada correctamente.');
     }
 
+    public function destroy(Raffle $raffle): RedirectResponse
+    {
+        $name = $raffle->name;
+        $raffle->delete();
+
+        if (! Raffle::where('is_featured', true)->exists()) {
+            Raffle::latest()->first()?->forceFill(['is_featured' => true])->save();
+        }
+
+        return to_route('admin.dashboard')->with('status', "Sorteo {$name} eliminado correctamente.");
+    }
+
     private function validatedData(Request $request, bool $creating): array
     {
         $rules = [
