@@ -41,7 +41,13 @@ class PurchaseController extends Controller
             'package_count' => ['required', 'integer', 'min:1', 'max:5'],
             'numbers' => ['required', 'array'],
             'numbers.*' => ['required', 'string', 'max:24'],
-            'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
+            'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:15360'],
+        ], [
+            'receipt.required' => 'Debes subir la foto o PDF del comprobante de pago.',
+            'receipt.file' => 'El comprobante debe ser un archivo valido.',
+            'receipt.mimes' => 'El comprobante debe ser una imagen JPG, PNG, WEBP o un PDF.',
+            'receipt.max' => 'El comprobante no puede pesar mas de 15 MB. Si es una foto, intenta enviarla como captura o reducir su tamano.',
+            'numbers.required' => 'Debes seleccionar al menos un paquete de numeros antes de enviar el comprobante.',
         ]);
 
         if ($validator->fails()) {

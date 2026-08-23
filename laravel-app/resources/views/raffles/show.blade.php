@@ -122,7 +122,11 @@
                             <p class="mt-3 text-2xl font-black text-rose-700" data-total>Total: ₡0</p>
                         </section>
 
-                        <label class="grid gap-1 text-sm font-black text-slate-600">Comprobante<input class="field" type="file" name="receipt" accept="image/*,.pdf" required></label>
+                        <label class="grid gap-1 text-sm font-black text-slate-600">
+                            Comprobante
+                            <input class="field" type="file" name="receipt" accept="image/*,.pdf" required>
+                            <span class="text-xs font-bold text-slate-500">Formatos: JPG, PNG, WEBP o PDF. Maximo 15 MB.</span>
+                        </label>
                         <button class="primary-action w-full text-base" type="submit">Enviar comprobante</button>
                     </div>
                 </form>
@@ -221,10 +225,4 @@
         </div>
     </section>
 </x-layouts.app>
-
-
-
-
-
-
 
