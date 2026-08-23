@@ -35,9 +35,14 @@
                     <p class="mt-3 leading-7 text-slate-700">Si ingresaste correo electronico, te enviamos un correo con tus tickets digitales separados. Cuando administracion valide el comprobante, recibiras otro correo confirmando que el pago fue aprobado y tu compra quedo correcta.</p>
                     <p class="mt-3 text-sm font-bold text-slate-500">Conserva esta pantalla o el correo hasta que el pago sea validado.</p>
                 </div>
+
+                <a class="primary-action inline-flex w-full items-center justify-center text-center text-base sm:w-auto sm:px-8" href="{{ route('raffles.show') }}">
+                    Comprar mas boletos
+                </a>
             </div>
         </article>
     </section>
 </x-layouts.app>
+
 
 
