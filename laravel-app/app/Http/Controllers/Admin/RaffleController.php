@@ -8,10 +8,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RaffleController extends Controller
 {
+    private const MAX_GALLERY_ITEMS = 12;
+
     public function create(): View
     {
         return view('admin.raffles.create');
@@ -39,6 +42,7 @@ class RaffleController extends Controller
     {
         return view('admin.raffles.edit', [
             'raffle' => $raffle,
+            'maxGalleryItems' => self::MAX_GALLERY_ITEMS,
         ]);
     }
 
@@ -61,6 +65,7 @@ class RaffleController extends Controller
     public function destroy(Raffle $raffle): RedirectResponse
     {
         $name = $raffle->name;
+        Storage::disk('public')->delete(array_filter(array_merge([$raffle->image_path], $raffle->media_paths ?? [])));
         $raffle->delete();
 
         if (! Raffle::where('is_featured', true)->exists()) {
@@ -90,6 +95,9 @@ class RaffleController extends Controller
             'image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'media_files' => ['nullable', 'array', 'max:8'],
             'media_files.*' => ['file', 'mimes:jpg,jpeg,png,webp,mp4,mov,webm', 'max:51200'],
+            'remove_image' => ['nullable', 'boolean'],
+            'remove_media' => ['nullable', 'array'],
+            'remove_media.*' => ['string'],
         ];
 
         if ($creating) {
@@ -102,7 +110,12 @@ class RaffleController extends Controller
 
     private function storeMedia(Request $request, array $data, ?Raffle $raffle = null): array
     {
-        unset($data['image'], $data['media_files']);
+        unset($data['image'], $data['media_files'], $data['remove_image'], $data['remove_media']);
+
+        if ($request->boolean('remove_image') && $raffle?->image_path && ! $request->hasFile('image')) {
+            Storage::disk('public')->delete($raffle->image_path);
+            $data['image_path'] = null;
+        }
 
         if ($request->hasFile('image')) {
             if ($raffle?->image_path) {
@@ -112,8 +125,23 @@ class RaffleController extends Controller
             $data['image_path'] = $request->file('image')->store('raffles/featured', 'public');
         }
 
+        $mediaPaths = $raffle->media_paths ?? [];
+        $removeMedia = collect($request->input('remove_media', []))->filter()->values()->all();
+
+        if ($removeMedia !== []) {
+            $mediaPaths = array_values(array_filter($mediaPaths, fn (string $path) => ! in_array($path, $removeMedia, true)));
+            Storage::disk('public')->delete($removeMedia);
+            $data['media_paths'] = $mediaPaths;
+        }
+
         if ($request->hasFile('media_files')) {
-            $mediaPaths = $raffle->media_paths ?? [];
+            $newFileCount = count($request->file('media_files'));
+
+            if (count($mediaPaths) + $newFileCount > self::MAX_GALLERY_ITEMS) {
+                throw ValidationException::withMessages([
+                    'media_files' => 'La galeria permite maximo '.self::MAX_GALLERY_ITEMS.' fotos o videos adicionales.',
+                ]);
+            }
 
             foreach ($request->file('media_files') as $file) {
                 $mediaPaths[] = $file->store('raffles/gallery', 'public');
@@ -162,3 +190,5 @@ class RaffleController extends Controller
         }
     }
 }
+
+
