@@ -45,7 +45,7 @@
 
     .primary-action {
         border-radius: 0.9rem;
-        background: #0f766e;
+        background: linear-gradient(135deg, #063d32, #0f766e);
         color: white;
         font-weight: 950;
         padding: 1rem 1.15rem;
@@ -53,7 +53,7 @@
     }
 
     .primary-action:hover {
-        background: linear-gradient(135deg, #10b981, #115e59);
+        background: linear-gradient(135deg, #0f766e, #063d32);
         transform: translateY(-1px);
     }
 
@@ -65,4 +65,5 @@
         box-shadow: 0 16px 35px rgb(15 23 42 / 0.05);
     }
 }
+
 
