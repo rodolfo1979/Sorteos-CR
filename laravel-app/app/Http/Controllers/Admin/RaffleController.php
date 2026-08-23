@@ -62,6 +62,14 @@ class RaffleController extends Controller
         return to_route('admin.raffles.edit', $raffle)->with('status', 'Rifa actualizada correctamente.');
     }
 
+    public function toggleSale(Raffle $raffle): RedirectResponse
+    {
+        $raffle->forceFill(['sale_enabled' => ! $raffle->sale_enabled])->save();
+
+        $status = $raffle->sale_enabled ? 'reactivada' : 'pausada';
+
+        return back()->with('status', "Venta de {$raffle->name} {$status} correctamente.");
+    }
     public function destroy(Raffle $raffle): RedirectResponse
     {
         $name = $raffle->name;
@@ -190,5 +198,7 @@ class RaffleController extends Controller
         }
     }
 }
+
+
 
 

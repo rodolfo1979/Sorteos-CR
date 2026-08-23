@@ -15,6 +15,7 @@ class PurchaseController extends Controller
 {
     public function random(Raffle $raffle, Request $request, RaffleReservationService $service): JsonResponse
     {
+        abort_unless($raffle->sale_enabled, 423, 'La venta de este sorteo esta pausada temporalmente.');
         $validated = $request->validate([
             'package_count' => ['required', 'integer', 'min:1', 'max:5'],
         ]);
@@ -29,6 +30,9 @@ class PurchaseController extends Controller
 
     public function store(Raffle $raffle, Request $request, RaffleReservationService $service): RedirectResponse
     {
+        if (! $raffle->sale_enabled) {
+            return back()->withErrors(['purchase' => 'La venta de este sorteo esta pausada temporalmente.'])->withInput();
+        }
         $validator = Validator::make($request->all(), [
             'buyer_name' => ['required', 'string', 'max:160'],
             'buyer_phone' => ['required', 'string', 'max:40'],
@@ -70,3 +74,5 @@ class PurchaseController extends Controller
         return redirect()->route('purchase.confirmation', $order->public_uuid);
     }
 }
+
+

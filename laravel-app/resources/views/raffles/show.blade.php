@@ -127,6 +127,7 @@
             </article>
         </div>
 
+        @if ($raffle->sale_enabled)
         <form class="surface sticky top-4 h-fit p-4 xl:p-5" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}" data-numbers-url="{{ route('raffles.numbers', $raffle) }}">
             @csrf
             <div class="flex items-start justify-between gap-4">
@@ -196,7 +197,18 @@
             <label class="mt-5 grid gap-1 text-sm font-black text-slate-600">Comprobante<input class="field" type="file" name="receipt" accept="image/*,.pdf" required></label>
             <button class="primary-action mt-5 w-full" type="submit">Enviar comprobante</button>
         </form>
-    </section>
+        @else
+            <aside class="surface sticky top-4 h-fit border-amber-200 bg-amber-50 p-5">
+                <p class="text-xs font-black uppercase tracking-wide text-amber-700">Venta pausada</p>
+                <h3 class="mt-2 text-2xl font-black tracking-tight text-slate-950">Este sorteo esta pausado temporalmente</h3>
+                <p class="mt-3 leading-7 text-slate-700">Por el momento no se pueden seleccionar numeros ni enviar comprobantes. La informacion del sorteo sigue visible y la venta puede reactivarse desde administracion.</p>
+                <div class="mt-5 rounded-2xl border border-amber-200 bg-white p-4">
+                    <p class="text-sm font-black text-slate-600">Estado actual</p>
+                    <strong class="mt-1 block text-xl font-black text-amber-700">Pausada por administracion</strong>
+                </div>
+            </aside>
+        @endif    </section>
 </x-layouts.app>
+
 
 

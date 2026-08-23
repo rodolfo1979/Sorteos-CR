@@ -15,6 +15,10 @@
         </div>
     </section>
 
+
+    @if (session('status'))
+        <div class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 font-black text-emerald-800">{{ session('status') }}</div>
+    @endif
     <section class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <article class="metric-card"><span class="text-sm font-black text-slate-500">Ventas aprobadas</span><strong class="mt-2 block text-3xl font-black text-teal-700">₡{{ number_format($approvedRevenue, 0, ',', ' ') }}</strong></article>
         <article class="metric-card"><span class="text-sm font-black text-slate-500">Comprobantes pendientes</span><strong class="mt-2 block text-3xl font-black">{{ $pendingPayments }}</strong></article>
@@ -43,13 +47,19 @@
                     <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                         <div class="flex items-center justify-between gap-3">
                             <strong>{{ $raffle->name }}</strong>
-                            <span class="text-sm font-black text-teal-700">{{ $progress }}%</span>
+                            <div class="flex items-center gap-2"><span class="rounded-full px-2.5 py-1 text-xs font-black {{ $raffle->sale_enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800' }}">{{ $raffle->sale_enabled ? 'Activa' : 'Pausada' }}</span><span class="text-sm font-black text-teal-700">{{ $progress }}%</span></div>
                         </div>
                         <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full bg-teal-600" style="width: {{ $progress }}%"></div></div>
                         <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
                             <p class="text-sm text-slate-500">{{ number_format($raffle->sold_numbers_count) }} vendidos · {{ number_format($raffle->reserved_numbers_count) }} reservados</p>
                             <div class="flex flex-wrap gap-2">
-                                <a class="rounded-lg bg-white px-3 py-2 text-xs font-black text-teal-700 shadow-sm transition hover:bg-teal-50" href="{{ route('admin.raffles.edit', $raffle) }}">Editar venta</a>
+                                <a class="rounded-lg bg-white px-3 py-2 text-xs font-black text-teal-700 shadow-sm transition hover:bg-teal-50" href="{{ route('admin.raffles.edit', $raffle) }}">Editar venta</a>                                <form method="post" action="{{ route('admin.raffles.toggle-sale', $raffle) }}">
+                                    @csrf
+                                    @method('patch')
+                                    <button class="rounded-lg px-3 py-2 text-xs font-black shadow-sm transition {{ $raffle->sale_enabled ? 'bg-amber-50 text-amber-800 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}" type="submit">
+                                        {{ $raffle->sale_enabled ? 'Pausar venta' : 'Reactivar venta' }}
+                                    </button>
+                                </form>
                                 <form method="post" action="{{ route('admin.raffles.destroy', $raffle) }}" onsubmit="return confirm('Eliminar este sorteo borrara sus numeros, ordenes y comprobantes asociados. ¿Deseas continuar?')">
                                     @csrf
                                     @method('delete')
@@ -83,3 +93,5 @@
         </div>
     </section>
 </x-layouts.app>
+
+
