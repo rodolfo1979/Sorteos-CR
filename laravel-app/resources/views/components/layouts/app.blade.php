@@ -6,7 +6,7 @@
     <title>{{ $title ?? 'Sorteos CR' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-[#f6f7f4] font-sans text-slate-950 antialiased">
+<body class="min-h-screen bg-[#f2f7f1] font-sans text-slate-950 antialiased">
     @php $isAdmin = request()->is('admin*'); @endphp
 
     @if ($isAdmin)
@@ -55,7 +55,7 @@
             </main>
         </div>
     @else
-        <main class="min-h-screen min-w-0">
+        <main class="min-h-screen min-w-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_30%),linear-gradient(180deg,#f8fff9,#f2f7f1_42%,#ffffff)]">
             @if (session('status'))
                 <div class="mx-auto mb-4 max-w-7xl px-4 pt-4 sm:px-6 xl:px-8">
                     <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 font-bold text-emerald-800 shadow-sm">{{ session('status') }}</div>

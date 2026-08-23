@@ -53,7 +53,7 @@
     }
 
     .primary-action:hover {
-        background: #115e59;
+        background: linear-gradient(135deg, #10b981, #115e59);
         transform: translateY(-1px);
     }
 
@@ -65,3 +65,4 @@
         box-shadow: 0 16px 35px rgb(15 23 42 / 0.05);
     }
 }
+
