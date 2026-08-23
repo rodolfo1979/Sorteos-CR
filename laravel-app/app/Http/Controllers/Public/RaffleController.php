@@ -30,7 +30,7 @@ class RaffleController extends Controller
 
     public function numbers(Raffle $raffle, Request $request): JsonResponse
     {
-        $perPage = min(1000, max(100, (int) $request->integer('per_page', 1000)));
+        $perPage = min(1000, max(50, (int) $request->integer('per_page', 100)));
         $totalPages = max(1, (int) ceil($raffle->total_numbers / $perPage));
         $page = min($totalPages, max(1, (int) $request->integer('page', 1)));
         $start = ($page - 1) * $perPage;

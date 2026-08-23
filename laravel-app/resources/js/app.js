@@ -67,18 +67,18 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     function setActivePackage(packageCount) {
         form.querySelectorAll('[data-package]').forEach((button) => {
             const isActive = Number(button.dataset.package) === Number(packageCount);
-            button.classList.toggle('border-red-500', isActive);
-            button.classList.toggle('bg-red-50', isActive);
-            button.classList.toggle('text-red-700', isActive);
+            button.classList.toggle('border-emerald-500', isActive);
+            button.classList.toggle('bg-emerald-50', isActive);
+            button.classList.toggle('text-emerald-800', isActive);
         });
     }
 
     function ticketMarkup(number) {
         return `
-            <span class="relative flex min-h-12 items-center justify-center overflow-hidden rounded-xl bg-amber-400 px-3 py-2 text-lg font-black tracking-wide text-slate-950 shadow-lg shadow-amber-900/10 ring-1 ring-amber-500/30">
+            <span class="relative flex min-h-12 items-center justify-center overflow-hidden rounded-xl bg-emerald-500 px-3 py-2 text-lg font-black tracking-wide text-white shadow-lg shadow-emerald-900/10 ring-1 ring-emerald-700/30">
                 <span class="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-slate-50"></span>
                 <span class="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-slate-50"></span>
-                <svg class="mr-2 h-5 w-5 text-amber-900/65" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <svg class="mr-2 h-5 w-5 text-emerald-950/55" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5v2a2 2 0 0 0 0 3v2A2.5 2.5 0 0 1 17.5 18h-11A2.5 2.5 0 0 1 4 15.5v-2a2 2 0 0 0 0-3v-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                     <path d="M9 8v8M15 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3"/>
                 </svg>
@@ -86,23 +86,24 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
             </span>
         `;
     }
-
     function numberButtonMarkup(item) {
         const selected = selectedNumbers.includes(item.number);
         const disabled = !item.available && !selected;
         const stateClass = selected
-            ? 'border-amber-500 bg-amber-400 text-slate-950 shadow-md shadow-amber-900/10'
+            ? 'border-emerald-700 bg-emerald-600 text-white shadow-md shadow-emerald-900/10'
             : (item.available
-                ? 'border-amber-200 bg-amber-50 text-slate-950 hover:border-amber-500 hover:bg-amber-300'
-                : 'cursor-not-allowed border-slate-200 bg-slate-200 text-slate-400 opacity-60');
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-950 hover:border-emerald-600 hover:bg-emerald-100 hover:shadow-sm'
+                : 'cursor-not-allowed border-slate-200 bg-white/45 text-slate-400 opacity-45 grayscale');
+        const label = item.available ? 'Disponible' : 'No disponible';
 
         return `
-            <button type="button" class="min-h-10 min-w-14 rounded-lg border px-2 py-1.5 text-center text-[0.82rem] font-black tracking-wide transition ${stateClass}" data-number-button="${item.number}" ${disabled ? 'disabled' : ''}>
-                ${item.number}
+            <button type="button" class="relative min-h-10 min-w-14 overflow-hidden rounded-xl border px-2 py-1.5 text-center text-[0.82rem] font-black tracking-wide transition ${stateClass}" data-number-button="${item.number}" title="${label}: ${item.number}" ${disabled ? 'disabled aria-disabled="true"' : ''}>
+                <span class="absolute -left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white"></span>
+                <span class="absolute -right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-white"></span>
+                <span class="relative z-10">${item.number}</span>
             </button>
         `;
     }
-
     function renderNumberGrid() {
         if (!numberGrid) {
             return;
@@ -274,7 +275,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
             ? 'Selecciona un paquete al azar o escoge manualmente en la cuadricula.'
             : 'Selecciona una cantidad para asignar numeros automaticamente.';
         form.querySelectorAll('[data-package]').forEach((button) => {
-            button.classList.remove('border-red-500', 'bg-red-50', 'text-red-700');
+            button.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-800');
         });
         render();
     });
@@ -290,3 +291,4 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     render();
     loadNumberPage(1);
 });
+

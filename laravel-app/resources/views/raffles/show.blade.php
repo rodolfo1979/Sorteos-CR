@@ -151,7 +151,7 @@
                 </div>
                 <div class="mt-3 grid grid-cols-2 gap-2" data-package-options>
                     @foreach ($packageOptions as $option)
-                        <button class="rounded-xl border border-slate-200 bg-white px-3 py-4 text-center font-black leading-tight shadow-sm transition hover:border-red-400 hover:bg-red-50" type="button" data-package="{{ $option['packages'] }}" data-quantity="{{ $option['quantity'] }}" data-amount="{{ $option['amount'] }}">
+                        <button class="rounded-xl border border-slate-200 bg-white px-3 py-4 text-center font-black leading-tight shadow-sm transition hover:border-emerald-500 hover:bg-emerald-50" type="button" data-package="{{ $option['packages'] }}" data-quantity="{{ $option['quantity'] }}" data-amount="{{ $option['amount'] }}">
                             {{ $raffle->assignment_mode === 'manual' ? 'Azar ' : '' }}{{ $option['quantity'] }}<br><span class="text-sm text-slate-500">numeros</span>
                         </button>
                     @endforeach
@@ -177,8 +177,9 @@
                         <p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">Cargando numeros...</p>
                     </div>
                     <div class="mt-3 flex flex-wrap gap-3 text-xs font-bold text-slate-500">
-                        <span><span class="inline-block h-3 w-3 rounded bg-amber-400 align-middle"></span> Disponible</span>
-                        <span><span class="inline-block h-3 w-3 rounded bg-slate-200 align-middle"></span> No disponible</span>
+                        <span><span class="inline-block h-3 w-3 rounded bg-emerald-100 ring-1 ring-emerald-300 align-middle"></span> Disponible</span>
+                        <span><span class="inline-block h-3 w-3 rounded bg-emerald-600 align-middle"></span> Tu seleccion</span>
+                        <span><span class="inline-block h-3 w-3 rounded bg-slate-200 opacity-45 align-middle"></span> No disponible</span>
                     </div>
                 </div>
             @endif
@@ -209,6 +210,8 @@
             </aside>
         @endif    </section>
 </x-layouts.app>
+
+
 
 
 
