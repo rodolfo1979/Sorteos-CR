@@ -7,12 +7,12 @@
     @endphp
 
     <section class="mx-auto max-w-7xl space-y-5 pb-24 sm:space-y-6 xl:pb-8">
-        <header class="relative overflow-hidden rounded-[1.5rem] bg-[#06110f] text-white shadow-2xl shadow-teal-950/25 sm:rounded-[2rem]">
+        <header class="relative overflow-hidden rounded-[1.5rem] bg-[#08080c] text-white shadow-2xl shadow-rose-950/25 sm:rounded-[2rem]">
             <div class="absolute inset-0">
                 @if ($heroImage)
                     <img class="h-full w-full object-cover opacity-55" src="{{ $heroImage }}" alt="Premio {{ $raffle->name }}">
                 @else
-                    <div class="h-full w-full bg-[radial-gradient(circle_at_top_left,#13c296,transparent_34%),linear-gradient(135deg,#071914,#12231f_45%,#0b0b0b)]"></div>
+                    <div class="h-full w-full bg-[radial-gradient(circle_at_top_left,#ff3b4f,transparent_34%),linear-gradient(135deg,#1a0b10,#2a1117_45%,#0b0b0b)]"></div>
                 @endif
                 <div class="absolute inset-0 bg-gradient-to-t from-black via-black/58 to-black/18"></div>
             </div>
@@ -20,7 +20,7 @@
             <div class="relative grid min-h-[420px] content-end gap-5 p-5 sm:min-h-[500px] sm:p-7 lg:grid-cols-[1fr_340px] lg:items-end lg:p-8">
                 <div class="max-w-3xl">
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="rounded-full bg-amber-300 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-[#063d32]">{{ $raffle->sale_enabled ? 'Venta activa' : 'Venta pausada' }}</span>
+                        <span class="rounded-full bg-amber-300 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-[#111827]">{{ $raffle->sale_enabled ? 'Venta activa' : 'Venta pausada' }}</span>
                         <span class="rounded-full bg-white/12 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white ring-1 ring-white/15">{{ number_format($raffle->available_count) }} disponibles</span>
                     </div>
                     <p class="mt-5 text-xs font-black uppercase tracking-[0.24em] text-amber-200">Sorteos CR</p>
@@ -42,7 +42,7 @@
                         </div>
                     </div>
                     <div class="mt-4 h-3 overflow-hidden rounded-full bg-white/18">
-                        <div class="h-full rounded-full bg-gradient-to-r from-amber-300 to-teal-300" style="width: {{ $soldPercent }}%"></div>
+                        <div class="h-full rounded-full bg-gradient-to-r from-amber-300 to-rose-300" style="width: {{ $soldPercent }}%"></div>
                     </div>
                 </div>
             </div>
@@ -50,17 +50,17 @@
 
         <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
             @if ($raffle->sale_enabled)
-                <form class="order-1 overflow-hidden rounded-[1.35rem] border border-teal-200 bg-white shadow-2xl shadow-teal-950/10 xl:sticky xl:top-4 xl:order-2" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}" data-numbers-url="{{ route('raffles.numbers', $raffle) }}">
+                <form class="order-1 overflow-hidden rounded-[1.35rem] border border-rose-200 bg-white shadow-2xl shadow-rose-950/10 xl:sticky xl:top-4 xl:order-2" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}" data-numbers-url="{{ route('raffles.numbers', $raffle) }}">
                     @csrf
-                    <div class="bg-gradient-to-br from-[#063d32] to-[#0f766e] p-5 text-white">
+                    <div class="bg-gradient-to-br from-[#111827] to-[#e11d48] p-5 text-white">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <p class="text-xs font-black uppercase tracking-[0.2em] text-amber-200">Compra segura</p>
                                 <h2 class="mt-1 text-3xl font-black tracking-tight">Tus numeros</h2>
                             </div>
-                            <span class="rounded-full bg-amber-200 px-3 py-2 text-xs font-black text-[#063d32]">Activa</span>
+                            <span class="rounded-full bg-amber-200 px-3 py-2 text-xs font-black text-[#111827]">Activa</span>
                         </div>
-                        <p class="mt-3 text-sm font-semibold leading-6 text-teal-50">Elige un paquete, cambia al azar si quieres y sube el comprobante para reservar.</p>
+                        <p class="mt-3 text-sm font-semibold leading-6 text-rose-50">Elige un paquete, cambia al azar si quieres y sube el comprobante para reservar.</p>
                     </div>
 
                     <div class="grid gap-4 p-4 sm:p-5">
@@ -70,10 +70,10 @@
                             <label class="grid gap-1 text-sm font-black text-slate-600">Correo<input class="field" type="email" name="buyer_email" value="{{ old('buyer_email') }}" autocomplete="email"></label>
                         </div>
 
-                        <section class="rounded-2xl border border-teal-100 bg-teal-50/80 p-4">
+                        <section class="rounded-2xl border border-rose-100 bg-rose-50/80 p-4">
                             <div class="flex items-center justify-between gap-3">
                                 <p class="font-black text-slate-950">Paquetes rapidos</p>
-                                <span class="rounded-full bg-white px-2.5 py-1 text-xs font-black uppercase text-teal-700">Hasta 5</span>
+                                <span class="rounded-full bg-white px-2.5 py-1 text-xs font-black uppercase text-rose-700">Hasta 5</span>
                             </div>
                             <div class="mt-3 grid grid-cols-2 gap-2" data-package-options>
                                 @foreach ($packageOptions as $option)
@@ -96,30 +96,30 @@
                                     <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-black text-slate-500">{{ number_format($raffle->available_count) }} disp.</span>
                                 </div>
                                 <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
-                                    <button class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xl font-black text-slate-800 shadow-sm transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-35" type="button" data-number-page-prev aria-label="Pagina anterior">‹</button>
+                                    <button class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xl font-black text-slate-800 shadow-sm transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-35" type="button" data-number-page-prev aria-label="Pagina anterior">‹</button>
                                     <strong class="text-sm font-black text-slate-600" data-number-page-label>Pagina 1</strong>
-                                    <button class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xl font-black text-slate-800 shadow-sm transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-35" type="button" data-number-page-next aria-label="Pagina siguiente">›</button>
+                                    <button class="grid h-10 w-10 place-items-center rounded-xl bg-white text-xl font-black text-slate-800 shadow-sm transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-35" type="button" data-number-page-next aria-label="Pagina siguiente">›</button>
                                 </div>
                                 <div class="mt-3 grid max-h-[18rem] grid-cols-4 gap-1.5 overflow-auto pr-1 min-[420px]:grid-cols-5 sm:grid-cols-5 xl:grid-cols-5" data-number-grid>
                                     <p class="col-span-full rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm font-black text-slate-400">Cargando numeros...</p>
                                 </div>
                                 <div class="mt-3 flex flex-wrap gap-3 text-xs font-bold text-slate-500">
-                                    <span><span class="inline-block h-3 w-3 rounded bg-teal-50 ring-1 ring-teal-300 align-middle"></span> Disponible</span>
-                                    <span><span class="inline-block h-3 w-3 rounded bg-teal-700 align-middle"></span> Tu seleccion</span>
+                                    <span><span class="inline-block h-3 w-3 rounded bg-rose-50 ring-1 ring-rose-300 align-middle"></span> Disponible</span>
+                                    <span><span class="inline-block h-3 w-3 rounded bg-rose-700 align-middle"></span> Tu seleccion</span>
                                     <span><span class="inline-block h-3 w-3 rounded bg-slate-200 opacity-45 align-middle"></span> No disponible</span>
                                 </div>
                             </section>
                         @endif
 
                         <section class="rounded-2xl border border-dashed border-amber-300 bg-gradient-to-br from-amber-50 to-white p-4">
-                            <p class="text-sm font-black text-[#063d32]">Seleccion actual</p>
+                            <p class="text-sm font-black text-[#111827]">Seleccion actual</p>
                             <div class="mt-3 grid min-h-10 grid-cols-2 gap-2" data-selected-list>Ninguno</div>
                             <div data-hidden-numbers></div>
                             <div class="mt-4 grid gap-2 sm:grid-cols-2">
                                 <button class="rounded-xl bg-amber-400 px-3 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:bg-amber-300" type="button" data-reroll-selection hidden>Cambiar numeros (5 restantes)</button>
                                 <button class="rounded-xl bg-red-50 px-3 py-3 text-sm font-black text-red-700 transition hover:bg-red-100" type="button" data-clear-selection hidden>Eliminar seleccion</button>
                             </div>
-                            <p class="mt-3 text-2xl font-black text-teal-700" data-total>Total: ₡0</p>
+                            <p class="mt-3 text-2xl font-black text-rose-700" data-total>Total: ₡0</p>
                         </section>
 
                         <label class="grid gap-1 text-sm font-black text-slate-600">Comprobante<input class="field" type="file" name="receipt" accept="image/*,.pdf" required></label>
@@ -141,17 +141,17 @@
             <div class="order-2 min-w-0 space-y-5 xl:order-1">
                 <section class="grid gap-3 sm:grid-cols-3">
                     <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                        <span class="text-xs font-black uppercase tracking-wide text-teal-700">1. Escoge</span>
+                        <span class="text-xs font-black uppercase tracking-wide text-rose-700">1. Escoge</span>
                         <h3 class="mt-1 text-lg font-black">Manual o al azar</h3>
                         <p class="mt-2 text-sm leading-6 text-slate-600">Selecciona paquetes automaticos o usa la cuadricula.</p>
                     </article>
                     <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                        <span class="text-xs font-black uppercase tracking-wide text-teal-700">2. Paga</span>
+                        <span class="text-xs font-black uppercase tracking-wide text-rose-700">2. Paga</span>
                         <h3 class="mt-1 text-lg font-black">Sube comprobante</h3>
                         <p class="mt-2 text-sm leading-6 text-slate-600">Tus numeros quedan reservados para validacion.</p>
                     </article>
                     <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                        <span class="text-xs font-black uppercase tracking-wide text-teal-700">3. Confirma</span>
+                        <span class="text-xs font-black uppercase tracking-wide text-rose-700">3. Confirma</span>
                         <h3 class="mt-1 text-lg font-black">Correo y estado</h3>
                         <p class="mt-2 text-sm leading-6 text-slate-600">Al aprobarse, pasan a vendidos.</p>
                     </article>
@@ -176,10 +176,10 @@
                     <section class="rounded-[1.35rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-950/5 sm:p-6">
                         <div class="flex flex-wrap items-end justify-between gap-3">
                             <div>
-                                <p class="text-xs font-black uppercase tracking-[0.22em] text-teal-700">Galeria</p>
+                                <p class="text-xs font-black uppercase tracking-[0.22em] text-rose-700">Galeria</p>
                                 <h2 class="mt-1 text-2xl font-black tracking-tight">Fotos y videos del premio</h2>
                             </div>
-                            <span class="rounded-full bg-amber-50 px-3 py-2 text-xs font-black uppercase text-[#063d32]">{{ $mediaItems->count() }} archivo(s)</span>
+                            <span class="rounded-full bg-amber-50 px-3 py-2 text-xs font-black uppercase text-[#111827]">{{ $mediaItems->count() }} archivo(s)</span>
                         </div>
                         <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach ($mediaItems as $mediaPath)
@@ -197,8 +197,8 @@
                 @endif
 
                 @if ($raffle->public_sales_text)
-                    <article class="overflow-hidden rounded-[1.35rem] border border-teal-900/25 bg-[#06110f] text-white shadow-2xl shadow-teal-950/10">
-                        <div class="border-b border-white/10 bg-gradient-to-r from-[#063d32] to-[#06110f] p-5 sm:p-6">
+                    <article class="overflow-hidden rounded-[1.35rem] border border-rose-900/25 bg-[#08080c] text-white shadow-2xl shadow-rose-950/10">
+                        <div class="border-b border-white/10 bg-gradient-to-r from-[#111827] to-[#08080c] p-5 sm:p-6">
                             <p class="text-xs font-black uppercase tracking-[0.22em] text-amber-300">Evento relacionado</p>
                             <h2 class="mt-2 text-3xl font-black tracking-tight">{{ $raffle->prize_title ?? $raffle->name }}</h2>
                         </div>
@@ -221,6 +221,8 @@
         </div>
     </section>
 </x-layouts.app>
+
+
 
 
 
