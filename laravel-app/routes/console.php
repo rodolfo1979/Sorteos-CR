@@ -56,3 +56,20 @@ Artisan::command('raffles:rebuild-numbers {raffle_id} {--force}', function (): i
 
     return 0;
 })->purpose('Reconstruye los numeros de una rifa desde cero. Borra compras si se usa --force.');
+
+Artisan::command('mail:test {email}', function (): int {
+    $email = (string) $this->argument('email');
+
+    try {
+        \Illuminate\Support\Facades\Mail::raw('Correo de prueba enviado correctamente desde Sorteos CR.', function ($message) use ($email) {
+            $message->to($email)->subject('Prueba de correo - Sorteos CR');
+        });
+    } catch (\Throwable $exception) {
+        $this->error('No se pudo enviar el correo: '.$exception->getMessage());
+        return 1;
+    }
+
+    $this->info('Correo de prueba enviado a '.$email.'.');
+    return 0;
+})->purpose('Envia un correo de prueba para validar la configuracion SMTP.');
+

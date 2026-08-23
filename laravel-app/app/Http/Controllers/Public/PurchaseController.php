@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Raffle;
+use App\Services\OrderMailService;
 use App\Services\RaffleReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Throwable;
 use RuntimeException;
 
 class PurchaseController extends Controller
@@ -31,7 +29,7 @@ class PurchaseController extends Controller
         ]);
     }
 
-    public function store(Raffle $raffle, Request $request, RaffleReservationService $service): RedirectResponse
+    public function store(Raffle $raffle, Request $request, RaffleReservationService $service, OrderMailService $mailService): RedirectResponse
     {
         if (! $raffle->sale_enabled) {
             return back()->withErrors(['purchase' => 'La venta de este sorteo esta pausada temporalmente.'])->withInput();
@@ -74,21 +72,10 @@ class PurchaseController extends Controller
             return back()->withErrors(['purchase' => $exception->getMessage()])->withInput();
         }
 
-        if ($order->buyer_email) {
-            try {
-                $order->load('raffle', 'numbers');
-                Mail::send('emails.order-reserved', ['order' => $order], function ($message) use ($order) {
-                    $message->to($order->buyer_email, $order->buyer_name)
-                        ->subject('Tus tickets fueron reservados - '.$order->raffle->name);
-                });
-            } catch (Throwable $exception) {
-                Log::warning('No se pudo enviar correo de reserva.', ['order_id' => $order->id, 'error' => $exception->getMessage()]);
-            }
-        }
+        $mailService->sendReserved($order);
+        $mailService->notifyAdminNewOrder($order);
 
         return redirect()->route('purchase.confirmation', $order->public_uuid);
     }
 }
-
-
 
