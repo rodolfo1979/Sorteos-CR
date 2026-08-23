@@ -1,6 +1,7 @@
 <x-layouts.app title="Comprar numeros - Sorteos CR" section="Sitio publico">
     @php
-        $soldPercent = $raffle->total_numbers > 0 ? min(100, round(($raffle->sold_count / $raffle->total_numbers) * 100)) : 0;
+        $occupiedCount = ($raffle->sold_count ?? 0) + ($raffle->reserved_count ?? 0);
+        $soldPercent = $raffle->total_numbers > 0 ? min(100, round(($occupiedCount / $raffle->total_numbers) * 100, 1)) : 0;
         $mediaItems = collect($raffle->media_paths ?? []);
         $heroImage = $raffle->image_path ? Storage::url($raffle->image_path) : null;
     @endphp
@@ -36,7 +37,7 @@
                             <p class="mt-1 text-sm font-bold text-white/70">{{ $raffle->numbers_per_package }} numero(s) por paquete</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-xs font-black uppercase tracking-wide text-white/60">Vendido</p>
+                            <p class="text-xs font-black uppercase tracking-wide text-white/60">Ocupado</p>
                             <strong class="text-2xl font-black">{{ $soldPercent }}%</strong>
                         </div>
                     </div>
@@ -220,3 +221,6 @@
         </div>
     </section>
 </x-layouts.app>
+
+
+

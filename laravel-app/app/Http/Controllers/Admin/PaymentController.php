@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 use Illuminate\View\View;
 
 class PaymentController extends Controller
@@ -27,6 +30,18 @@ class PaymentController extends Controller
             $order->update(['status' => 'approved', 'approved_at' => now()]);
         });
 
+        $order->load('raffle', 'numbers');
+        if ($order->buyer_email) {
+            try {
+                Mail::send('emails.order-approved', ['order' => $order], function ($message) use ($order) {
+                    $message->to($order->buyer_email, $order->buyer_name)
+                        ->subject('Pago validado - '.$order->raffle->name);
+                });
+            } catch (Throwable $exception) {
+                Log::warning('No se pudo enviar correo de aprobacion.', ['order_id' => $order->id, 'error' => $exception->getMessage()]);
+            }
+        }
+
         return back()->with('status', 'Pago aprobado. Los numeros quedaron vendidos.');
     }
 
@@ -43,3 +58,4 @@ class PaymentController extends Controller
         return back()->with('status', 'Pago rechazado. Los numeros volvieron a estar disponibles.');
     }
 }
+

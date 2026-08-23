@@ -8,7 +8,10 @@ use App\Services\RaffleReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 use RuntimeException;
 
 class PurchaseController extends Controller
@@ -71,8 +74,21 @@ class PurchaseController extends Controller
             return back()->withErrors(['purchase' => $exception->getMessage()])->withInput();
         }
 
+        if ($order->buyer_email) {
+            try {
+                $order->load('raffle', 'numbers');
+                Mail::send('emails.order-reserved', ['order' => $order], function ($message) use ($order) {
+                    $message->to($order->buyer_email, $order->buyer_name)
+                        ->subject('Tus tickets fueron reservados - '.$order->raffle->name);
+                });
+            } catch (Throwable $exception) {
+                Log::warning('No se pudo enviar correo de reserva.', ['order_id' => $order->id, 'error' => $exception->getMessage()]);
+            }
+        }
+
         return redirect()->route('purchase.confirmation', $order->public_uuid);
     }
 }
+
 
 
