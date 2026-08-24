@@ -39,13 +39,25 @@ class PaymentController extends Controller
 
     public function approve(Order $order, OrderMailService $mailService): RedirectResponse
     {
-        DB::transaction(function () use ($order) {
-            $order->load('numbers');
-            foreach ($order->numbers as $number) {
-                $number->update(['status' => 'sold', 'reserved_until' => null]);
+        $processed = DB::transaction(function () use ($order) {
+            $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedOrder->status !== 'pending') {
+                return false;
             }
-            $order->update(['status' => 'approved', 'approved_at' => now()]);
-        });
+
+            $lockedOrder->numbers()->orderBy('raffle_numbers.id')->lockForUpdate()->get()->each(function ($number) {
+                $number->forceFill(['status' => 'sold', 'reserved_until' => null])->save();
+            });
+
+            $lockedOrder->update(['status' => 'approved', 'approved_at' => now()]);
+
+            return true;
+        }, 5);
+
+        if (! $processed) {
+            return back()->with('status', 'Esta compra ya habia sido procesada anteriormente.');
+        }
 
         $mailSent = $mailService->sendApproved($order->fresh(['raffle', 'numbers']));
 
@@ -56,13 +68,25 @@ class PaymentController extends Controller
 
     public function reject(Order $order, OrderMailService $mailService): RedirectResponse
     {
-        DB::transaction(function () use ($order) {
-            $order->load('numbers');
-            foreach ($order->numbers as $number) {
-                $number->update(['status' => 'available', 'reserved_until' => null]);
+        $processed = DB::transaction(function () use ($order) {
+            $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedOrder->status !== 'pending') {
+                return false;
             }
-            $order->update(['status' => 'rejected', 'rejected_at' => now()]);
-        });
+
+            $lockedOrder->numbers()->orderBy('raffle_numbers.id')->lockForUpdate()->get()->each(function ($number) {
+                $number->forceFill(['status' => 'available', 'reserved_until' => null])->save();
+            });
+
+            $lockedOrder->update(['status' => 'rejected', 'rejected_at' => now()]);
+
+            return true;
+        }, 5);
+
+        if (! $processed) {
+            return back()->with('status', 'Esta compra ya habia sido procesada anteriormente.');
+        }
 
         $mailSent = $mailService->sendRejected($order->fresh(['raffle', 'numbers']));
 

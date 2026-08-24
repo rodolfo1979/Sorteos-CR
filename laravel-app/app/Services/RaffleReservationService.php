@@ -14,6 +14,7 @@ class RaffleReservationService
     public function randomNumbers(Raffle $raffle, int $packageCount): array
     {
         $quantity = $this->quantityFor($raffle, $packageCount);
+        $this->releaseExpiredReservations($raffle);
 
         return RaffleNumber::query()
             ->where('raffle_id', $raffle->id)
@@ -27,20 +28,25 @@ class RaffleReservationService
     public function reserve(Raffle $raffle, array $buyer, array $numbers, array $receipt, int $packageCount, int $randomChangesUsed = 0): Order
     {
         $expectedQuantity = $this->quantityFor($raffle, $packageCount);
-        $numbers = array_values(array_unique($numbers));
-
-        if (! $raffle->sale_enabled) {
-            throw new RuntimeException('La venta de esta rifa esta pausada.');
-        }
+        $numbers = $this->normalizeNumbers($numbers);
 
         if (count($numbers) !== $expectedQuantity) {
             throw new RuntimeException("Esta compra debe tener {$expectedQuantity} numero(s).");
         }
 
         return DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed) {
+            $lockedRaffle = Raffle::query()->whereKey($raffle->id)->lockForUpdate()->firstOrFail();
+
+            if (! $lockedRaffle->sale_enabled) {
+                throw new RuntimeException('La venta de esta rifa esta pausada.');
+            }
+
+            $this->releaseExpiredReservations($lockedRaffle);
+
             $lockedNumbers = RaffleNumber::query()
-                ->where('raffle_id', $raffle->id)
+                ->where('raffle_id', $lockedRaffle->id)
                 ->whereIn('number', $numbers)
+                ->orderBy('id')
                 ->lockForUpdate()
                 ->get();
 
@@ -54,13 +60,13 @@ class RaffleReservationService
 
             $order = Order::create([
                 'public_uuid' => (string) Str::uuid(),
-                'raffle_id' => $raffle->id,
+                'raffle_id' => $lockedRaffle->id,
                 'buyer_name' => $buyer['name'],
                 'buyer_phone' => $buyer['phone'],
                 'buyer_email' => $buyer['email'] ?? null,
                 'package_count' => $packageCount,
-                'amount_total' => $raffle->price_per_package * $packageCount,
-                'assignment_mode' => $raffle->assignment_mode,
+                'amount_total' => $lockedRaffle->price_per_package * $packageCount,
+                'assignment_mode' => $lockedRaffle->assignment_mode,
                 'random_changes_used' => $randomChangesUsed,
                 'status' => 'pending',
                 'receipt_path' => $receipt['path'] ?? null,
@@ -68,17 +74,43 @@ class RaffleReservationService
                 'receipt_mime' => $receipt['mime'] ?? null,
             ]);
 
+            $reservedUntil = now()->addMinutes($lockedRaffle->reservation_minutes);
+
             foreach ($lockedNumbers as $raffleNumber) {
-                $raffleNumber->update([
+                $raffleNumber->forceFill([
                     'status' => 'reserved',
-                    'reserved_until' => now()->addMinutes($raffle->reservation_minutes),
-                ]);
+                    'reserved_until' => $reservedUntil,
+                ])->save();
 
                 $order->numbers()->attach($raffleNumber->id, ['number' => $raffleNumber->number]);
             }
 
             return $order->load('numbers', 'raffle');
-        });
+        }, 5);
+    }
+
+    public function releaseExpiredReservations(Raffle $raffle): int
+    {
+        return RaffleNumber::query()
+            ->where('raffle_id', $raffle->id)
+            ->where('status', 'reserved')
+            ->whereNotNull('reserved_until')
+            ->where('reserved_until', '<', now())
+            ->update([
+                'status' => 'available',
+                'reserved_until' => null,
+                'updated_at' => now(),
+            ]);
+    }
+
+    private function normalizeNumbers(array $numbers): array
+    {
+        return collect($numbers)
+            ->map(fn ($number) => trim((string) $number))
+            ->filter(fn (string $number) => $number !== '')
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function quantityFor(Raffle $raffle, int $packageCount): int

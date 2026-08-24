@@ -9,6 +9,7 @@ use App\Services\RaffleReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RuntimeException;
 
@@ -34,6 +35,7 @@ class PurchaseController extends Controller
         if (! $raffle->sale_enabled) {
             return back()->withErrors(['purchase' => 'La venta de este sorteo esta pausada temporalmente.'])->withInput();
         }
+
         $validator = Validator::make($request->all(), [
             'buyer_name' => ['required', 'string', 'max:160'],
             'buyer_phone' => ['required', 'string', 'max:40'],
@@ -77,6 +79,8 @@ class PurchaseController extends Controller
                 (int) $request->integer('random_changes_used', 0),
             );
         } catch (RuntimeException $exception) {
+            Storage::disk('public')->delete($receiptPath);
+
             return back()->withErrors(['purchase' => $exception->getMessage()])->withInput();
         }
 
@@ -86,4 +90,3 @@ class PurchaseController extends Controller
         return redirect()->route('purchase.confirmation', $order->public_uuid);
     }
 }
-
