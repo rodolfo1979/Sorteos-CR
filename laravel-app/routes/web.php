@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\NumberController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\RaffleController as AdminRaffleController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\RealtimeController;
 use App\Http\Controllers\Public\ConfirmationController;
 use App\Http\Controllers\Public\PurchaseController;
 use App\Http\Controllers\Public\RaffleController;
@@ -19,6 +20,7 @@ Route::get('/confirmacion/{uuid}', [ConfirmationController::class, 'show'])->nam
 
 Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/tiempo-real', RealtimeController::class)->name('realtime');
     Route::get('/rifas/crear', [AdminRaffleController::class, 'create'])->name('raffles.create');
     Route::post('/rifas', [AdminRaffleController::class, 'store'])->name('raffles.store');
     Route::get('/rifas/{raffle}/editar', [AdminRaffleController::class, 'edit'])->name('raffles.edit');

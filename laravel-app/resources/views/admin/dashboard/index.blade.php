@@ -1,4 +1,5 @@
 <x-layouts.app title="Admin - Sorteos CR" section="Administracion">
+    <div data-admin-realtime-url="{{ route('admin.realtime') }}">
     <section class="overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.28),transparent_34%),linear-gradient(135deg,#0f172a,#1e1b4b_58%,#083344)] text-white shadow-2xl shadow-slate-950/20">
         <div class="grid gap-6 p-6 lg:grid-cols-[1fr_320px] lg:p-8">
             <div>
@@ -20,10 +21,10 @@
         <div class="mt-5 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 font-black text-cyan-900">{{ session('status') }}</div>
     @endif
     <section class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <article class="metric-card"><span class="text-sm font-black text-slate-500">Ventas aprobadas</span><strong class="mt-2 block text-3xl font-black text-indigo-700">₡{{ number_format($approvedRevenue, 0, ',', ' ') }}</strong></article>
-        <article class="metric-card"><span class="text-sm font-black text-slate-500">Comprobantes pendientes</span><strong class="mt-2 block text-3xl font-black">{{ $pendingPayments }}</strong></article>
-        <article class="metric-card"><span class="text-sm font-black text-slate-500">Rifas creadas</span><strong class="mt-2 block text-3xl font-black">{{ $raffles->count() }}</strong></article>
-        <article class="metric-card"><span class="text-sm font-black text-slate-500">Numeros reservados</span><strong class="mt-2 block text-3xl font-black">{{ number_format($raffles->sum('reserved_numbers_count')) }}</strong></article>
+        <article class="metric-card"><span class="text-sm font-black text-slate-500">Ventas aprobadas</span><strong class="mt-2 block text-3xl font-black text-indigo-700" data-admin-stat="approved_revenue">₡{{ number_format($approvedRevenue, 0, ',', ' ') }}</strong></article>
+        <article class="metric-card"><span class="text-sm font-black text-slate-500">Comprobantes pendientes</span><strong class="mt-2 block text-3xl font-black" data-admin-stat="pending_payments">{{ $pendingPayments }}</strong></article>
+        <article class="metric-card"><span class="text-sm font-black text-slate-500">Rifas creadas</span><strong class="mt-2 block text-3xl font-black" data-admin-stat="raffles_count">{{ $raffles->count() }}</strong></article>
+        <article class="metric-card"><span class="text-sm font-black text-slate-500">Numeros reservados</span><strong class="mt-2 block text-3xl font-black" data-admin-stat="reserved_numbers">{{ number_format($raffles->sum('reserved_numbers_count')) }}</strong></article>
     </section>
 
     <section class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
@@ -33,7 +34,7 @@
                     <p class="text-xs font-black uppercase tracking-wide text-slate-500">Inventario</p>
                     <h3 class="text-2xl font-black tracking-tight">Vendidos y reservados</h3>
                 </div>
-                <span class="rounded-full bg-slate-100 px-3 py-2 text-sm font-black text-slate-600">Tiempo real al recargar</span>
+                <span class="rounded-full bg-slate-100 px-3 py-2 text-sm font-black text-slate-600">Actualiza solo cada 5s</span>
             </div>
             <div class="mt-5 h-[320px]"><canvas data-admin-sales-chart='@json($salesChart)'></canvas></div>
         </article>
@@ -80,11 +81,12 @@
                 <h3 class="text-2xl font-black tracking-tight">Actividad reciente</h3>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <span class="rounded-full bg-slate-100 px-3 py-2 text-sm font-black text-slate-600">{{ $recentOrders->total() }} movimiento(s)</span>
+                <span class="rounded-full bg-slate-100 px-3 py-2 text-sm font-black text-slate-600" data-admin-recent-count>{{ $recentOrders->total() }} movimiento(s)</span>
+                <span class="rounded-full bg-cyan-50 px-3 py-2 text-sm font-black text-cyan-700" data-admin-updated-at>En vivo</span>
                 <a class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-200" href="{{ route('admin.payments.index') }}">Revisar pagos</a>
             </div>
         </div>
-        <div class="mt-4 grid gap-3">
+        <div class="mt-4 grid gap-3" data-admin-recent-list>
             @forelse ($recentOrders as $order)
                 <article class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
                     <div><strong>{{ $order->buyer_name }}</strong><p class="text-sm text-slate-500">{{ $order->raffle->name }} · {{ $order->numbers->pluck('number')->join(', ') }}</p></div>
@@ -118,6 +120,7 @@
             </div>
         @endif
     </section>
+    </div>
 </x-layouts.app>
 
 

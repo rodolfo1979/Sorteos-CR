@@ -10,7 +10,7 @@ const formatter = new Intl.NumberFormat('es-CR', {
 
 document.querySelectorAll('[data-admin-sales-chart]').forEach((canvas) => {
     const data = JSON.parse(canvas.dataset.adminSalesChart || '{}');
-    new Chart(canvas, {
+    const adminChart = new Chart(canvas, {
         type: 'bar',
         data: {
             labels: data.labels || [],
@@ -32,6 +32,142 @@ document.querySelectorAll('[data-admin-sales-chart]').forEach((canvas) => {
             },
         },
     });
+
+    canvas.adminSalesChart = adminChart;
+});
+const adminRealtimeRoots = document.querySelectorAll('[data-admin-realtime-url]');
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+const statusLabels = {
+    pending: 'Pendiente',
+    approved: 'Aprobada',
+    rejected: 'Rechazada',
+};
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#039;',
+        '"': '&quot;',
+    }[char]));
+}
+
+function renderRecentOrder(order) {
+    const numbers = (order.numbers || []).join(', ');
+    const status = statusLabels[order.status] || order.status;
+
+    return `
+        <article class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+            <div>
+                <strong>${escapeHtml(order.buyer_name)}</strong>
+                <p class="text-sm text-slate-500">${escapeHtml(order.raffle_name)} · ${escapeHtml(numbers)}</p>
+            </div>
+            <span class="rounded-full bg-amber-50 px-3 py-1 text-sm font-black text-amber-700">${escapeHtml(status)}</span>
+        </article>
+    `;
+}
+
+function renderPendingOrder(order) {
+    const numbers = (order.numbers || []).join(', ');
+    const receipt = order.receipt_url
+        ? `<a class="inline-flex rounded-xl bg-slate-100 px-4 py-2 font-black text-slate-800 transition hover:bg-slate-200" href="${escapeHtml(order.receipt_url)}" target="_blank" rel="noopener">Ver comprobante</a>`
+        : '<span class="inline-flex rounded-xl bg-red-50 px-4 py-2 font-black text-red-700">Sin comprobante</span>';
+
+    return `
+        <article class="rounded-2xl border border-slate-200 p-4 shadow-sm">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h3 class="font-black">${escapeHtml(order.buyer_name)} - ${escapeHtml(order.raffle_name)}</h3>
+                    <p class="text-sm text-slate-500">${escapeHtml(order.buyer_phone)} · ${escapeHtml(order.buyer_email)}</p>
+                    <p class="mt-1 text-xs font-bold text-slate-400">Orden ${escapeHtml(order.order_code)} · ${escapeHtml(order.created_at)}</p>
+                </div>
+                <span class="rounded-full bg-amber-50 px-3 py-1 font-black text-amber-700">${escapeHtml(order.amount)}</span>
+            </div>
+            <p class="mt-3 text-sm text-slate-700">Numeros: <strong>${escapeHtml(numbers)}</strong></p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                ${receipt}
+                <form method="post" action="${escapeHtml(order.approve_url)}">
+                    <input type="hidden" name="_token" value="${escapeHtml(csrfToken)}">
+                    <button class="rounded-xl bg-indigo-700 px-4 py-2 font-black text-white transition hover:bg-indigo-800">Aprobar</button>
+                </form>
+                <form method="post" action="${escapeHtml(order.reject_url)}">
+                    <input type="hidden" name="_token" value="${escapeHtml(csrfToken)}">
+                    <button class="rounded-xl bg-red-50 px-4 py-2 font-black text-red-700 transition hover:bg-red-100">Rechazar</button>
+                </form>
+            </div>
+        </article>
+    `;
+}
+
+function refreshAdminRealtime(root) {
+    if (document.visibilityState === 'hidden') {
+        return;
+    }
+
+    fetch(root.dataset.adminRealtimeUrl, {
+        headers: {
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        cache: 'no-store',
+    })
+        .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+        .then((data) => {
+            Object.entries(data.stats || {}).forEach(([key, value]) => {
+                root.querySelectorAll(`[data-admin-stat="${key}"]`).forEach((element) => {
+                    element.textContent = value;
+                });
+            });
+
+            root.querySelectorAll('[data-admin-updated-at]').forEach((element) => {
+                element.textContent = `Actualizado ${data.updated_at}`;
+            });
+
+            const chartCanvas = root.querySelector('[data-admin-sales-chart]');
+            if (chartCanvas?.adminSalesChart && data.sales_chart) {
+                chartCanvas.adminSalesChart.data.labels = data.sales_chart.labels || [];
+                chartCanvas.adminSalesChart.data.datasets[0].data = data.sales_chart.sold || [];
+                chartCanvas.adminSalesChart.data.datasets[1].data = data.sales_chart.reserved || [];
+                chartCanvas.adminSalesChart.update('none');
+            }
+
+            const recentList = root.querySelector('[data-admin-recent-list]');
+            if (recentList) {
+                const orders = data.recent_orders || [];
+                recentList.innerHTML = orders.length
+                    ? orders.map((order) => renderRecentOrder(order)).join('')
+                    : '<p class="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-slate-500">Aun no hay compras.</p>';
+            }
+
+            const recentCount = root.querySelector('[data-admin-recent-count]');
+            if (recentCount) {
+                recentCount.textContent = `${(data.recent_orders || []).length} movimiento(s) recientes`;
+            }
+
+            const pendingList = root.querySelector('[data-admin-pending-list]');
+            if (pendingList) {
+                const orders = data.pending_orders || [];
+                pendingList.innerHTML = orders.length
+                    ? orders.map((order) => renderPendingOrder(order)).join('')
+                    : '<p class="rounded-2xl border border-dashed border-slate-300 p-6 text-center text-slate-500">No hay comprobantes pendientes.</p>';
+            }
+
+            const pendingCount = root.querySelector('[data-admin-pending-count]');
+            if (pendingCount) {
+                pendingCount.textContent = `${data.stats?.pending_payments || 0} pendiente(s)`;
+            }
+        })
+        .catch(() => {
+            root.querySelectorAll('[data-admin-updated-at]').forEach((element) => {
+                element.textContent = 'Sin conexion en vivo';
+            });
+        });
+}
+
+adminRealtimeRoots.forEach((root) => {
+    refreshAdminRealtime(root);
+    setInterval(() => refreshAdminRealtime(root), 5000);
 });
 
 document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
