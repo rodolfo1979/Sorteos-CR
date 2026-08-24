@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [RaffleController::class, 'show'])->name('raffles.show');
 Route::get('/rifas/{slug}', [RaffleController::class, 'show'])->name('raffles.slug');
-Route::get('/rifas/{raffle}/numeros-disponibles', [RaffleController::class, 'numbers'])->name('raffles.numbers');
-Route::post('/rifas/{raffle}/random', [PurchaseController::class, 'random'])->name('purchases.random');
-Route::post('/rifas/{raffle}/comprar', [PurchaseController::class, 'store'])->name('purchases.store');
+Route::get('/rifas/{raffleId}/numeros-disponibles', [RaffleController::class, 'numbers'])->name('raffles.numbers');
+Route::post('/rifas/{raffleId}/random', [PurchaseController::class, 'random'])->name('purchases.random');
+Route::post('/rifas/{raffleId}/comprar', [PurchaseController::class, 'store'])->name('purchases.store');
 Route::get('/confirmacion/{uuid}', [ConfirmationController::class, 'show'])->name('purchase.confirmation');
 
 Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(function () {

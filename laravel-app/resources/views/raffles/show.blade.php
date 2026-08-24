@@ -139,7 +139,7 @@
 
             <div class="xl:sticky xl:top-4">
                 @if ($raffle->sale_enabled)
-                    <form class="overflow-hidden rounded-[1.35rem] border border-cyan-200 bg-white shadow-2xl shadow-cyan-950/12" method="post" action="{{ route('purchases.store', $raffle) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', $raffle) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}" data-numbers-url="{{ route('raffles.numbers', $raffle) }}">
+                    <form class="overflow-hidden rounded-[1.35rem] border border-cyan-200 bg-white shadow-2xl shadow-cyan-950/12" method="post" action="{{ route('purchases.store', ['raffleId' => $raffle->id]) }}" enctype="multipart/form-data" data-raffle-purchase data-random-url="{{ route('purchases.random', ['raffleId' => $raffle->id]) }}" data-mode="{{ $raffle->assignment_mode }}" data-max-random-changes="{{ $raffle->max_random_changes }}" data-numbers-url="{{ route('raffles.numbers', ['raffleId' => $raffle->id]) }}">
                         @csrf
                         <div class="bg-gradient-to-br from-[#0f172a] via-[#155e75] to-[#0f766e] p-5 text-white">
                             <div class="flex items-start justify-between gap-4">

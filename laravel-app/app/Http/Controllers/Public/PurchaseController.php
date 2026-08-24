@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Raffle;
 use App\Services\OrderMailService;
+use App\Services\PublicRaffleSnapshotService;
 use App\Services\RaffleReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,8 +16,9 @@ use RuntimeException;
 
 class PurchaseController extends Controller
 {
-    public function random(Raffle $raffle, Request $request, RaffleReservationService $service): JsonResponse
+    public function random(int $raffleId, Request $request, RaffleReservationService $service, PublicRaffleSnapshotService $snapshotService): JsonResponse
     {
+        $raffle = $snapshotService->byId($raffleId);
         abort_unless($raffle->sale_enabled, 423, 'La venta de este sorteo esta pausada temporalmente.');
         $validated = $request->validate([
             'package_count' => ['required', 'integer', 'min:1', 'max:5'],
@@ -30,8 +32,9 @@ class PurchaseController extends Controller
         ]);
     }
 
-    public function store(Raffle $raffle, Request $request, RaffleReservationService $service, OrderMailService $mailService): RedirectResponse
+    public function store(int $raffleId, Request $request, RaffleReservationService $service, OrderMailService $mailService, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
+        $raffle = $snapshotService->byId($raffleId);
         if (! $raffle->sale_enabled) {
             return back()->withErrors(['purchase' => 'La venta de este sorteo esta pausada temporalmente.'])->withInput();
         }

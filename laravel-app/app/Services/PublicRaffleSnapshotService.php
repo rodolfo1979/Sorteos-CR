@@ -19,10 +19,16 @@ class PublicRaffleSnapshotService
         return $this->remember("slug:{$slug}", fn () => Raffle::where('slug', $slug)->firstOrFail());
     }
 
+    public function byId(int $id): Raffle
+    {
+        return $this->remember("id:{$id}", fn () => Raffle::findOrFail($id));
+    }
+
     public function warmFeatured(): Raffle
     {
         $raffle = Raffle::where('is_featured', true)->first() ?? Raffle::latest()->firstOrFail();
         $this->store('featured', $raffle);
+        $this->store("id:{$raffle->id}", $raffle);
         $this->store("slug:{$raffle->slug}", $raffle);
 
         return $raffle;
@@ -31,6 +37,7 @@ class PublicRaffleSnapshotService
     public function warm(Raffle $raffle): void
     {
         $fresh = $raffle->fresh() ?? $raffle;
+        $this->store("id:{$fresh->id}", $fresh);
         $this->store("slug:{$fresh->slug}", $fresh);
 
         if ($fresh->is_featured) {
@@ -43,13 +50,14 @@ class PublicRaffleSnapshotService
         Cache::forget('public-raffle:snapshot:featured');
 
         if ($raffle) {
+            Cache::forget("public-raffle:snapshot:id:{$raffle->id}");
             Cache::forget("public-raffle:snapshot:slug:{$raffle->slug}");
         }
     }
 
     public function adjustCounts(Raffle $raffle, int $availableDelta = 0, int $reservedDelta = 0, int $soldDelta = 0): void
     {
-        foreach (['featured', "slug:{$raffle->slug}"] as $key) {
+        foreach (['featured', "id:{$raffle->id}", "slug:{$raffle->slug}"] as $key) {
             $this->adjustSnapshot($key, $raffle, $availableDelta, $reservedDelta, $soldDelta);
         }
     }
@@ -69,6 +77,7 @@ class PublicRaffleSnapshotService
 
         Cache::forever($cacheKey, $snapshot);
     }
+
     private function remember(string $key, callable $resolver): Raffle
     {
         $cacheKey = "public-raffle:snapshot:{$key}";

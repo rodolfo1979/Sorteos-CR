@@ -22,8 +22,9 @@ class RaffleController extends Controller
         ]);
     }
 
-    public function numbers(Raffle $raffle, Request $request): JsonResponse
+    public function numbers(int $raffleId, Request $request): JsonResponse
     {
+        $raffle = app(PublicRaffleSnapshotService::class)->byId($raffleId);
         $perPage = min(1000, max(50, (int) $request->integer('per_page', 100)));
         $totalPages = max(1, (int) ceil($raffle->total_numbers / $perPage));
         $page = min($totalPages, max(1, (int) $request->integer('page', 1)));
