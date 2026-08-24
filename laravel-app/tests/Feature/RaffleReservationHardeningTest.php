@@ -75,14 +75,14 @@ class RaffleReservationHardeningTest extends TestCase
         $this->assertCount(0, Storage::disk('public')->files('receipts'));
     }
 
-    public function test_expired_reserved_numbers_are_released_before_random_assignment(): void
+    public function test_expired_reserved_numbers_can_be_released_by_maintenance(): void
     {
         $raffle = $this->raffle();
         $this->number($raffle, '0001', 'reserved', now()->subMinute());
         $this->number($raffle, '0002', 'reserved', now()->addHour());
         $this->number($raffle, '0003');
 
-        app(RaffleReservationService::class)->randomNumbers($raffle, 1);
+        app(RaffleReservationService::class)->releaseExpiredReservations($raffle);
 
         $this->assertSame('available', RaffleNumber::where('number', '0001')->first()->status);
         $this->assertSame('reserved', RaffleNumber::where('number', '0002')->first()->status);

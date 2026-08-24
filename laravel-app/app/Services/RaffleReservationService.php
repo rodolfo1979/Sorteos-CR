@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\Raffle;
 use App\Models\RaffleNumber;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -139,7 +138,7 @@ class RaffleReservationService
 
     private function releaseExpiredReservationsIfDue(Raffle $raffle): void
     {
-        if (! Cache::add("raffle:{$raffle->id}:release-expired-due", true, now()->addSeconds(30))) {
+        if (random_int(1, 30) !== 1) {
             return;
         }
 

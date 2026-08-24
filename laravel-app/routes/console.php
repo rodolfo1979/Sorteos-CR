@@ -73,3 +73,25 @@ Artisan::command('mail:test {email}', function (): int {
     return 0;
 })->purpose('Envia un correo de prueba para validar la configuracion SMTP.');
 
+Artisan::command('raffles:release-expired-reservations', function (): int {
+    $released = 0;
+
+    Raffle::query()->chunkById(50, function ($raffles) use (&$released) {
+        foreach ($raffles as $raffle) {
+            $released += $raffle->numbers()
+                ->where('status', 'reserved')
+                ->whereNotNull('reserved_until')
+                ->where('reserved_until', '<', now())
+                ->update([
+                    'status' => 'available',
+                    'reserved_until' => null,
+                    'updated_at' => now(),
+                ]);
+        }
+    });
+
+    $this->info("Reservas vencidas liberadas: {$released}.");
+
+    return 0;
+})->purpose('Libera numeros reservados cuyo tiempo de reserva ya vencio.');
+
