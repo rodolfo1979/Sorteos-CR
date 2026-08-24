@@ -100,8 +100,25 @@
                 </table>
             </div>
 
-            <div class="mt-4">
-                {{ $processedOrders->links() }}
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <p class="text-sm font-bold text-slate-500">
+                    Mostrando {{ $processedOrders->firstItem() ?? 0 }}-{{ $processedOrders->lastItem() ?? 0 }} de {{ $processedOrders->total() }} compra(s)
+                </p>
+                <div class="flex items-center gap-2">
+                    @if ($processedOrders->onFirstPage())
+                        <span class="rounded-xl bg-white px-4 py-2 font-black text-slate-300 ring-1 ring-slate-200">Anterior</span>
+                    @else
+                        <a class="rounded-xl bg-white px-4 py-2 font-black text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100" href="{{ $processedOrders->previousPageUrl() }}">Anterior</a>
+                    @endif
+
+                    <span class="rounded-xl bg-slate-950 px-4 py-2 font-black text-white">Pagina {{ $processedOrders->currentPage() }} de {{ $processedOrders->lastPage() }}</span>
+
+                    @if ($processedOrders->hasMorePages())
+                        <a class="rounded-xl bg-white px-4 py-2 font-black text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100" href="{{ $processedOrders->nextPageUrl() }}">Siguiente</a>
+                    @else
+                        <span class="rounded-xl bg-white px-4 py-2 font-black text-slate-300 ring-1 ring-slate-200">Siguiente</span>
+                    @endif
+                </div>
             </div>
         </section>
     </div>
