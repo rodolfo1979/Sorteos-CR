@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Models\Raffle;
 use App\Services\OrderMailService;
 use App\Services\PublicRaffleSnapshotService;
 use App\Services\RaffleReservationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RuntimeException;
 
@@ -57,6 +56,7 @@ class PurchaseController extends Controller
             'numbers' => ['required', 'array'],
             'numbers.*' => ['required', 'string', 'max:24'],
             'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:15360'],
+            'selection_source' => ['nullable', 'in:manual,random'],
         ], [
             'buyer_email.required' => 'Debes indicar un correo electronico para enviarte tus tickets y el estado del pago.',
             'buyer_email.email' => 'Ingresa un correo electronico valido.',
@@ -90,6 +90,7 @@ class PurchaseController extends Controller
                 ],
                 (int) $request->integer('package_count'),
                 (int) $request->integer('random_changes_used', 0),
+                $request->input('selection_source', 'manual'),
             );
         } catch (RuntimeException $exception) {
             Storage::disk('public')->delete($receiptPath);

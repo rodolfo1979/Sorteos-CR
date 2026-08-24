@@ -179,6 +179,8 @@
                                     @endforeach
                                 </div>
                                 <input type="hidden" name="package_count" value="1" data-package-count>
+                                <input type="hidden" name="selection_source" value="manual" data-selection-source>
+                                <input type="hidden" name="random_changes_used" value="0" data-random-changes-used>
                                 <p class="mt-3 text-sm font-semibold leading-6 text-slate-600" data-package-help>Selecciona un paquete o escoge manualmente en la cuadricula.</p>
                             </section>
 

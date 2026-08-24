@@ -177,6 +177,8 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     const maxRandomChanges = Number(form.dataset.maxRandomChanges || 5);
     const packageCountInput = form.querySelector('[data-package-count]');
     const packageHelp = form.querySelector('[data-package-help]');
+    const selectionSourceInput = form.querySelector('[data-selection-source]');
+    const randomChangesInput = form.querySelector('[data-random-changes-used]');
     const selectedList = form.querySelector('[data-selected-list]');
     const hiddenNumbers = form.querySelector('[data-hidden-numbers]');
     const clearButton = form.querySelector('[data-clear-selection]');
@@ -318,6 +320,9 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         }
 
         packageCountInput.value = packageCount;
+        if (selectionSourceInput) {
+            selectionSourceInput.value = 'random';
+        }
         currentPackageCount = packageCount;
         expectedQuantity = quantity;
         amount = newAmount;
@@ -343,6 +348,9 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         selectedNumbers = data.numbers || [];
         if (countAsChange) {
             randomChangesUsed += 1;
+            if (randomChangesInput) {
+                randomChangesInput.value = randomChangesUsed;
+            }
         }
         packageHelp.textContent = countAsChange
             ? `Numeros actualizados. Te quedan ${remainingChanges()} cambio(s).`
@@ -366,6 +374,12 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         amount = Number(activePackage.dataset.amount);
         setActivePackage(packages);
         randomChangesUsed = 0;
+        if (selectionSourceInput) {
+            selectionSourceInput.value = 'manual';
+        }
+        if (randomChangesInput) {
+            randomChangesInput.value = randomChangesUsed;
+        }
         packageHelp.textContent = selectedNumbers.length === expectedQuantity
             ? `Seleccion completa de ${expectedQuantity} numeros. Puedes cambiarlos al azar hasta ${maxRandomChanges} vez/veces.`
             : `Te falta ${expectedQuantity - selectedNumbers.length} numero(s) para completar la compra de ${expectedQuantity}.`;
@@ -375,6 +389,9 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     form.querySelectorAll('[data-package]').forEach((button) => {
         button.addEventListener('click', () => {
             randomChangesUsed = 0;
+            if (randomChangesInput) {
+                randomChangesInput.value = randomChangesUsed;
+            }
             takeRandom(Number(button.dataset.package), Number(button.dataset.quantity), Number(button.dataset.amount));
         });
     });
@@ -410,6 +427,12 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         amount = 0;
         currentPackageCount = 1;
         randomChangesUsed = 0;
+        if (selectionSourceInput) {
+            selectionSourceInput.value = 'manual';
+        }
+        if (randomChangesInput) {
+            randomChangesInput.value = randomChangesUsed;
+        }
         packageHelp.textContent = mode === 'manual'
             ? 'Selecciona un paquete al azar o escoge manualmente en la cuadricula.'
             : 'Selecciona una cantidad para asignar numeros automaticamente.';
@@ -430,7 +453,4 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     render();
     loadNumberPage(1);
 });
-
-
-
 

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\Raffle;
 use App\Models\RaffleNumber;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -52,16 +53,18 @@ class RaffleReservationService
 
         return $this->randomCandidateNumbers($raffle, $quantity);
     }
-    public function reserve(Raffle $raffle, array $buyer, array $numbers, array $receipt, int $packageCount, int $randomChangesUsed = 0): Order
+
+    public function reserve(Raffle $raffle, array $buyer, array $numbers, array $receipt, int $packageCount, int $randomChangesUsed = 0, string $selectionSource = 'manual'): Order
     {
         $expectedQuantity = $this->quantityFor($raffle, $packageCount);
         $numbers = $this->normalizeNumbers($numbers);
+        $selectionSource = $this->normalizeSelectionSource($selectionSource);
 
         if (count($numbers) !== $expectedQuantity) {
             throw new RuntimeException("Esta compra debe tener {$expectedQuantity} numero(s).");
         }
 
-        $order = DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed) {
+        $order = DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed, $selectionSource, $expectedQuantity) {
             $lockedRaffle = Raffle::query()->whereKey($raffle->id)->lockForUpdate()->firstOrFail();
 
             if (! $lockedRaffle->sale_enabled) {
@@ -82,7 +85,15 @@ class RaffleReservationService
             }
 
             if ($lockedNumbers->contains(fn (RaffleNumber $number) => $number->status !== 'available')) {
-                throw new RuntimeException('Uno o mas numeros ya no estan disponibles. Intenta con otra seleccion.');
+                if ($selectionSource !== 'random') {
+                    throw new RuntimeException('Uno o mas numeros ya no estan disponibles. Intenta con otra seleccion.');
+                }
+
+                $lockedNumbers = $this->availableReplacementNumbers($lockedRaffle, $expectedQuantity, $numbers);
+
+                if ($lockedNumbers->count() !== $expectedQuantity) {
+                    throw new RuntimeException('Uno o mas numeros ya no estan disponibles. Intenta con otra seleccion.');
+                }
             }
 
             $order = Order::create([
@@ -93,7 +104,7 @@ class RaffleReservationService
                 'buyer_email' => $buyer['email'] ?? null,
                 'package_count' => $packageCount,
                 'amount_total' => $lockedRaffle->price_per_package * $packageCount,
-                'assignment_mode' => $lockedRaffle->assignment_mode,
+                'assignment_mode' => $selectionSource,
                 'random_changes_used' => $randomChangesUsed,
                 'status' => 'pending',
                 'receipt_path' => $receipt['path'] ?? null,
@@ -115,7 +126,7 @@ class RaffleReservationService
             return $order->load('numbers', 'raffle');
         }, 5);
 
-        app(PublicRaffleSnapshotService::class)->adjustCounts($order->raffle, availableDelta: -count($numbers), reservedDelta: count($numbers));
+        app(PublicRaffleSnapshotService::class)->adjustCounts($order->raffle, availableDelta: -$order->numbers->count(), reservedDelta: $order->numbers->count());
 
         return $order;
     }
@@ -163,6 +174,48 @@ class RaffleReservationService
             ->unique()
             ->values()
             ->all();
+    }
+
+    private function availableReplacementNumbers(Raffle $raffle, int $quantity, array $excludedNumbers): Collection
+    {
+        $selected = collect();
+        $candidatePoolSize = min($raffle->total_numbers, max($quantity * 12, 80));
+
+        for ($attempt = 0; $attempt < 5 && $selected->count() < $quantity; $attempt++) {
+            $candidates = $this->randomCandidateNumbers($raffle, $candidatePoolSize);
+
+            $available = RaffleNumber::query()
+                ->where('raffle_id', $raffle->id)
+                ->where('status', 'available')
+                ->whereNotIn('number', $excludedNumbers)
+                ->whereIn('number', $candidates)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->limit($quantity - $selected->count())
+                ->get();
+
+            $selected = $selected->merge($available)->unique('id')->values();
+        }
+
+        if ($selected->count() < $quantity) {
+            $fallback = RaffleNumber::query()
+                ->where('raffle_id', $raffle->id)
+                ->where('status', 'available')
+                ->whereNotIn('number', $excludedNumbers)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->limit($quantity - $selected->count())
+                ->get();
+
+            $selected = $selected->merge($fallback)->unique('id')->values();
+        }
+
+        return $selected->take($quantity);
+    }
+
+    private function normalizeSelectionSource(string $selectionSource): string
+    {
+        return $selectionSource === 'random' ? 'random' : 'manual';
     }
 
     private function quantityFor(Raffle $raffle, int $packageCount): int

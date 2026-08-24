@@ -65,6 +65,7 @@ class RaffleReservationHardeningTest extends TestCase
             'buyer_email' => 'cliente@example.com',
             'package_count' => 1,
             'numbers' => ['0001', '0002'],
+            'selection_source' => 'manual',
             'receipt' => UploadedFile::fake()->create('comprobante.pdf', 100, 'application/pdf'),
         ])
             ->assertRedirect()
@@ -73,6 +74,42 @@ class RaffleReservationHardeningTest extends TestCase
 
         $this->assertSame(0, Order::count());
         $this->assertCount(0, Storage::disk('public')->files('receipts'));
+    }
+
+    public function test_random_purchase_conflict_reassigns_available_package_without_error(): void
+    {
+        Storage::fake('public');
+        $raffle = $this->raffle();
+        $this->number($raffle, '0001', 'sold');
+        $this->number($raffle, '0002');
+        $this->number($raffle, '0003');
+        $this->number($raffle, '0004');
+
+        $response = $this->post(route('purchases.store', $raffle), [
+            'buyer_name' => 'Cliente Azar',
+            'buyer_phone' => '88888888',
+            'buyer_email' => 'azar@example.com',
+            'package_count' => 1,
+            'numbers' => ['0001', '0002'],
+            'selection_source' => 'random',
+            'random_changes_used' => 2,
+            'receipt' => UploadedFile::fake()->create('comprobante.pdf', 100, 'application/pdf'),
+        ]);
+
+        $order = Order::with('numbers')->first();
+
+        $response
+            ->assertRedirect(route('purchase.confirmation', $order->public_uuid))
+            ->assertSessionHasNoErrors()
+            ->assertSessionMissing('availability_notice');
+
+        $this->assertSame('random', $order->assignment_mode);
+        $this->assertSame(2, $order->random_changes_used);
+        $this->assertEqualsCanonicalizing(['0003', '0004'], $order->numbers->pluck('number')->all());
+        $this->assertSame('sold', RaffleNumber::where('number', '0001')->first()->status);
+        $this->assertSame('available', RaffleNumber::where('number', '0002')->first()->status);
+        $this->assertSame(2, RaffleNumber::where('status', 'reserved')->count());
+        $this->assertCount(1, Storage::disk('public')->files('receipts'));
     }
 
     public function test_expired_reserved_numbers_can_be_released_by_maintenance(): void
