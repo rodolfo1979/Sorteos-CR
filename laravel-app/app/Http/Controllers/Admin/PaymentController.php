@@ -62,7 +62,7 @@ class PaymentController extends Controller
         $mailSent = $mailService->sendApproved($order->fresh(['raffle', 'numbers']));
 
         return back()->with('status', $mailSent
-            ? 'Pago aprobado. Los numeros quedaron vendidos y el correo fue enviado al cliente.'
+            ? 'Pago aprobado. Los numeros quedaron vendidos y el correo quedo programado para enviarse al cliente.'
             : 'Pago aprobado. Los numeros quedaron vendidos, pero no se pudo enviar el correo al cliente. Revisa la configuracion SMTP o el correo del comprador.');
     }
 
@@ -91,7 +91,7 @@ class PaymentController extends Controller
         $mailSent = $mailService->sendRejected($order->fresh(['raffle', 'numbers']));
 
         return back()->with('status', $mailSent
-            ? 'Pago rechazado. Los numeros volvieron a estar disponibles y el correo fue enviado al cliente.'
+            ? 'Pago rechazado. Los numeros volvieron a estar disponibles y el correo quedo programado para enviarse al cliente.'
             : 'Pago rechazado. Los numeros volvieron a estar disponibles, pero no se pudo enviar el correo al cliente. Revisa la configuracion SMTP o el correo del comprador.');
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Raffle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class RaffleController extends Controller
@@ -16,11 +17,22 @@ class RaffleController extends Controller
             ? Raffle::where('slug', $slug)->firstOrFail()
             : Raffle::where('is_featured', true)->first() ?? Raffle::latest()->firstOrFail();
 
-        $raffle->loadCount([
-            'numbers as available_count' => fn ($query) => $query->where('status', 'available'),
-            'numbers as sold_count' => fn ($query) => $query->where('status', 'sold'),
-            'numbers as reserved_count' => fn ($query) => $query->where('status', 'reserved'),
-        ]);
+        $counts = Cache::remember("raffle:{$raffle->id}:public-counts", now()->addSeconds(5), function () use ($raffle) {
+            $statusCounts = $raffle->numbers()
+                ->selectRaw('status, COUNT(*) as total')
+                ->groupBy('status')
+                ->pluck('total', 'status');
+
+            return [
+                'available_count' => (int) ($statusCounts['available'] ?? 0),
+                'sold_count' => (int) ($statusCounts['sold'] ?? 0),
+                'reserved_count' => (int) ($statusCounts['reserved'] ?? 0),
+            ];
+        });
+
+        foreach ($counts as $key => $value) {
+            $raffle->setAttribute($key, $value);
+        }
 
         return view('raffles.show', [
             'raffle' => $raffle,

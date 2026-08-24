@@ -57,7 +57,7 @@ class OrderMailService
         $order->loadMissing('raffle', 'numbers');
 
         try {
-            Mail::to($adminEmail)->send(new OrderStatusMail(
+            Mail::to($adminEmail)->queue(new OrderStatusMail(
                 $order,
                 'emails.admin-new-order',
                 'Nuevo comprobante pendiente - '.$order->raffle->name
@@ -83,7 +83,7 @@ class OrderMailService
         }
 
         try {
-            Mail::to($order->buyer_email, $order->buyer_name)->send(new OrderStatusMail($order, $view, $subject));
+            Mail::to($order->buyer_email, $order->buyer_name)->queue(new OrderStatusMail($order, $view, $subject));
 
             return true;
         } catch (Throwable $exception) {

@@ -61,11 +61,11 @@ class PaymentRejectionEmailTest extends TestCase
         $this->withBasicAuth('admin-test', 'secure-test-password')
             ->post(route('admin.payments.reject', $order))
             ->assertRedirect()
-            ->assertSessionHas('status', 'Pago rechazado. Los numeros volvieron a estar disponibles y el correo fue enviado al cliente.');
+            ->assertSessionHas('status', 'Pago rechazado. Los numeros volvieron a estar disponibles y el correo quedo programado para enviarse al cliente.');
 
         $this->assertSame('rejected', $order->fresh()->status);
         $this->assertTrue($order->fresh()->rejected_at !== null);
         $this->assertSame(2, RaffleNumber::where('raffle_id', $raffle->id)->where('status', 'available')->count());
-        Mail::assertSent(OrderStatusMail::class, fn (OrderStatusMail $message) => $message->hasTo('cliente@example.com'));
+        Mail::assertQueued(OrderStatusMail::class, fn (OrderStatusMail $message) => $message->hasTo('cliente@example.com'));
     }
 }

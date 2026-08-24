@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\Raffle;
 use App\Models\RaffleNumber;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -14,7 +15,7 @@ class RaffleReservationService
     public function randomNumbers(Raffle $raffle, int $packageCount): array
     {
         $quantity = $this->quantityFor($raffle, $packageCount);
-        $this->releaseExpiredReservations($raffle);
+        $this->releaseExpiredReservationsIfDue($raffle);
 
         return RaffleNumber::query()
             ->where('raffle_id', $raffle->id)
@@ -41,7 +42,7 @@ class RaffleReservationService
                 throw new RuntimeException('La venta de esta rifa esta pausada.');
             }
 
-            $this->releaseExpiredReservations($lockedRaffle);
+            $this->releaseExpiredReservationsIfDue($lockedRaffle);
 
             $lockedNumbers = RaffleNumber::query()
                 ->where('raffle_id', $lockedRaffle->id)
@@ -101,6 +102,15 @@ class RaffleReservationService
                 'reserved_until' => null,
                 'updated_at' => now(),
             ]);
+    }
+
+    private function releaseExpiredReservationsIfDue(Raffle $raffle): void
+    {
+        if (! Cache::add("raffle:{$raffle->id}:release-expired-due", true, now()->addSeconds(30))) {
+            return;
+        }
+
+        $this->releaseExpiredReservations($raffle);
     }
 
     private function normalizeNumbers(array $numbers): array
