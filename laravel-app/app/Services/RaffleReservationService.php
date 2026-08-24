@@ -55,7 +55,7 @@ class RaffleReservationService
             throw new RuntimeException("Esta compra debe tener {$expectedQuantity} numero(s).");
         }
 
-        return DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed) {
+        $order = DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed) {
             $lockedRaffle = Raffle::query()->whereKey($raffle->id)->lockForUpdate()->firstOrFail();
 
             if (! $lockedRaffle->sale_enabled) {
@@ -108,6 +108,10 @@ class RaffleReservationService
 
             return $order->load('numbers', 'raffle');
         }, 5);
+
+        app(PublicRaffleSnapshotService::class)->adjustCounts($order->raffle, availableDelta: -count($numbers), reservedDelta: count($numbers));
+
+        return $order;
     }
 
     public function releaseExpiredReservations(Raffle $raffle): int

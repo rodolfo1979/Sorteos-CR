@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Raffle;
+use App\Services\PublicRaffleSnapshotService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -94,4 +95,10 @@ Artisan::command('raffles:release-expired-reservations', function (): int {
 
     return 0;
 })->purpose('Libera numeros reservados cuyo tiempo de reserva ya vencio.');
+Artisan::command('raffles:warm-public-snapshot', function (PublicRaffleSnapshotService $snapshotService): int {
+    $raffle = $snapshotService->warmFeatured();
 
+    $this->info("Snapshot publico actualizado para: {$raffle->name}.");
+
+    return 0;
+})->purpose('Precalienta el snapshot de la pagina publica de venta.');

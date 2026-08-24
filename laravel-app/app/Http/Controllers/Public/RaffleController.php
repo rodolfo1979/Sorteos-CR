@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Raffle;
+use App\Services\PublicRaffleSnapshotService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -12,18 +13,8 @@ class RaffleController extends Controller
 {
     public function show(?string $slug = null): View
     {
-        $raffle = $slug
-            ? Raffle::where('slug', $slug)->firstOrFail()
-            : Raffle::where('is_featured', true)->first() ?? Raffle::latest()->firstOrFail();
-
-        $statusCounts = $raffle->numbers()
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
-        $raffle->setAttribute('available_count', (int) ($statusCounts['available'] ?? 0));
-        $raffle->setAttribute('sold_count', (int) ($statusCounts['sold'] ?? 0));
-        $raffle->setAttribute('reserved_count', (int) ($statusCounts['reserved'] ?? 0));
+        $snapshotService = app(PublicRaffleSnapshotService::class);
+        $raffle = $slug ? $snapshotService->bySlug($slug) : $snapshotService->featured();
 
         return view('raffles.show', [
             'raffle' => $raffle,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Raffle;
+use App\Services\PublicRaffleSnapshotService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +21,7 @@ class RaffleController extends Controller
         return view('admin.raffles.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
         $data = $this->validatedData($request, true);
         $data['slug'] = $this->uniqueSlug($data['name']);
@@ -34,6 +35,9 @@ class RaffleController extends Controller
 
         $raffle = Raffle::create($data);
         $this->createNumbers($raffle);
+        $snapshotService->forget();
+        $snapshotService->warmFeatured();
+        $snapshotService->warm($raffle);
 
         return to_route('admin.raffles.edit', $raffle)->with('status', 'Sorteo creado correctamente.');
     }
@@ -46,7 +50,7 @@ class RaffleController extends Controller
         ]);
     }
 
-    public function update(Request $request, Raffle $raffle): RedirectResponse
+    public function update(Request $request, Raffle $raffle, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
         $data = $this->validatedData($request, false);
         $data['sale_enabled'] = $request->boolean('sale_enabled');
@@ -58,26 +62,39 @@ class RaffleController extends Controller
         }
 
         $raffle->update($data);
+        $snapshotService->forget($raffle);
+        $snapshotService->warmFeatured();
+        $snapshotService->warm($raffle);
 
         return to_route('admin.raffles.edit', $raffle)->with('status', 'Rifa actualizada correctamente.');
     }
 
-    public function toggleSale(Raffle $raffle): RedirectResponse
+    public function toggleSale(Raffle $raffle, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
         $raffle->forceFill(['sale_enabled' => ! $raffle->sale_enabled])->save();
+        $snapshotService->forget($raffle);
+        $snapshotService->warmFeatured();
+        $snapshotService->warm($raffle);
 
         $status = $raffle->sale_enabled ? 'reactivada' : 'pausada';
 
         return back()->with('status', "Venta de {$raffle->name} {$status} correctamente.");
     }
-    public function destroy(Raffle $raffle): RedirectResponse
+    public function destroy(Raffle $raffle, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
         $name = $raffle->name;
+        $snapshotService->forget($raffle);
         Storage::disk('public')->delete(array_filter(array_merge([$raffle->image_path], $raffle->media_paths ?? [])));
         $raffle->delete();
 
         if (! Raffle::where('is_featured', true)->exists()) {
             Raffle::latest()->first()?->forceFill(['is_featured' => true])->save();
+        }
+
+        if (Raffle::query()->exists()) {
+            $snapshotService->warmFeatured();
+        } else {
+            $snapshotService->forget();
         }
 
         return to_route('admin.dashboard')->with('status', "Sorteo {$name} eliminado correctamente.");

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\OrderMailService;
+use App\Services\PublicRaffleSnapshotService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function approve(Order $order, OrderMailService $mailService): RedirectResponse
+    public function approve(Order $order, OrderMailService $mailService, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
         $processed = DB::transaction(function () use ($order) {
             $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
@@ -59,14 +60,16 @@ class PaymentController extends Controller
             return back()->with('status', 'Esta compra ya habia sido procesada anteriormente.');
         }
 
-        $mailSent = $mailService->sendApproved($order->fresh(['raffle', 'numbers']));
+        $freshOrder = $order->fresh(['raffle', 'numbers']);
+        $snapshotService->adjustCounts($freshOrder->raffle, reservedDelta: -$freshOrder->numbers->count(), soldDelta: $freshOrder->numbers->count());
+        $mailSent = $mailService->sendApproved($freshOrder);
 
         return back()->with('status', $mailSent
             ? 'Pago aprobado. Los numeros quedaron vendidos y el correo quedo programado para enviarse al cliente.'
             : 'Pago aprobado. Los numeros quedaron vendidos, pero no se pudo enviar el correo al cliente. Revisa la configuracion SMTP o el correo del comprador.');
     }
 
-    public function reject(Order $order, OrderMailService $mailService): RedirectResponse
+    public function reject(Order $order, OrderMailService $mailService, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
         $processed = DB::transaction(function () use ($order) {
             $lockedOrder = Order::query()->whereKey($order->id)->lockForUpdate()->firstOrFail();
@@ -88,7 +91,9 @@ class PaymentController extends Controller
             return back()->with('status', 'Esta compra ya habia sido procesada anteriormente.');
         }
 
-        $mailSent = $mailService->sendRejected($order->fresh(['raffle', 'numbers']));
+        $freshOrder = $order->fresh(['raffle', 'numbers']);
+        $snapshotService->adjustCounts($freshOrder->raffle, availableDelta: $freshOrder->numbers->count(), reservedDelta: -$freshOrder->numbers->count());
+        $mailSent = $mailService->sendRejected($freshOrder);
 
         return back()->with('status', $mailSent
             ? 'Pago rechazado. Los numeros volvieron a estar disponibles y el correo quedo programado para enviarse al cliente.'
