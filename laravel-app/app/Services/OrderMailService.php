@@ -72,6 +72,11 @@ class OrderMailService
     private function sendToBuyer(Order $order, string $view, string $subject, string $type): void
     {
         if (! $order->buyer_email) {
+            Log::warning("No se envio correo de {$type} porque la orden no tiene correo del comprador.", [
+                'order_id' => $order->id,
+                'buyer_name' => $order->buyer_name,
+            ]);
+
             return;
         }
 
@@ -89,3 +94,4 @@ class OrderMailService
         }
     }
 }
+

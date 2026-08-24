@@ -37,12 +37,14 @@ class PurchaseController extends Controller
         $validator = Validator::make($request->all(), [
             'buyer_name' => ['required', 'string', 'max:160'],
             'buyer_phone' => ['required', 'string', 'max:40'],
-            'buyer_email' => ['nullable', 'email', 'max:180'],
+            'buyer_email' => ['required', 'email', 'max:180'],
             'package_count' => ['required', 'integer', 'min:1', 'max:5'],
             'numbers' => ['required', 'array'],
             'numbers.*' => ['required', 'string', 'max:24'],
             'receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:15360'],
         ], [
+            'buyer_email.required' => 'Debes indicar un correo electronico para enviarte tus tickets y el estado del pago.',
+            'buyer_email.email' => 'Ingresa un correo electronico valido.',
             'receipt.required' => 'Debes subir la foto o PDF del comprobante de pago.',
             'receipt.file' => 'El comprobante debe ser un archivo valido.',
             'receipt.mimes' => 'El comprobante debe ser una imagen JPG, PNG, WEBP o un PDF.',
@@ -63,7 +65,7 @@ class PurchaseController extends Controller
                 [
                     'name' => $request->string('buyer_name')->trim()->toString(),
                     'phone' => $request->string('buyer_phone')->trim()->toString(),
-                    'email' => $request->string('buyer_email')->trim()->toString() ?: null,
+                    'email' => $request->string('buyer_email')->trim()->toString(),
                 ],
                 $request->input('numbers', []),
                 [

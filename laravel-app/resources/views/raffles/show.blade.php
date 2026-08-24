@@ -67,7 +67,7 @@
                         <div class="grid gap-3">
                             <label class="grid gap-1 text-sm font-black text-slate-600">Nombre completo<input class="field" name="buyer_name" value="{{ old('buyer_name') }}" autocomplete="name" required></label>
                             <label class="grid gap-1 text-sm font-black text-slate-600">Telefono<input class="field" name="buyer_phone" value="{{ old('buyer_phone') }}" inputmode="tel" autocomplete="tel" required></label>
-                            <label class="grid gap-1 text-sm font-black text-slate-600">Correo<input class="field" type="email" name="buyer_email" value="{{ old('buyer_email') }}" autocomplete="email"></label>
+                            <label class="grid gap-1 text-sm font-black text-slate-600">Correo<input class="field" type="email" name="buyer_email" value="{{ old('buyer_email') }}" autocomplete="email" required><span class="text-xs font-bold text-slate-500">Aqui recibiras tus tickets y la confirmacion del pago.</span></label>
                         </div>
 
                         <section class="rounded-2xl border border-rose-100 bg-rose-50/80 p-4">
