@@ -81,6 +81,12 @@ class PurchaseController extends Controller
         } catch (RuntimeException $exception) {
             Storage::disk('public')->delete($receiptPath);
 
+            if (str_contains($exception->getMessage(), 'ya no estan disponibles')) {
+                return back()
+                    ->with('availability_notice', 'Actualizamos la disponibilidad. Elige nuevamente tus numeros y adjunta el comprobante para continuar.')
+                    ->withInput($request->except(['numbers', 'receipt']));
+            }
+
             return back()->withErrors(['purchase' => $exception->getMessage()])->withInput();
         }
 

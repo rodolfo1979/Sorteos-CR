@@ -7,6 +7,8 @@ use App\Models\Raffle;
 use App\Models\RaffleNumber;
 use App\Services\RaffleReservationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -48,6 +50,29 @@ class RaffleReservationHardeningTest extends TestCase
             ['path' => 'receipts/test.jpg'],
             1,
         );
+    }
+
+    public function test_purchase_availability_conflict_returns_soft_notice_instead_of_global_error(): void
+    {
+        Storage::fake('public');
+        $raffle = $this->raffle();
+        $this->number($raffle, '0001', 'sold');
+        $this->number($raffle, '0002');
+
+        $this->post(route('purchases.store', $raffle), [
+            'buyer_name' => 'Cliente Seguro',
+            'buyer_phone' => '88888888',
+            'buyer_email' => 'cliente@example.com',
+            'package_count' => 1,
+            'numbers' => ['0001', '0002'],
+            'receipt' => UploadedFile::fake()->create('comprobante.pdf', 100, 'application/pdf'),
+        ])
+            ->assertRedirect()
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('availability_notice', 'Actualizamos la disponibilidad. Elige nuevamente tus numeros y adjunta el comprobante para continuar.');
+
+        $this->assertSame(0, Order::count());
+        $this->assertCount(0, Storage::disk('public')->files('receipts'));
     }
 
     public function test_expired_reserved_numbers_are_released_before_random_assignment(): void

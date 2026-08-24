@@ -64,6 +64,12 @@
                     </div>
 
                     <div class="grid gap-4 p-4 sm:p-5">
+                        @if (session('availability_notice'))
+                            <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black leading-6 text-amber-900">
+                                {{ session('availability_notice') }}
+                            </div>
+                        @endif
+
                         <div class="grid gap-3">
                             <label class="grid gap-1 text-sm font-black text-slate-600">Nombre completo<input class="field" name="buyer_name" value="{{ old('buyer_name') }}" autocomplete="name" required></label>
                             <label class="grid gap-1 text-sm font-black text-slate-600">Telefono<input class="field" name="buyer_phone" value="{{ old('buyer_phone') }}" inputmode="tel" autocomplete="tel" required></label>
@@ -235,4 +241,3 @@
         </div>
     </section>
 </x-layouts.app>
-
