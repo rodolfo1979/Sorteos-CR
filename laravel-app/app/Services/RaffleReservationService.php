@@ -17,13 +17,34 @@ class RaffleReservationService
         $quantity = $this->quantityFor($raffle, $packageCount);
         $this->releaseExpiredReservationsIfDue($raffle);
 
-        return RaffleNumber::query()
-            ->where('raffle_id', $raffle->id)
-            ->where('status', 'available')
-            ->inRandomOrder()
-            ->limit($quantity)
-            ->pluck('number')
-            ->all();
+        $selected = collect();
+        $candidatePoolSize = min($raffle->total_numbers, max($quantity * 12, 80));
+
+        for ($attempt = 0; $attempt < 5 && $selected->count() < $quantity; $attempt++) {
+            $candidates = $this->randomCandidateNumbers($raffle, $candidatePoolSize);
+
+            $available = RaffleNumber::query()
+                ->where('raffle_id', $raffle->id)
+                ->where('status', 'available')
+                ->whereIn('number', $candidates)
+                ->limit($quantity - $selected->count())
+                ->pluck('number');
+
+            $selected = $selected->merge($available)->unique()->values();
+        }
+
+        if ($selected->count() < $quantity) {
+            $fallback = RaffleNumber::query()
+                ->where('raffle_id', $raffle->id)
+                ->where('status', 'available')
+                ->orderBy('id')
+                ->limit($quantity - $selected->count())
+                ->pluck('number');
+
+            $selected = $selected->merge($fallback)->unique()->values();
+        }
+
+        return $selected->take($quantity)->all();
     }
 
     public function reserve(Raffle $raffle, array $buyer, array $numbers, array $receipt, int $packageCount, int $randomChangesUsed = 0): Order
@@ -102,6 +123,18 @@ class RaffleReservationService
                 'reserved_until' => null,
                 'updated_at' => now(),
             ]);
+    }
+
+    private function randomCandidateNumbers(Raffle $raffle, int $count): array
+    {
+        $numbers = [];
+        $end = $raffle->numberEnd();
+
+        while (count($numbers) < $count) {
+            $numbers[$raffle->formatNumber(random_int($raffle->numberStart(), $end))] = true;
+        }
+
+        return array_keys($numbers);
     }
 
     private function releaseExpiredReservationsIfDue(Raffle $raffle): void

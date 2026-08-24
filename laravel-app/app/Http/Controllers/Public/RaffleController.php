@@ -13,9 +13,11 @@ class RaffleController extends Controller
 {
     public function show(?string $slug = null): View
     {
-        $raffle = $slug
-            ? Raffle::where('slug', $slug)->firstOrFail()
-            : Raffle::where('is_featured', true)->first() ?? Raffle::latest()->firstOrFail();
+        $raffle = Cache::remember($slug ? "raffle:public:slug:{$slug}" : 'raffle:public:featured', now()->addSeconds(5), function () use ($slug) {
+            return $slug
+                ? Raffle::where('slug', $slug)->firstOrFail()
+                : Raffle::where('is_featured', true)->first() ?? Raffle::latest()->firstOrFail();
+        });
 
         $counts = Cache::remember("raffle:{$raffle->id}:public-counts", now()->addSeconds(5), function () use ($raffle) {
             $statusCounts = $raffle->numbers()
