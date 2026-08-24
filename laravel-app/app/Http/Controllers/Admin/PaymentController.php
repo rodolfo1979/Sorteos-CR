@@ -47,9 +47,11 @@ class PaymentController extends Controller
             $order->update(['status' => 'approved', 'approved_at' => now()]);
         });
 
-        $mailService->sendApproved($order);
+        $mailSent = $mailService->sendApproved($order->fresh(['raffle', 'numbers']));
 
-        return back()->with('status', 'Pago aprobado. Los numeros quedaron vendidos.');
+        return back()->with('status', $mailSent
+            ? 'Pago aprobado. Los numeros quedaron vendidos y el correo fue enviado al cliente.'
+            : 'Pago aprobado. Los numeros quedaron vendidos, pero no se pudo enviar el correo al cliente. Revisa la configuracion SMTP o el correo del comprador.');
     }
 
     public function reject(Order $order, OrderMailService $mailService): RedirectResponse
@@ -62,9 +64,10 @@ class PaymentController extends Controller
             $order->update(['status' => 'rejected', 'rejected_at' => now()]);
         });
 
-        $mailService->sendRejected($order);
+        $mailSent = $mailService->sendRejected($order->fresh(['raffle', 'numbers']));
 
-        return back()->with('status', 'Pago rechazado. Los numeros volvieron a estar disponibles.');
+        return back()->with('status', $mailSent
+            ? 'Pago rechazado. Los numeros volvieron a estar disponibles y el correo fue enviado al cliente.'
+            : 'Pago rechazado. Los numeros volvieron a estar disponibles, pero no se pudo enviar el correo al cliente. Revisa la configuracion SMTP o el correo del comprador.');
     }
 }
-

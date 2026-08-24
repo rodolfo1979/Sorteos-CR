@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\OrderStatusMail;
 use App\Models\Order;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -9,11 +10,11 @@ use Throwable;
 
 class OrderMailService
 {
-    public function sendReserved(Order $order): void
+    public function sendReserved(Order $order): bool
     {
         $order->loadMissing('raffle', 'numbers');
 
-        $this->sendToBuyer(
+        return $this->sendToBuyer(
             $order,
             'emails.order-reserved',
             'Tus tickets fueron reservados - '.$order->raffle->name,
@@ -21,11 +22,11 @@ class OrderMailService
         );
     }
 
-    public function sendApproved(Order $order): void
+    public function sendApproved(Order $order): bool
     {
         $order->loadMissing('raffle', 'numbers');
 
-        $this->sendToBuyer(
+        return $this->sendToBuyer(
             $order,
             'emails.order-approved',
             'Pago validado - '.$order->raffle->name,
@@ -33,11 +34,11 @@ class OrderMailService
         );
     }
 
-    public function sendRejected(Order $order): void
+    public function sendRejected(Order $order): bool
     {
         $order->loadMissing('raffle', 'numbers');
 
-        $this->sendToBuyer(
+        return $this->sendToBuyer(
             $order,
             'emails.order-rejected',
             'Compra rechazada - '.$order->raffle->name,
@@ -56,10 +57,11 @@ class OrderMailService
         $order->loadMissing('raffle', 'numbers');
 
         try {
-            Mail::send('emails.admin-new-order', ['order' => $order], function ($message) use ($order, $adminEmail) {
-                $message->to($adminEmail)
-                    ->subject('Nuevo comprobante pendiente - '.$order->raffle->name);
-            });
+            Mail::to($adminEmail)->send(new OrderStatusMail(
+                $order,
+                'emails.admin-new-order',
+                'Nuevo comprobante pendiente - '.$order->raffle->name
+            ));
         } catch (Throwable $exception) {
             Log::warning('No se pudo enviar notificacion admin de compra.', [
                 'order_id' => $order->id,
@@ -69,7 +71,7 @@ class OrderMailService
         }
     }
 
-    private function sendToBuyer(Order $order, string $view, string $subject, string $type): void
+    private function sendToBuyer(Order $order, string $view, string $subject, string $type): bool
     {
         if (! $order->buyer_email) {
             Log::warning("No se envio correo de {$type} porque la orden no tiene correo del comprador.", [
@@ -77,21 +79,21 @@ class OrderMailService
                 'buyer_name' => $order->buyer_name,
             ]);
 
-            return;
+            return false;
         }
 
         try {
-            Mail::send($view, ['order' => $order], function ($message) use ($order, $subject) {
-                $message->to($order->buyer_email, $order->buyer_name)
-                    ->subject($subject);
-            });
+            Mail::to($order->buyer_email, $order->buyer_name)->send(new OrderStatusMail($order, $view, $subject));
+
+            return true;
         } catch (Throwable $exception) {
             Log::warning("No se pudo enviar correo de {$type}.", [
                 'order_id' => $order->id,
                 'buyer_email' => $order->buyer_email,
                 'error' => $exception->getMessage(),
             ]);
+
+            return false;
         }
     }
 }
-
