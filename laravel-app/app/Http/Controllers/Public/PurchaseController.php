@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use RuntimeException;
 
@@ -24,7 +25,16 @@ class PurchaseController extends Controller
             'package_count' => ['required', 'integer', 'min:1', 'max:5'],
         ]);
 
-        $numbers = $service->randomNumbers($raffle, (int) $validated['package_count']);
+        try {
+            $numbers = $service->randomNumbers($raffle, (int) $validated['package_count']);
+        } catch (\Throwable $exception) {
+            Log::warning('Fallback de azar sin base de datos.', [
+                'raffle_id' => $raffle->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            $numbers = $service->approximateRandomNumbers($raffle, (int) $validated['package_count']);
+        }
 
         return response()->json([
             'numbers' => $numbers,

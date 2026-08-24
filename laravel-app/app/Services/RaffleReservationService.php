@@ -46,6 +46,12 @@ class RaffleReservationService
         return $selected->take($quantity)->all();
     }
 
+    public function approximateRandomNumbers(Raffle $raffle, int $packageCount): array
+    {
+        $quantity = $this->quantityFor($raffle, $packageCount);
+
+        return $this->randomCandidateNumbers($raffle, $quantity);
+    }
     public function reserve(Raffle $raffle, array $buyer, array $numbers, array $receipt, int $packageCount, int $randomChangesUsed = 0): Order
     {
         $expectedQuantity = $this->quantityFor($raffle, $packageCount);
