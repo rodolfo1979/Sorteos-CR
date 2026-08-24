@@ -75,10 +75,20 @@
                                 <p class="font-black text-slate-950">Paquetes rapidos</p>
                                 <span class="rounded-full bg-white px-2.5 py-1 text-xs font-black uppercase text-cyan-700">Hasta 5</span>
                             </div>
+                            @php
+                                $packageThemes = [
+                                    'from-amber-300 to-yellow-200 text-slate-950 border-amber-300 hover:shadow-amber-300/30',
+                                    'from-cyan-300 to-sky-200 text-slate-950 border-cyan-300 hover:shadow-cyan-300/30',
+                                    'from-violet-300 to-fuchsia-200 text-slate-950 border-violet-300 hover:shadow-violet-300/30',
+                                    'from-emerald-300 to-teal-200 text-slate-950 border-emerald-300 hover:shadow-emerald-300/30',
+                                    'from-indigo-300 to-blue-200 text-slate-950 border-indigo-300 hover:shadow-indigo-300/30',
+                                ];
+                            @endphp
                             <div class="mt-3 grid grid-cols-2 gap-2" data-package-options>
                                 @foreach ($packageOptions as $option)
-                                    <button class="rounded-2xl border border-white bg-white px-3 py-4 text-center font-black leading-tight text-slate-950 shadow-sm transition hover:border-cyan-400 hover:bg-cyan-50" type="button" data-package="{{ $option['packages'] }}" data-quantity="{{ $option['quantity'] }}" data-amount="{{ $option['amount'] }}">
-                                        {{ $raffle->assignment_mode === 'manual' ? 'Azar ' : '' }}{{ $option['quantity'] }}<br><span class="text-sm text-slate-500">numeros</span>
+                                    @php $theme = $packageThemes[$loop->index % count($packageThemes)]; @endphp
+                                    <button class="rounded-2xl border bg-gradient-to-br {{ $theme }} px-3 py-4 text-center font-black leading-tight shadow-md transition hover:-translate-y-0.5 hover:shadow-lg" type="button" data-package="{{ $option['packages'] }}" data-quantity="{{ $option['quantity'] }}" data-amount="{{ $option['amount'] }}">
+                                        {{ $raffle->assignment_mode === 'manual' ? 'Azar ' : '' }}{{ $option['quantity'] }}<br><span class="text-sm text-slate-700">numeros</span>
                                     </button>
                                 @endforeach
                             </div>

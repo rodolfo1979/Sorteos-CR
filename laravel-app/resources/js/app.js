@@ -67,9 +67,12 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     function setActivePackage(packageCount) {
         form.querySelectorAll('[data-package]').forEach((button) => {
             const isActive = Number(button.dataset.package) === Number(packageCount);
-            button.classList.toggle('border-amber-400', isActive);
-            button.classList.toggle('bg-amber-50', isActive);
-            button.classList.toggle('text-slate-950', isActive);
+            button.classList.toggle('ring-2', isActive);
+            button.classList.toggle('ring-white', isActive);
+            button.classList.toggle('ring-offset-2', isActive);
+            button.classList.toggle('ring-offset-slate-950', isActive);
+            button.classList.toggle('scale-[1.02]', isActive);
+            button.classList.toggle('shadow-xl', isActive);
         });
     }
 
@@ -275,7 +278,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
             ? 'Selecciona un paquete al azar o escoge manualmente en la cuadricula.'
             : 'Selecciona una cantidad para asignar numeros automaticamente.';
         form.querySelectorAll('[data-package]').forEach((button) => {
-            button.classList.remove('border-amber-400', 'bg-amber-50', 'text-slate-950');
+            button.classList.remove('ring-2', 'ring-white', 'ring-offset-2', 'ring-offset-slate-950', 'scale-[1.02]', 'shadow-xl');
         });
         render();
     });
