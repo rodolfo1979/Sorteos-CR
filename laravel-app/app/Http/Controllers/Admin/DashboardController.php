@@ -22,7 +22,7 @@ class DashboardController extends Controller
             'pendingPayments' => Order::where('status', 'pending')->count(),
             'approvedRevenue' => Order::where('status', 'approved')->sum('amount_total'),
             'reservedOrders' => Order::where('status', 'pending')->count(),
-            'recentOrders' => Order::with('raffle', 'numbers')->latest()->limit(8)->get(),
+            'recentOrders' => Order::with('raffle', 'numbers')->latest()->paginate(20, ['*'], 'actividad')->withQueryString(),
             'salesChart' => [
                 'labels' => $raffles->pluck('name')->values(),
                 'sold' => $raffles->pluck('sold_numbers_count')->values(),
