@@ -10,6 +10,7 @@ const stats = {
     failed: 0,
     conflicts: 0,
     validation: 0,
+    redirects: 0,
     durations: [],
     errors: new Map(),
 };
@@ -152,6 +153,12 @@ async function buyTicket(index) {
             return;
         }
 
+        if ([302, 303].includes(purchaseResponse.status)) {
+            stats.redirects += 1;
+            rememberError(`Redireccion al formulario location=${location || 'sin-location'}`);
+            return;
+        }
+
         const body = await purchaseResponse.text();
         if (body.includes('Actualizamos la disponibilidad') || body.includes('ya no estan disponibles')) {
             stats.conflicts += 1;
@@ -202,6 +209,7 @@ async function runPool() {
     console.log(`Compras creadas: ${stats.ok}`);
     console.log(`Conflictos controlados: ${stats.conflicts}`);
     console.log(`Validaciones: ${stats.validation}`);
+    console.log(`Redirecciones al formulario: ${stats.redirects}`);
     console.log(`Fallos tecnicos: ${stats.failed}`);
     console.log(`p50: ${percentile(50).toFixed(0)}ms`);
     console.log(`p90: ${percentile(90).toFixed(0)}ms`);
