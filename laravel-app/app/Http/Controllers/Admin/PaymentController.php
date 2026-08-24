@@ -14,7 +14,12 @@ class PaymentController extends Controller
     public function index(): View
     {
         return view('admin.payments.index', [
-            'orders' => Order::with('raffle', 'numbers')->where('status', 'pending')->latest()->get(),
+            'pendingOrders' => Order::with('raffle', 'numbers')->where('status', 'pending')->latest()->get(),
+            'processedOrders' => Order::with('raffle', 'numbers')
+                ->whereIn('status', ['approved', 'rejected'])
+                ->latest('updated_at')
+                ->limit(80)
+                ->get(),
         ]);
     }
 
@@ -48,4 +53,3 @@ class PaymentController extends Controller
         return back()->with('status', 'Pago rechazado. Los numeros volvieron a estar disponibles.');
     }
 }
-
