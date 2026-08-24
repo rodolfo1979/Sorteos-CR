@@ -3,7 +3,7 @@
         <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-end justify-between gap-3">
                 <div>
-                    <p class="text-xs font-black uppercase tracking-[0.2em] text-rose-700">Revision</p>
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-700">Revision</p>
                     <h2 class="mt-1 text-2xl font-black tracking-tight">Comprobantes pendientes</h2>
                 </div>
                 <span class="rounded-full bg-amber-50 px-3 py-2 text-sm font-black text-amber-700">{{ $pendingOrders->count() }} pendiente(s)</span>
@@ -27,7 +27,7 @@
                             @else
                                 <span class="inline-flex rounded-xl bg-red-50 px-4 py-2 font-black text-red-700">Sin comprobante</span>
                             @endif
-                            <form method="post" action="{{ route('admin.payments.approve', $order) }}">@csrf<button class="rounded-xl bg-rose-700 px-4 py-2 font-black text-white transition hover:bg-rose-800">Aprobar</button></form>
+                            <form method="post" action="{{ route('admin.payments.approve', $order) }}">@csrf<button class="rounded-xl bg-indigo-700 px-4 py-2 font-black text-white transition hover:bg-indigo-800">Aprobar</button></form>
                             <form method="post" action="{{ route('admin.payments.reject', $order) }}">@csrf<button class="rounded-xl bg-red-50 px-4 py-2 font-black text-red-700 transition hover:bg-red-100">Rechazar</button></form>
                         </div>
                     </article>
@@ -51,7 +51,7 @@
                     Buscar cliente, orden o numero
                     <input class="field bg-white" name="q" value="{{ $search }}" placeholder="Ej: Rodolfo, 13BA9F78, 00152">
                 </label>
-                <button class="self-end rounded-xl bg-slate-950 px-4 py-3 font-black text-white transition hover:bg-rose-700" type="submit">Buscar</button>
+                <button class="self-end rounded-xl bg-slate-950 px-4 py-3 font-black text-white transition hover:bg-indigo-700" type="submit">Buscar</button>
                 @if ($search !== '')
                     <a class="self-end rounded-xl bg-white px-4 py-3 text-center font-black text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100" href="{{ route('admin.payments.index') }}">Limpiar</a>
                 @endif
@@ -79,7 +79,7 @@
                                 <td class="px-4 py-3 align-top font-black">₡{{ number_format($order->amount_total, 0, ',', ' ') }}</td>
                                 <td class="px-4 py-3 align-top">
                                     @if ($order->status === 'approved')
-                                        <span class="rounded-full bg-rose-50 px-3 py-1 text-xs font-black text-rose-700">Aprobada</span>
+                                        <span class="rounded-full bg-cyan-50 px-3 py-1 text-xs font-black text-cyan-700">Aprobada</span>
                                     @else
                                         <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-black text-red-700">Rechazada</span>
                                     @endif

@@ -1,7 +1,7 @@
 <x-layouts.app title="Crear sorteo - Sorteos CR" section="Administracion">
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-            <p class="text-xs font-black uppercase tracking-[0.22em] text-teal-700">Nuevo sorteo</p>
+            <p class="text-xs font-black uppercase tracking-[0.22em] text-indigo-700">Nuevo sorteo</p>
             <h2 class="mt-2 text-4xl font-black tracking-tight">Crear sorteo</h2>
             <p class="mt-2 max-w-2xl text-slate-600">Configura la cantidad de numeros, paquetes, modo de compra y texto que vera el cliente.</p>
         </div>
@@ -75,11 +75,11 @@
                 <div class="mt-5 grid gap-4">
                     <label class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-black text-slate-700">
                         Venta activa
-                        <input class="h-5 w-5 accent-teal-700" type="checkbox" name="sale_enabled" value="1" @checked(old('sale_enabled', true))>
+                        <input class="h-5 w-5 accent-cyan-700" type="checkbox" name="sale_enabled" value="1" @checked(old('sale_enabled', true))>
                     </label>
                     <label class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-black text-slate-700">
                         Mostrar como principal
-                        <input class="h-5 w-5 accent-teal-700" type="checkbox" name="is_featured" value="1" @checked(old('is_featured', true))>
+                        <input class="h-5 w-5 accent-cyan-700" type="checkbox" name="is_featured" value="1" @checked(old('is_featured', true))>
                     </label>
                     <label class="grid gap-1 text-sm font-black text-slate-600">Precio por paquete
                         <input class="field" type="number" name="price_per_package" min="1" value="{{ old('price_per_package', 4000) }}" required>

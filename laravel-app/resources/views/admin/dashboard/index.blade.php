@@ -1,26 +1,26 @@
 <x-layouts.app title="Admin - Sorteos CR" section="Administracion">
-    <section class="overflow-hidden rounded-2xl bg-[#063d32] text-white shadow-2xl shadow-emerald-950/15">
+    <section class="overflow-hidden rounded-2xl bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.28),transparent_34%),linear-gradient(135deg,#0f172a,#1e1b4b_58%,#083344)] text-white shadow-2xl shadow-slate-950/20">
         <div class="grid gap-6 p-6 lg:grid-cols-[1fr_320px] lg:p-8">
             <div>
-                <p class="text-xs font-black uppercase tracking-[0.22em] text-emerald-200">Centro de control</p>
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-cyan-200">Centro de control</p>
                 <h2 class="mt-2 text-4xl font-black tracking-tight">Dashboard operativo</h2>
-                <p class="mt-3 max-w-2xl text-emerald-50">Ventas, comprobantes, ocupacion de numeros y actividad reciente en una vista preparada para administracion diaria.</p>
+                <p class="mt-3 max-w-2xl text-cyan-50">Ventas, comprobantes, ocupacion de numeros y actividad reciente en una vista preparada para administracion diaria.</p>
             </div>
             <div class="rounded-2xl border border-white/10 bg-white/10 p-5">
-                <p class="text-sm font-black text-emerald-100">Estado del sistema</p>
+                <p class="text-sm font-black text-cyan-100">Estado del sistema</p>
                 <strong class="mt-2 block text-3xl font-black">En pruebas</strong>
-                <p class="mt-2 text-sm text-emerald-100/80">Subdominio activo antes del dominio oficial.</p>
-                <a class="mt-4 inline-flex rounded-xl bg-white px-4 py-3 text-sm font-black text-[#063d32] transition hover:bg-emerald-50" href="{{ route('admin.raffles.create') }}">Crear sorteo</a>
+                <p class="mt-2 text-sm text-cyan-100/80">Subdominio activo antes del dominio oficial.</p>
+                <a class="mt-4 inline-flex rounded-xl bg-white px-4 py-3 text-sm font-black text-[#0f172a] transition hover:bg-cyan-50" href="{{ route('admin.raffles.create') }}">Crear sorteo</a>
             </div>
         </div>
     </section>
 
 
     @if (session('status'))
-        <div class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 font-black text-emerald-800">{{ session('status') }}</div>
+        <div class="mt-5 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 font-black text-cyan-900">{{ session('status') }}</div>
     @endif
     <section class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <article class="metric-card"><span class="text-sm font-black text-slate-500">Ventas aprobadas</span><strong class="mt-2 block text-3xl font-black text-teal-700">₡{{ number_format($approvedRevenue, 0, ',', ' ') }}</strong></article>
+        <article class="metric-card"><span class="text-sm font-black text-slate-500">Ventas aprobadas</span><strong class="mt-2 block text-3xl font-black text-indigo-700">₡{{ number_format($approvedRevenue, 0, ',', ' ') }}</strong></article>
         <article class="metric-card"><span class="text-sm font-black text-slate-500">Comprobantes pendientes</span><strong class="mt-2 block text-3xl font-black">{{ $pendingPayments }}</strong></article>
         <article class="metric-card"><span class="text-sm font-black text-slate-500">Rifas creadas</span><strong class="mt-2 block text-3xl font-black">{{ $raffles->count() }}</strong></article>
         <article class="metric-card"><span class="text-sm font-black text-slate-500">Numeros reservados</span><strong class="mt-2 block text-3xl font-black">{{ number_format($raffles->sum('reserved_numbers_count')) }}</strong></article>
@@ -47,16 +47,16 @@
                     <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                         <div class="flex items-center justify-between gap-3">
                             <strong>{{ $raffle->name }}</strong>
-                            <div class="flex items-center gap-2"><span class="rounded-full px-2.5 py-1 text-xs font-black {{ $raffle->sale_enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800' }}">{{ $raffle->sale_enabled ? 'Activa' : 'Pausada' }}</span><span class="text-sm font-black text-teal-700">{{ $progress }}%</span></div>
+                            <div class="flex items-center gap-2"><span class="rounded-full px-2.5 py-1 text-xs font-black {{ $raffle->sale_enabled ? 'bg-cyan-100 text-cyan-700' : 'bg-amber-100 text-amber-800' }}">{{ $raffle->sale_enabled ? 'Activa' : 'Pausada' }}</span><span class="text-sm font-black text-indigo-700">{{ $progress }}%</span></div>
                         </div>
-                        <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full bg-teal-600" style="width: {{ $progress }}%"></div></div>
+                        <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full bg-cyan-600" style="width: {{ $progress }}%"></div></div>
                         <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
                             <p class="text-sm text-slate-500">{{ number_format($raffle->sold_numbers_count) }} vendidos · {{ number_format($raffle->reserved_numbers_count) }} reservados</p>
                             <div class="flex flex-wrap gap-2">
-                                <a class="rounded-lg bg-white px-3 py-2 text-xs font-black text-teal-700 shadow-sm transition hover:bg-teal-50" href="{{ route('admin.raffles.edit', $raffle) }}">Editar venta</a>                                <form method="post" action="{{ route('admin.raffles.toggle-sale', $raffle) }}">
+                                <a class="rounded-lg bg-white px-3 py-2 text-xs font-black text-indigo-700 shadow-sm transition hover:bg-cyan-50" href="{{ route('admin.raffles.edit', $raffle) }}">Editar venta</a>                                <form method="post" action="{{ route('admin.raffles.toggle-sale', $raffle) }}">
                                     @csrf
                                     @method('patch')
-                                    <button class="rounded-lg px-3 py-2 text-xs font-black shadow-sm transition {{ $raffle->sale_enabled ? 'bg-amber-50 text-amber-800 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}" type="submit">
+                                    <button class="rounded-lg px-3 py-2 text-xs font-black shadow-sm transition {{ $raffle->sale_enabled ? 'bg-amber-50 text-amber-800 hover:bg-amber-100' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100' }}" type="submit">
                                         {{ $raffle->sale_enabled ? 'Pausar venta' : 'Reactivar venta' }}
                                     </button>
                                 </form>

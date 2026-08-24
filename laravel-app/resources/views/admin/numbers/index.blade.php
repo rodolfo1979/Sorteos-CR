@@ -9,7 +9,7 @@
                     <option value="{{ $value }}" @selected($status === $value)>{{ $label }}</option>
                 @endforeach
             </select>
-            <button class="rounded-lg bg-emerald-700 px-4 py-3 font-black text-white">Filtrar</button>
+            <button class="rounded-lg bg-cyan-700 px-4 py-3 font-black text-white">Filtrar</button>
         </form>
         <div class="mt-5 overflow-x-auto">
             <table class="w-full min-w-[680px] text-left text-sm">

@@ -1,7 +1,7 @@
 <x-layouts.app title="Editar rifa - Sorteos CR" section="Administracion">
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-            <p class="text-xs font-black uppercase tracking-[0.22em] text-teal-700">Configuracion de venta</p>
+            <p class="text-xs font-black uppercase tracking-[0.22em] text-indigo-700">Configuracion de venta</p>
             <h2 class="mt-2 text-4xl font-black tracking-tight">Editar {{ $raffle->name }}</h2>
             <p class="mt-2 max-w-2xl text-slate-600">Ajusta el contenido que ve el cliente, las reglas de compra y el estado de venta del sorteo.</p>
         </div>
@@ -9,7 +9,7 @@
     </div>
 
     @if (session('status'))
-        <div class="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 font-black text-emerald-800">{{ session('status') }}</div>
+        <div class="mt-5 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 font-black text-cyan-900">{{ session('status') }}</div>
     @endif
 
     @if ($errors->any())
@@ -118,11 +118,11 @@
                 <div class="mt-5 grid gap-4">
                     <label class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-black text-slate-700">
                         Venta activa
-                        <input class="h-5 w-5 accent-teal-700" type="checkbox" name="sale_enabled" value="1" @checked(old('sale_enabled', $raffle->sale_enabled))>
+                        <input class="h-5 w-5 accent-cyan-700" type="checkbox" name="sale_enabled" value="1" @checked(old('sale_enabled', $raffle->sale_enabled))>
                     </label>
                     <label class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-black text-slate-700">
                         Mostrar en venta principal
-                        <input class="h-5 w-5 accent-teal-700" type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $raffle->is_featured))>
+                        <input class="h-5 w-5 accent-cyan-700" type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $raffle->is_featured))>
                     </label>
                     <label class="grid gap-1 text-sm font-black text-slate-600">Modo de asignacion
                         <select class="field" name="assignment_mode">
