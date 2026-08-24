@@ -39,21 +39,22 @@
     }
 
     .field:focus {
-        border-color: #e11d48;
-        box-shadow: 0 0 0 4px rgb(225 29 72 / 0.14);
+        border-color: #0891b2;
+        box-shadow: 0 0 0 4px rgb(34 211 238 / 0.16);
     }
 
     .primary-action {
         border-radius: 0.9rem;
-        background: linear-gradient(135deg, #111827, #e11d48);
-        color: white;
+        background: linear-gradient(135deg, #fbbf24, #22d3ee);
+        color: #06111f;
+        box-shadow: 0 16px 35px rgb(34 211 238 / 0.18);
         font-weight: 950;
         padding: 1rem 1.15rem;
         transition: 160ms ease;
     }
 
     .primary-action:hover {
-        background: linear-gradient(135deg, #e11d48, #111827);
+        background: linear-gradient(135deg, #fde047, #06b6d4);
         transform: translateY(-1px);
     }
 

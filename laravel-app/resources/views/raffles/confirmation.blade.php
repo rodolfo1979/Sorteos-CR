@@ -1,20 +1,20 @@
 <x-layouts.app title="Confirmacion - Sorteos CR" section="Compra recibida">
     <section class="mx-auto max-w-4xl space-y-5 pb-20">
-        <article class="overflow-hidden rounded-[1.5rem] border border-rose-200 bg-white shadow-2xl shadow-rose-950/10">
-            <div class="bg-gradient-to-br from-[#111827] to-[#e11d48] p-6 text-white sm:p-8">
+        <article class="overflow-hidden rounded-[1.5rem] border border-cyan-200 bg-white shadow-2xl shadow-cyan-950/10">
+            <div class="bg-gradient-to-br from-[#111827] to-[#0e7490] p-6 text-white sm:p-8">
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-amber-200">Orden {{ strtoupper(substr($order->public_uuid, 0, 8)) }}</p>
                 <h1 class="mt-2 text-4xl font-black tracking-tight">Numeros reservados</h1>
-                <p class="mt-3 max-w-2xl text-lg font-semibold leading-7 text-rose-50">Tu comprobante queda pendiente de validacion por administracion.</p>
+                <p class="mt-3 max-w-2xl text-lg font-semibold leading-7 text-cyan-50">Tu comprobante queda pendiente de validacion por administracion.</p>
             </div>
 
             <div class="grid gap-5 p-5 sm:p-6">
-                <div class="rounded-2xl border border-rose-100 bg-rose-50 p-4">
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
                     <p class="text-sm font-black uppercase tracking-wide text-[#111827]">Tus tickets digitales</p>
                     <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                         @foreach ($order->numbers as $number)
-                            <span class="relative flex min-h-14 items-center justify-center overflow-hidden rounded-xl bg-rose-700 px-3 py-2 text-xl font-black tracking-wide text-white shadow-lg shadow-rose-900/10 ring-1 ring-amber-400/45">
-                                <span class="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-rose-50"></span>
-                                <span class="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-rose-50"></span>
+                            <span class="relative flex min-h-14 items-center justify-center overflow-hidden rounded-xl bg-cyan-700 px-3 py-2 text-xl font-black tracking-wide text-white shadow-lg shadow-cyan-900/10 ring-1 ring-amber-400/45">
+                                <span class="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-amber-50"></span>
+                                <span class="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-amber-50"></span>
                                 <svg class="mr-2 h-5 w-5 text-amber-200/80" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5v2a2 2 0 0 0 0 3v2A2.5 2.5 0 0 1 17.5 18h-11A2.5 2.5 0 0 1 4 15.5v-2a2 2 0 0 0 0-3v-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
                                     <path d="M9 8v8M15 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3"/>

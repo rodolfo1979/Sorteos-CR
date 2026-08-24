@@ -15,7 +15,7 @@ document.querySelectorAll('[data-admin-sales-chart]').forEach((canvas) => {
         data: {
             labels: data.labels || [],
             datasets: [
-                { label: 'Vendidos', data: data.sold || [], backgroundColor: '#e11d48', borderRadius: 10 },
+                { label: 'Vendidos', data: data.sold || [], backgroundColor: '#0891b2', borderRadius: 10 },
                 { label: 'Reservados', data: data.reserved || [], backgroundColor: '#f59e0b', borderRadius: 10 },
             ],
         },
@@ -69,13 +69,13 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
             const isActive = Number(button.dataset.package) === Number(packageCount);
             button.classList.toggle('border-amber-400', isActive);
             button.classList.toggle('bg-amber-50', isActive);
-            button.classList.toggle('text-rose-950', isActive);
+            button.classList.toggle('text-slate-950', isActive);
         });
     }
 
     function ticketMarkup(number) {
         return `
-            <span class="relative flex min-h-12 items-center justify-center overflow-hidden rounded-xl bg-rose-700 px-3 py-2 text-lg font-black tracking-wide text-white shadow-lg shadow-rose-900/10 ring-1 ring-amber-400/45">
+            <span class="relative flex min-h-12 items-center justify-center overflow-hidden rounded-xl bg-cyan-700 px-3 py-2 text-lg font-black tracking-wide text-white shadow-lg shadow-cyan-900/10 ring-1 ring-amber-400/45">
                 <span class="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-slate-50"></span>
                 <span class="absolute -right-2 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-slate-50"></span>
                 <svg class="mr-2 h-5 w-5 text-amber-200/80" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -90,9 +90,9 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
         const selected = selectedNumbers.includes(item.number);
         const disabled = !item.available && !selected;
         const stateClass = selected
-            ? 'border-rose-900 bg-rose-700 text-white shadow-md shadow-rose-900/10'
+            ? 'border-cyan-900 bg-cyan-700 text-white shadow-md shadow-cyan-900/10'
             : (item.available
-                ? 'border-rose-300 bg-rose-50 text-rose-950 hover:border-amber-400 hover:bg-amber-50 hover:shadow-sm'
+                ? 'border-amber-300 bg-amber-50 text-slate-950 hover:border-cyan-400 hover:bg-cyan-50 hover:shadow-sm'
                 : 'cursor-not-allowed border-slate-200 bg-white/45 text-slate-400 opacity-45 grayscale');
         const label = item.available ? 'Disponible' : 'No disponible';
 
@@ -136,7 +136,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
 
         const response = await fetch(url, { headers: { Accept: 'application/json' } });
         if (!response.ok) {
-            numberGrid.innerHTML = '<p class="col-span-full rounded-xl border border-red-200 bg-red-50 p-4 text-center text-sm font-black text-red-700">No se pudo cargar esta pagina de numeros.</p>';
+            numberGrid.innerHTML = '<p class="col-span-full rounded-xl border border-amber-200 bg-amber-50 p-4 text-center text-sm font-black text-amber-800">No se pudo cargar esta pagina de numeros.</p>';
             return;
         }
 
@@ -275,7 +275,7 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
             ? 'Selecciona un paquete al azar o escoge manualmente en la cuadricula.'
             : 'Selecciona una cantidad para asignar numeros automaticamente.';
         form.querySelectorAll('[data-package]').forEach((button) => {
-            button.classList.remove('border-amber-400', 'bg-amber-50', 'text-rose-950');
+            button.classList.remove('border-amber-400', 'bg-amber-50', 'text-slate-950');
         });
         render();
     });

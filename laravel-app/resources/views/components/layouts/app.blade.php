@@ -41,7 +41,7 @@
                 @endif
 
                 @if ($errors->any())
-                    <div class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 shadow-sm">
+                    <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 shadow-sm">
                         <strong class="font-black">Revisa la solicitud:</strong>
                         <ul class="mt-2 list-disc pl-5">
                             @foreach ($errors->all() as $error)
@@ -55,7 +55,7 @@
             </main>
         </div>
     @else
-        <main class="min-h-screen min-w-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.16),transparent_30%),linear-gradient(180deg,#f8fff9,#f2f7f1_42%,#ffffff)]">
+        <main class="min-h-screen min-w-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(245,158,11,0.16),transparent_30%),linear-gradient(180deg,#06111f,#0f172a_46%,#07111f)]">
             @if (session('status'))
                 <div class="mx-auto mb-4 max-w-7xl px-4 pt-4 sm:px-6 xl:px-8">
                     <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 font-bold text-emerald-800 shadow-sm">{{ session('status') }}</div>
@@ -64,7 +64,7 @@
 
             @if ($errors->any())
                 <div class="mx-auto mb-4 max-w-7xl px-4 pt-4 sm:px-6 xl:px-8">
-                    <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 shadow-sm">
+                    <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 shadow-sm">
                         <strong class="font-black">Revisa la solicitud:</strong>
                         <ul class="mt-2 list-disc pl-5">
                             @foreach ($errors->all() as $error)
