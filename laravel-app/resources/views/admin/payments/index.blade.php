@@ -43,8 +43,19 @@
                     <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Historial</p>
                     <h2 class="mt-1 text-2xl font-black tracking-tight">Compras procesadas</h2>
                 </div>
-                <span class="rounded-full bg-slate-100 px-3 py-2 text-sm font-black text-slate-600">Ultimas 80</span>
+                <span class="rounded-full bg-slate-100 px-3 py-2 text-sm font-black text-slate-600">{{ $processedOrders->total() }} resultado(s)</span>
             </div>
+
+            <form class="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[1fr_auto_auto]" method="get" action="{{ route('admin.payments.index') }}">
+                <label class="grid gap-1 text-sm font-black text-slate-600">
+                    Buscar cliente, orden o numero
+                    <input class="field bg-white" name="q" value="{{ $search }}" placeholder="Ej: Rodolfo, 13BA9F78, 00152">
+                </label>
+                <button class="self-end rounded-xl bg-slate-950 px-4 py-3 font-black text-white transition hover:bg-rose-700" type="submit">Buscar</button>
+                @if ($search !== '')
+                    <a class="self-end rounded-xl bg-white px-4 py-3 text-center font-black text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100" href="{{ route('admin.payments.index') }}">Limpiar</a>
+                @endif
+            </form>
 
             <div class="mt-5 overflow-x-auto rounded-2xl border border-slate-200">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -88,6 +99,11 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="mt-4">
+                {{ $processedOrders->links() }}
+            </div>
         </section>
     </div>
 </x-layouts.app>
+
