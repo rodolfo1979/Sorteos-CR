@@ -53,14 +53,14 @@ class RealtimeController extends Controller
                 'buyer_email' => $order->buyer_email ?: 'Sin correo',
                 'raffle_name' => $order->raffle?->name ?? 'Sorteo eliminado',
                 'order_code' => strtoupper(substr($order->public_uuid, 0, 8)),
-                'created_at' => $order->created_at->format('d/m/Y H:i'),
+                'created_at' => $order->created_at->timezone('America/Costa_Rica')->format('d/m/Y H:i'),
                 'amount' => '₡'.number_format($order->amount_total, 0, ',', ' '),
                 'numbers' => $order->numbers->pluck('number')->values(),
                 'receipt_url' => $order->receipt_path ? Storage::url($order->receipt_path) : null,
                 'approve_url' => route('admin.payments.approve', $order),
                 'reject_url' => route('admin.payments.reject', $order),
             ])->values(),
-            'updated_at' => now()->format('H:i:s'),
+            'updated_at' => now('America/Costa_Rica')->format('H:i:s'),
         ]);
     }
 }

@@ -16,7 +16,7 @@
                             <div>
                                 <h3 class="font-black">{{ $order->buyer_name }} - {{ $order->raffle->name }}</h3>
                                 <p class="text-sm text-slate-500">{{ $order->buyer_phone }} · {{ $order->buyer_email ?: 'Sin correo' }}</p>
-                                <p class="mt-1 text-xs font-bold text-slate-400">Orden {{ strtoupper(substr($order->public_uuid, 0, 8)) }} · {{ $order->created_at->format('d/m/Y H:i') }}</p>
+                                <p class="mt-1 text-xs font-bold text-slate-400">Orden {{ strtoupper(substr($order->public_uuid, 0, 8)) }} · {{ $order->created_at->timezone('America/Costa_Rica')->format('d/m/Y H:i') }}</p>
                             </div>
                             <span class="rounded-full bg-amber-50 px-3 py-1 font-black text-amber-700">₡{{ number_format($order->amount_total, 0, ',', ' ') }}</span>
                         </div>
@@ -84,7 +84,7 @@
                                         <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-black text-red-700">Rechazada</span>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 align-top text-slate-500">{{ $order->updated_at->format('d/m/Y H:i') }}</td>
+                                <td class="px-4 py-3 align-top text-slate-500">{{ $order->updated_at->timezone('America/Costa_Rica')->format('d/m/Y H:i') }}</td>
                                 <td class="px-4 py-3 align-top">
                                     @if ($order->receipt_path)
                                         <a class="inline-flex rounded-lg bg-slate-100 px-3 py-2 font-black text-slate-800 transition hover:bg-slate-200" href="{{ Storage::url($order->receipt_path) }}" target="_blank" rel="noopener">Ver</a>

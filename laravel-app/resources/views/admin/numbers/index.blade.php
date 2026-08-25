@@ -16,7 +16,7 @@
                 <thead><tr class="border-b"><th class="py-3">Numero</th><th>Estado</th><th>Reservado hasta</th></tr></thead>
                 <tbody>
                     @foreach ($numbers as $number)
-                        <tr class="border-b"><td class="py-3 font-black">{{ $number->number }}</td><td>{{ $number->status }}</td><td>{{ $number->reserved_until?->format('d/m/Y H:i') ?? '-' }}</td></tr>
+                        <tr class="border-b"><td class="py-3 font-black">{{ $number->number }}</td><td>{{ $number->status }}</td><td>{{ $number->reserved_until?->timezone('America/Costa_Rica')->format('d/m/Y H:i') ?? '-' }}</td></tr>
                     @endforeach
                 </tbody>
             </table>
