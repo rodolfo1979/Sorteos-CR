@@ -11,6 +11,7 @@ const stats = {
     conflicts: 0,
     validation: 0,
     insufficient: 0,
+    busy: 0,
     redirects: 0,
     durations: [],
     errors: new Map(),
@@ -46,6 +47,11 @@ function validationMessages(body) {
 }
 
 function classifyResponseBody(body) {
+    if (body.includes('Estamos procesando muchas compras')) {
+        stats.busy += 1;
+        return 'Servidor ocupado: reintentar en segundos';
+    }
+
     if (body.includes('Actualizamos la disponibilidad') || body.includes('ya no estan disponibles')) {
         stats.conflicts += 1;
         return 'Conflicto de disponibilidad';
@@ -162,6 +168,12 @@ async function buyTicket(index) {
         if (randomResponse.status === 409) {
             stats.insufficient += 1;
             rememberError(`Disponibilidad insuficiente en azar: ${randomData.quantity || 0}/${expectedQuantity || 'desconocido'} numero(s)`);
+            return;
+        }
+
+        if (randomResponse.status === 503) {
+            stats.busy += 1;
+            rememberError(`Azar ocupado: ${randomData.message || 'reintentar'}`);
             return;
         }
 
@@ -283,6 +295,7 @@ async function runPool() {
     console.log(`Conflictos controlados: ${stats.conflicts}`);
     console.log(`Validaciones: ${stats.validation}`);
     console.log(`Disponibilidad insuficiente: ${stats.insufficient}`);
+    console.log(`Servidor ocupado: ${stats.busy}`);
     console.log(`Redirecciones al formulario: ${stats.redirects}`);
     console.log(`Fallos tecnicos: ${stats.failed}`);
     console.log(`p50: ${percentile(50).toFixed(0)}ms`);

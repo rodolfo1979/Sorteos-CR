@@ -13,26 +13,41 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use RuntimeException;
+use Throwable;
 
 class PurchaseController extends Controller
 {
     public function random(int $raffleId, Request $request, RaffleReservationService $service, PublicRaffleSnapshotService $snapshotService): JsonResponse
     {
-        $raffle = $snapshotService->byId($raffleId);
-        abort_unless($raffle->sale_enabled, 423, 'La venta de este sorteo esta pausada temporalmente.');
         $validated = $request->validate([
             'package_count' => ['required', 'integer', 'min:1', 'max:5'],
         ]);
 
         try {
-            $numbers = $service->randomNumbers($raffle, (int) $validated['package_count']);
-        } catch (\Throwable $exception) {
-            Log::warning('Fallback de azar sin base de datos.', [
-                'raffle_id' => $raffle->id,
+            $raffle = $snapshotService->byId($raffleId);
+            if (! $raffle->sale_enabled) {
+                return response()->json(['message' => 'La venta de este sorteo esta pausada temporalmente.'], 423);
+            }
+
+            try {
+                $numbers = $service->randomNumbers($raffle, (int) $validated['package_count']);
+            } catch (Throwable $exception) {
+                Log::warning('Fallback de azar sin base de datos.', [
+                    'raffle_id' => $raffle->id,
+                    'error' => $exception->getMessage(),
+                ]);
+
+                $numbers = $service->approximateRandomNumbers($raffle, (int) $validated['package_count']);
+            }
+        } catch (Throwable $exception) {
+            Log::warning('No se pudo generar paquete al azar por carga transitoria.', [
+                'raffle_id' => $raffleId,
                 'error' => $exception->getMessage(),
             ]);
 
-            $numbers = $service->approximateRandomNumbers($raffle, (int) $validated['package_count']);
+            return response()->json([
+                'message' => 'Estamos procesando muchas compras. Intenta nuevamente en unos segundos.',
+            ], 503);
         }
 
         $expectedQuantity = $raffle->numbers_per_package * (int) $validated['package_count'];
@@ -55,7 +70,19 @@ class PurchaseController extends Controller
 
     public function store(int $raffleId, Request $request, RaffleReservationService $service, OrderMailService $mailService, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
-        $raffle = $snapshotService->byId($raffleId);
+        try {
+            $raffle = $snapshotService->byId($raffleId);
+        } catch (Throwable $exception) {
+            Log::warning('No se pudo cargar rifa para compra por carga transitoria.', [
+                'raffle_id' => $raffleId,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return back()
+                ->withErrors(['purchase' => 'Estamos procesando muchas compras. Intenta enviar el comprobante nuevamente en unos segundos.'])
+                ->withInput($request->except(['receipt']));
+        }
+
         if (! $raffle->sale_enabled) {
             return back()->withErrors(['purchase' => 'La venta de este sorteo esta pausada temporalmente.'])->withInput();
         }
@@ -114,6 +141,17 @@ class PurchaseController extends Controller
             }
 
             return back()->withErrors(['purchase' => $exception->getMessage()])->withInput();
+        } catch (Throwable $exception) {
+            Storage::disk('public')->delete($receiptPath);
+
+            Log::warning('No se pudo completar compra por carga transitoria.', [
+                'raffle_id' => $raffle->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return back()
+                ->withErrors(['purchase' => 'Estamos procesando muchas compras. Intenta enviar el comprobante nuevamente en unos segundos.'])
+                ->withInput($request->except(['receipt']));
         }
 
         $mailService->sendReserved($order);

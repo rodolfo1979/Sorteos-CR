@@ -78,6 +78,19 @@ class RaffleReservationHardeningTest extends TestCase
         $this->assertCount(0, Storage::disk('public')->files('receipts'));
     }
 
+    public function test_random_endpoint_returns_busy_response_when_raffle_lookup_fails(): void
+    {
+        $this->mock(PublicRaffleSnapshotService::class, function ($mock) {
+            $mock->shouldReceive('byId')->once()->andThrow(new \Exception('SQLSTATE[HY000] [2002] Operation not permitted'));
+        });
+
+        $this->postJson(route('purchases.random', 999), [
+            'package_count' => 1,
+        ])
+            ->assertStatus(503)
+            ->assertJsonPath('message', 'Estamos procesando muchas compras. Intenta nuevamente en unos segundos.');
+    }
+
     public function test_random_endpoint_rejects_incomplete_packages_when_availability_is_low(): void
     {
         $raffle = $this->raffle();
@@ -126,6 +139,35 @@ class RaffleReservationHardeningTest extends TestCase
         $this->assertSame('available', RaffleNumber::where('number', '0002')->first()->status);
         $this->assertSame(2, RaffleNumber::where('status', 'reserved')->count());
         $this->assertCount(1, Storage::disk('public')->files('receipts'));
+    }
+
+    public function test_purchase_returns_busy_message_without_leaking_sql_when_reservation_fails(): void
+    {
+        Storage::fake('public');
+        $raffle = $this->raffle();
+        $this->number($raffle, '0001');
+        $this->number($raffle, '0002');
+
+        $this->mock(RaffleReservationService::class, function ($mock) {
+            $mock->shouldReceive('reserve')->once()->andThrow(new \Exception('SQLSTATE[HY000] [2002] Operation not permitted'));
+        });
+
+        $this->post(route('purchases.store', $raffle), [
+            'buyer_name' => 'Cliente Carga',
+            'buyer_phone' => '88888888',
+            'buyer_email' => 'carga@example.com',
+            'package_count' => 1,
+            'numbers' => ['0001', '0002'],
+            'selection_source' => 'random',
+            'receipt' => UploadedFile::fake()->create('comprobante.pdf', 100, 'application/pdf'),
+        ])
+            ->assertRedirect()
+            ->assertSessionHasErrors([
+                'purchase' => 'Estamos procesando muchas compras. Intenta enviar el comprobante nuevamente en unos segundos.',
+            ]);
+
+        $this->assertSame(0, Order::count());
+        $this->assertCount(0, Storage::disk('public')->files('receipts'));
     }
 
     public function test_expired_reserved_numbers_can_be_released_by_maintenance(): void
