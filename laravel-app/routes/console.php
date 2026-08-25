@@ -7,6 +7,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -126,3 +127,7 @@ Artisan::command('raffles:warm-public-snapshot', function (PublicRaffleSnapshotS
 
     return 0;
 })->purpose('Precalienta el snapshot de la pagina publica de venta.');
+
+Schedule::command('queue:work --stop-when-empty --tries=3 --timeout=50')
+    ->everyMinute()
+    ->withoutOverlapping();
