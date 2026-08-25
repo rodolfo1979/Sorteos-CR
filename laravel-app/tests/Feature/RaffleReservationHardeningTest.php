@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Order;
 use App\Models\Raffle;
 use App\Models\RaffleNumber;
+use App\Services\PublicRaffleSnapshotService;
 use App\Services\RaffleReservationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -123,6 +124,23 @@ class RaffleReservationHardeningTest extends TestCase
 
         $this->assertSame('available', RaffleNumber::where('number', '0001')->first()->status);
         $this->assertSame('reserved', RaffleNumber::where('number', '0002')->first()->status);
+    }
+
+    public function test_releasing_expired_reservations_updates_public_snapshot_counts(): void
+    {
+        $raffle = $this->raffle();
+        $this->number($raffle, '0001', 'reserved', now()->subMinute());
+        $this->number($raffle, '0002');
+
+        $snapshotService = app(PublicRaffleSnapshotService::class);
+        $snapshotService->warm($raffle);
+
+        app(RaffleReservationService::class)->releaseExpiredReservations($raffle);
+
+        $snapshot = $snapshotService->byId($raffle->id);
+
+        $this->assertSame(2, $snapshot->available_count);
+        $this->assertSame(0, $snapshot->reserved_count);
     }
 
     public function test_successful_reservation_locks_numbers_as_reserved_and_creates_single_order(): void

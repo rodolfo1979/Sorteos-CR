@@ -64,17 +64,17 @@ class RaffleReservationService
             throw new RuntimeException("Esta compra debe tener {$expectedQuantity} numero(s).");
         }
 
-        $order = DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed, $selectionSource, $expectedQuantity) {
-            $lockedRaffle = Raffle::query()->whereKey($raffle->id)->lockForUpdate()->firstOrFail();
+        $this->releaseExpiredReservationsIfDue($raffle);
 
-            if (! $lockedRaffle->sale_enabled) {
+        $order = DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed, $selectionSource, $expectedQuantity) {
+            $freshRaffle = Raffle::query()->whereKey($raffle->id)->firstOrFail();
+
+            if (! $freshRaffle->sale_enabled) {
                 throw new RuntimeException('La venta de esta rifa esta pausada.');
             }
 
-            $this->releaseExpiredReservationsIfDue($lockedRaffle);
-
             $lockedNumbers = RaffleNumber::query()
-                ->where('raffle_id', $lockedRaffle->id)
+                ->where('raffle_id', $freshRaffle->id)
                 ->whereIn('number', $numbers)
                 ->orderBy('id')
                 ->lockForUpdate()
@@ -89,7 +89,7 @@ class RaffleReservationService
                     throw new RuntimeException('Uno o mas numeros ya no estan disponibles. Intenta con otra seleccion.');
                 }
 
-                $lockedNumbers = $this->availableReplacementNumbers($lockedRaffle, $expectedQuantity, $numbers);
+                $lockedNumbers = $this->availableReplacementNumbers($freshRaffle, $expectedQuantity, $numbers);
 
                 if ($lockedNumbers->count() !== $expectedQuantity) {
                     throw new RuntimeException('Uno o mas numeros ya no estan disponibles. Intenta con otra seleccion.');
@@ -98,12 +98,12 @@ class RaffleReservationService
 
             $order = Order::create([
                 'public_uuid' => (string) Str::uuid(),
-                'raffle_id' => $lockedRaffle->id,
+                'raffle_id' => $freshRaffle->id,
                 'buyer_name' => $buyer['name'],
                 'buyer_phone' => $buyer['phone'],
                 'buyer_email' => $buyer['email'] ?? null,
                 'package_count' => $packageCount,
-                'amount_total' => $lockedRaffle->price_per_package * $packageCount,
+                'amount_total' => $freshRaffle->price_per_package * $packageCount,
                 'assignment_mode' => $selectionSource,
                 'random_changes_used' => $randomChangesUsed,
                 'status' => 'pending',
@@ -112,7 +112,7 @@ class RaffleReservationService
                 'receipt_mime' => $receipt['mime'] ?? null,
             ]);
 
-            $reservedUntil = now()->addMinutes($lockedRaffle->reservation_minutes);
+            $reservedUntil = now()->addMinutes($freshRaffle->reservation_minutes);
 
             foreach ($lockedNumbers as $raffleNumber) {
                 $raffleNumber->forceFill([
@@ -133,7 +133,7 @@ class RaffleReservationService
 
     public function releaseExpiredReservations(Raffle $raffle): int
     {
-        return RaffleNumber::query()
+        $released = RaffleNumber::query()
             ->where('raffle_id', $raffle->id)
             ->where('status', 'reserved')
             ->whereNotNull('reserved_until')
@@ -143,6 +143,12 @@ class RaffleReservationService
                 'reserved_until' => null,
                 'updated_at' => now(),
             ]);
+
+        if ($released > 0) {
+            app(PublicRaffleSnapshotService::class)->adjustCounts($raffle, availableDelta: $released, reservedDelta: -$released);
+        }
+
+        return $released;
     }
 
     private function randomCandidateNumbers(Raffle $raffle, int $count): array

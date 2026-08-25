@@ -23,6 +23,24 @@ function rememberError(message) {
     stats.errors.set(message, (stats.errors.get(message) || 0) + 1);
 }
 
+function classifyResponseBody(body) {
+    if (body.includes('Actualizamos la disponibilidad') || body.includes('ya no estan disponibles')) {
+        stats.conflicts += 1;
+        return 'Conflicto de disponibilidad';
+    }
+
+    if (body.includes('Revisa la solicitud')
+        || body.includes('Debes subir')
+        || body.includes('Debes seleccionar')
+        || body.includes('correo electronico valido')
+        || body.includes('El comprobante debe')) {
+        stats.validation += 1;
+        return 'Validacion en formulario';
+    }
+
+    return null;
+}
+
 function extract(pattern, text, label) {
     const match = text.match(pattern);
     if (!match) {
@@ -130,6 +148,7 @@ async function buyTicket(index) {
         form.set('buyer_email', `carga${index}@example.com`);
         form.set('package_count', String(packageCount));
         form.set('random_changes_used', '0');
+        form.set('selection_source', 'random');
         numbers.forEach((number) => form.append('numbers[]', number));
         form.set('receipt', new Blob(['%PDF-1.4\n% load-test receipt\n'], { type: 'application/pdf' }), `comprobante-${index}.pdf`);
 
@@ -155,20 +174,31 @@ async function buyTicket(index) {
 
         if ([302, 303].includes(purchaseResponse.status)) {
             stats.redirects += 1;
-            rememberError(`Redireccion al formulario location=${location || 'sin-location'}`);
+            const redirectUrl = location ? new URL(location, baseUrl).toString() : baseUrl;
+
+            try {
+                const redirectedResponse = await timedFetch(redirectUrl, {
+                    headers: {
+                        Accept: 'text/html,application/xhtml+xml',
+                        Cookie: context.cookies,
+                    },
+                });
+                context.cookies = mergeCookies(context.cookies, redirectedResponse);
+                const redirectedBody = await redirectedResponse.text();
+                const reason = classifyResponseBody(redirectedBody) || `HTTP ${redirectedResponse.status} sin mensaje reconocido`;
+                rememberError(`Redireccion al formulario motivo=${reason}`);
+            } catch (redirectError) {
+                const message = redirectError instanceof Error ? redirectError.message : String(redirectError);
+                rememberError(`Redireccion al formulario sin clasificar: ${message}`);
+            }
+
             return;
         }
 
         const body = await purchaseResponse.text();
-        if (body.includes('Actualizamos la disponibilidad') || body.includes('ya no estan disponibles')) {
-            stats.conflicts += 1;
-            rememberError('Conflicto de disponibilidad');
-            return;
-        }
-
-        if (body.includes('Revisa la solicitud')) {
-            stats.validation += 1;
-            rememberError('Validacion en formulario');
+        const reason = classifyResponseBody(body);
+        if (reason) {
+            rememberError(reason);
             return;
         }
 
