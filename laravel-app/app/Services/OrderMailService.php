@@ -65,7 +65,7 @@ class OrderMailService
                 $subject
             ));
 
-            Log::info('Correo encolado para administracion.', [
+            Log::warning('Correo encolado para administracion.', [
                 'type' => 'admin_nueva_compra',
                 'order_id' => $order->id,
                 'email' => $adminEmail,
@@ -94,7 +94,7 @@ class OrderMailService
         try {
             Mail::to($order->buyer_email, $order->buyer_name)->queue(new OrderStatusMail($order, $view, $subject));
 
-            Log::info("Correo encolado para comprador: {$type}.", [
+            Log::warning("Correo encolado para comprador: {$type}.", [
                 'type' => $type,
                 'order_id' => $order->id,
                 'email' => $order->buyer_email,

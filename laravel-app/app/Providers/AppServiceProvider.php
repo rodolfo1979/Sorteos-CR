@@ -24,14 +24,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(MessageSending::class, function (MessageSending $event): void {
-            Log::info('Laravel iniciando envio de correo.', [
+            Log::warning('Laravel iniciando envio de correo.', [
                 'subject' => $event->message->getSubject(),
                 'to' => array_keys($event->message->getTo() ?? []),
             ]);
         });
 
         Event::listen(MessageSent::class, function (MessageSent $event): void {
-            Log::info('Laravel completo envio de correo.', [
+            Log::warning('Laravel completo envio de correo.', [
                 'subject' => $event->message->getSubject(),
                 'to' => array_keys($event->message->getTo() ?? []),
             ]);
