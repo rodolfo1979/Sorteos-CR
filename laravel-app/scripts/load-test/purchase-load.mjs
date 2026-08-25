@@ -24,19 +24,45 @@ function rememberError(message) {
     stats.errors.set(message, (stats.errors.get(message) || 0) + 1);
 }
 
+function decodeHtml(value) {
+    return String(value || '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/&nbsp;/g, ' ');
+}
+
+function validationMessages(body) {
+    if (!body.includes('Revisa la solicitud')) {
+        return [];
+    }
+
+    return [...body.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)]
+        .map((match) => decodeHtml(match[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()))
+        .filter(Boolean)
+        .slice(0, 3);
+}
+
 function classifyResponseBody(body) {
     if (body.includes('Actualizamos la disponibilidad') || body.includes('ya no estan disponibles')) {
         stats.conflicts += 1;
         return 'Conflicto de disponibilidad';
     }
 
-    if (body.includes('Revisa la solicitud')
-        || body.includes('Debes subir')
+    const messages = validationMessages(body);
+    if (messages.length) {
+        stats.validation += 1;
+        return `Validacion en formulario: ${messages.join(' | ')}`;
+    }
+
+    if (body.includes('Debes subir')
         || body.includes('Debes seleccionar')
         || body.includes('correo electronico valido')
         || body.includes('El comprobante debe')) {
         stats.validation += 1;
-        return 'Validacion en formulario';
+        return 'Validacion en formulario sin lista de errores';
     }
 
     return null;
