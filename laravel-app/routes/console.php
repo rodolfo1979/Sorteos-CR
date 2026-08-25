@@ -80,6 +80,32 @@ Artisan::command('mail:test {email}', function (): int {
     return 0;
 })->purpose('Envia un correo de prueba para validar la configuracion SMTP.');
 
+Artisan::command('mail:diagnose {email}', function (): int {
+    $email = (string) $this->argument('email');
+
+    $this->line('MAIL_MAILER='.config('mail.default'));
+    $this->line('MAIL_HOST='.config('mail.mailers.smtp.host'));
+    $this->line('MAIL_PORT='.config('mail.mailers.smtp.port'));
+    $this->line('MAIL_USERNAME='.(config('mail.mailers.smtp.username') ? 'configurado' : 'vacio'));
+    $this->line('MAIL_PASSWORD='.(config('mail.mailers.smtp.password') ? 'configurado' : 'vacio'));
+    $this->line('MAIL_FROM_ADDRESS='.config('mail.from.address'));
+    $this->line('MAIL_FROM_NAME='.config('mail.from.name'));
+    $this->line('QUEUE_CONNECTION='.config('queue.default'));
+
+    try {
+        Mail::raw('Diagnostico SMTP enviado correctamente desde Sorteos CR.', function ($message) use ($email) {
+            $message->to($email)->subject('Diagnostico SMTP - Sorteos CR');
+        });
+    } catch (Throwable $exception) {
+        $this->error('Fallo envio SMTP: '.$exception->getMessage());
+
+        return 1;
+    }
+
+    $this->info('Laravel entrego el correo al transport SMTP para '.$email.'. Revisa bandeja, spam y registros del proveedor si no aparece.');
+
+    return 0;
+})->purpose('Muestra configuracion segura de correo y prueba SMTP capturando errores.');
 Artisan::command('raffles:release-expired-reservations', function (RaffleReservationService $reservationService): int {
     $released = 0;
 
