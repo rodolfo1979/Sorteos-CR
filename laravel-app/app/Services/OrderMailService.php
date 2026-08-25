@@ -56,12 +56,21 @@ class OrderMailService
 
         $order->loadMissing('raffle', 'numbers');
 
+        $subject = 'Nuevo comprobante pendiente - '.$order->raffle->name;
+
         try {
             Mail::to($adminEmail)->queue(new OrderStatusMail(
                 $order,
                 'emails.admin-new-order',
-                'Nuevo comprobante pendiente - '.$order->raffle->name
+                $subject
             ));
+
+            Log::info('Correo encolado para administracion.', [
+                'type' => 'admin_nueva_compra',
+                'order_id' => $order->id,
+                'email' => $adminEmail,
+                'subject' => $subject,
+            ]);
         } catch (Throwable $exception) {
             Log::warning('No se pudo enviar notificacion admin de compra.', [
                 'order_id' => $order->id,
@@ -84,6 +93,13 @@ class OrderMailService
 
         try {
             Mail::to($order->buyer_email, $order->buyer_name)->queue(new OrderStatusMail($order, $view, $subject));
+
+            Log::info("Correo encolado para comprador: {$type}.", [
+                'type' => $type,
+                'order_id' => $order->id,
+                'email' => $order->buyer_email,
+                'subject' => $subject,
+            ]);
 
             return true;
         } catch (Throwable $exception) {

@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Order;
 use App\Models\Raffle;
+use App\Services\OrderMailService;
 use App\Services\PublicRaffleSnapshotService;
 use App\Services\RaffleReservationService;
 use Illuminate\Foundation\Inspiring;
@@ -107,6 +109,34 @@ Artisan::command('mail:diagnose {email}', function (): int {
 
     return 0;
 })->purpose('Muestra configuracion segura de correo y prueba SMTP capturando errores.');
+Artisan::command('mail:order {order_id} {type=approved}', function (OrderMailService $mailService): int {
+    $order = Order::with('raffle', 'numbers')->find((int) $this->argument('order_id'));
+    $type = (string) $this->argument('type');
+
+    if (! $order) {
+        $this->error('No se encontro la orden indicada.');
+
+        return 1;
+    }
+
+    $sent = match ($type) {
+        'reserved' => $mailService->sendReserved($order),
+        'approved' => $mailService->sendApproved($order),
+        'rejected' => $mailService->sendRejected($order),
+        'admin' => tap(true, fn () => $mailService->notifyAdminNewOrder($order)),
+        default => null,
+    };
+
+    if ($sent === null) {
+        $this->error('Tipo invalido. Usa: reserved, approved, rejected o admin.');
+
+        return 1;
+    }
+
+    $this->info("Correo {$type} encolado para la orden {$order->id}.");
+
+    return 0;
+})->purpose('Reenvia manualmente un correo de una orden: reserved, approved, rejected o admin.');
 Artisan::command('raffles:release-expired-reservations', function (RaffleReservationService $reservationService): int {
     $released = 0;
 
