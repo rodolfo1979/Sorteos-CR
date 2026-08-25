@@ -4,8 +4,8 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NumberController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\RaffleController as AdminRaffleController;
-use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RealtimeController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Public\ConfirmationController;
 use App\Http\Controllers\Public\PurchaseController;
 use App\Http\Controllers\Public\RaffleController;
@@ -28,9 +28,10 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
     Route::patch('/rifas/{raffle}/venta', [AdminRaffleController::class, 'toggleSale'])->name('raffles.toggle-sale');
     Route::delete('/rifas/{raffle}', [AdminRaffleController::class, 'destroy'])->name('raffles.destroy');
     Route::get('/pagos', [PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/pagos/{order}/aprobar', fn () => redirect()->route('admin.payments.index')->with('status', 'Para aprobar una compra usa el boton Aprobar desde el panel de pagos.'))->name('payments.approve.get');
     Route::post('/pagos/{order}/aprobar', [PaymentController::class, 'approve'])->name('payments.approve');
+    Route::get('/pagos/{order}/rechazar', fn () => redirect()->route('admin.payments.index')->with('status', 'Para rechazar una compra usa el boton Rechazar desde el panel de pagos.'))->name('payments.reject.get');
     Route::post('/pagos/{order}/rechazar', [PaymentController::class, 'reject'])->name('payments.reject');
     Route::get('/reportes', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/numeros', [NumberController::class, 'index'])->name('numbers.index');
 });
-
