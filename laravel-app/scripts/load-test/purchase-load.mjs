@@ -10,6 +10,7 @@ const stats = {
     failed: 0,
     conflicts: 0,
     validation: 0,
+    insufficient: 0,
     redirects: 0,
     durations: [],
     errors: new Map(),
@@ -129,14 +130,30 @@ async function buyTicket(index) {
         });
         context.cookies = mergeCookies(context.cookies, randomResponse);
 
+        const randomData = await randomResponse.json().catch(() => ({}));
+        const expectedQuantity = Number(randomData.expected_quantity || randomData.quantity || 0);
+
+        if (randomResponse.status === 409) {
+            stats.insufficient += 1;
+            rememberError(`Disponibilidad insuficiente en azar: ${randomData.quantity || 0}/${expectedQuantity || 'desconocido'} numero(s)`);
+            return;
+        }
+
         if (!randomResponse.ok) {
             throw new Error(`Azar HTTP ${randomResponse.status}`);
         }
 
-        const randomData = await randomResponse.json();
         const numbers = randomData.numbers || [];
         if (!numbers.length) {
-            throw new Error('Azar no devolvio numeros');
+            stats.insufficient += 1;
+            rememberError('Disponibilidad insuficiente en azar: 0 numeros');
+            return;
+        }
+
+        if (expectedQuantity > 0 && numbers.length !== expectedQuantity) {
+            stats.insufficient += 1;
+            rememberError(`Disponibilidad insuficiente en azar: ${numbers.length}/${expectedQuantity} numero(s)`);
+            return;
         }
 
         await sleep(pauseMs);
@@ -239,6 +256,7 @@ async function runPool() {
     console.log(`Compras creadas: ${stats.ok}`);
     console.log(`Conflictos controlados: ${stats.conflicts}`);
     console.log(`Validaciones: ${stats.validation}`);
+    console.log(`Disponibilidad insuficiente: ${stats.insufficient}`);
     console.log(`Redirecciones al formulario: ${stats.redirects}`);
     console.log(`Fallos tecnicos: ${stats.failed}`);
     console.log(`p50: ${percentile(50).toFixed(0)}ms`);

@@ -35,9 +35,21 @@ class PurchaseController extends Controller
             $numbers = $service->approximateRandomNumbers($raffle, (int) $validated['package_count']);
         }
 
+        $expectedQuantity = $raffle->numbers_per_package * (int) $validated['package_count'];
+
+        if (count($numbers) !== $expectedQuantity) {
+            return response()->json([
+                'message' => 'No hay suficientes numeros disponibles para ese paquete.',
+                'numbers' => $numbers,
+                'quantity' => count($numbers),
+                'expected_quantity' => $expectedQuantity,
+            ], 409);
+        }
+
         return response()->json([
             'numbers' => $numbers,
             'quantity' => count($numbers),
+            'expected_quantity' => $expectedQuantity,
         ]);
     }
 

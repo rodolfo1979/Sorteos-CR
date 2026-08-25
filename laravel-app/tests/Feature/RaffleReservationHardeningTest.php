@@ -77,6 +77,20 @@ class RaffleReservationHardeningTest extends TestCase
         $this->assertCount(0, Storage::disk('public')->files('receipts'));
     }
 
+    public function test_random_endpoint_rejects_incomplete_packages_when_availability_is_low(): void
+    {
+        $raffle = $this->raffle();
+        $this->number($raffle, '0001');
+
+        $this->postJson(route('purchases.random', $raffle), [
+            'package_count' => 1,
+        ])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'No hay suficientes numeros disponibles para ese paquete.')
+            ->assertJsonPath('quantity', 1)
+            ->assertJsonPath('expected_quantity', 2);
+    }
+
     public function test_random_purchase_conflict_reassigns_available_package_without_error(): void
     {
         Storage::fake('public');
