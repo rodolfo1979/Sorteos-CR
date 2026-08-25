@@ -15,8 +15,6 @@ class RaffleReservationService
     public function randomNumbers(Raffle $raffle, int $packageCount): array
     {
         $quantity = $this->quantityFor($raffle, $packageCount);
-        $this->releaseExpiredReservationsIfDue($raffle);
-
         $selected = collect();
         $candidatePoolSize = min($raffle->total_numbers, max($quantity * 12, 80));
 
@@ -63,8 +61,6 @@ class RaffleReservationService
         if (count($numbers) !== $expectedQuantity) {
             throw new RuntimeException("Esta compra debe tener {$expectedQuantity} numero(s).");
         }
-
-        $this->releaseExpiredReservationsIfDue($raffle);
 
         $order = DB::transaction(function () use ($raffle, $buyer, $numbers, $receipt, $packageCount, $randomChangesUsed, $selectionSource, $expectedQuantity) {
             $freshRaffle = Raffle::query()->whereKey($raffle->id)->firstOrFail();
@@ -161,15 +157,6 @@ class RaffleReservationService
         }
 
         return array_keys($numbers);
-    }
-
-    private function releaseExpiredReservationsIfDue(Raffle $raffle): void
-    {
-        if (random_int(1, 30) !== 1) {
-            return;
-        }
-
-        $this->releaseExpiredReservations($raffle);
     }
 
     private function normalizeNumbers(array $numbers): array

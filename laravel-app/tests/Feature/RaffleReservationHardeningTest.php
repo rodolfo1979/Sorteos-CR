@@ -9,6 +9,7 @@ use App\Services\PublicRaffleSnapshotService;
 use App\Services\RaffleReservationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Tests\TestCase;
@@ -155,6 +156,24 @@ class RaffleReservationHardeningTest extends TestCase
 
         $this->assertSame(2, $snapshot->available_count);
         $this->assertSame(0, $snapshot->reserved_count);
+    }
+
+    public function test_release_expired_reservations_command_updates_public_snapshot_counts(): void
+    {
+        $raffle = $this->raffle();
+        $this->number($raffle, '0001', 'reserved', now()->subMinute());
+        $this->number($raffle, '0002');
+
+        $snapshotService = app(PublicRaffleSnapshotService::class);
+        $snapshotService->warm($raffle);
+
+        Artisan::call('raffles:release-expired-reservations');
+
+        $snapshot = $snapshotService->byId($raffle->id);
+
+        $this->assertSame(2, $snapshot->available_count);
+        $this->assertSame(0, $snapshot->reserved_count);
+        $this->assertStringContainsString('Reservas vencidas liberadas: 1.', Artisan::output());
     }
 
     public function test_successful_reservation_locks_numbers_as_reserved_and_creates_single_order(): void

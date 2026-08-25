@@ -2,9 +2,11 @@
 
 use App\Models\Raffle;
 use App\Services\PublicRaffleSnapshotService;
+use App\Services\RaffleReservationService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -16,12 +18,14 @@ Artisan::command('raffles:rebuild-numbers {raffle_id} {--force}', function (): i
 
     if (! $raffle) {
         $this->error('No se encontro la rifa indicada.');
+
         return 1;
     }
 
     $ordersCount = $raffle->orders()->count();
     if ($ordersCount > 0 && ! $this->option('force')) {
         $this->error("Esta rifa tiene {$ordersCount} compra(s). Usa --force solo si son pruebas y deseas borrarlas.");
+
         return 1;
     }
 
@@ -62,32 +66,26 @@ Artisan::command('mail:test {email}', function (): int {
     $email = (string) $this->argument('email');
 
     try {
-        \Illuminate\Support\Facades\Mail::raw('Correo de prueba enviado correctamente desde Sorteos CR.', function ($message) use ($email) {
+        Mail::raw('Correo de prueba enviado correctamente desde Sorteos CR.', function ($message) use ($email) {
             $message->to($email)->subject('Prueba de correo - Sorteos CR');
         });
-    } catch (\Throwable $exception) {
+    } catch (Throwable $exception) {
         $this->error('No se pudo enviar el correo: '.$exception->getMessage());
+
         return 1;
     }
 
     $this->info('Correo de prueba enviado a '.$email.'.');
+
     return 0;
 })->purpose('Envia un correo de prueba para validar la configuracion SMTP.');
 
-Artisan::command('raffles:release-expired-reservations', function (): int {
+Artisan::command('raffles:release-expired-reservations', function (RaffleReservationService $reservationService): int {
     $released = 0;
 
-    Raffle::query()->chunkById(50, function ($raffles) use (&$released) {
+    Raffle::query()->chunkById(50, function ($raffles) use (&$released, $reservationService) {
         foreach ($raffles as $raffle) {
-            $released += $raffle->numbers()
-                ->where('status', 'reserved')
-                ->whereNotNull('reserved_until')
-                ->where('reserved_until', '<', now())
-                ->update([
-                    'status' => 'available',
-                    'reserved_until' => null,
-                    'updated_at' => now(),
-                ]);
+            $released += $reservationService->releaseExpiredReservations($raffle);
         }
     });
 
