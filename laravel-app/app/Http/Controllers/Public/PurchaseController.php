@@ -140,6 +140,17 @@ class PurchaseController extends Controller
                     ->withInput($request->except(['numbers', 'receipt']));
             }
 
+            if ($this->isTransientInfrastructureError($exception)) {
+                Log::warning('No se pudo completar compra por carga transitoria.', [
+                    'raffle_id' => $raffle->id,
+                    'error' => $exception->getMessage(),
+                ]);
+
+                return back()
+                    ->withErrors(['purchase' => 'Estamos procesando muchas compras. Intenta enviar el comprobante nuevamente en unos segundos.'])
+                    ->withInput($request->except(['receipt']));
+            }
+
             return back()->withErrors(['purchase' => $exception->getMessage()])->withInput();
         } catch (Throwable $exception) {
             Storage::disk('public')->delete($receiptPath);
@@ -158,5 +169,17 @@ class PurchaseController extends Controller
         $mailService->notifyAdminNewOrder($order);
 
         return redirect()->route('purchase.confirmation', $order->public_uuid);
+    }
+
+    private function isTransientInfrastructureError(Throwable $exception): bool
+    {
+        $message = $exception->getMessage();
+
+        return str_contains($message, 'SQLSTATE')
+            || str_contains($message, 'Operation not permitted')
+            || str_contains($message, 'Connection refused')
+            || str_contains($message, 'Connection timed out')
+            || str_contains($message, 'server has gone away')
+            || str_contains($message, 'Too many connections');
     }
 }

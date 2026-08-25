@@ -170,6 +170,38 @@ class RaffleReservationHardeningTest extends TestCase
         $this->assertCount(0, Storage::disk('public')->files('receipts'));
     }
 
+    public function test_purchase_sanitizes_sqlstate_even_when_wrapped_as_runtime_exception(): void
+    {
+        Storage::fake('public');
+        $raffle = $this->raffle();
+        $this->number($raffle, '0001');
+        $this->number($raffle, '0002');
+
+        $this->mock(RaffleReservationService::class, function ($mock) {
+            $mock->shouldReceive('reserve')->once()->andThrow(new RuntimeException('SQLSTATE[HY000] [2002] Operation not permitted'));
+        });
+
+        $this->post(route('purchases.store', $raffle), [
+            'buyer_name' => 'Cliente Carga',
+            'buyer_phone' => '88888888',
+            'buyer_email' => 'carga@example.com',
+            'package_count' => 1,
+            'numbers' => ['0001', '0002'],
+            'selection_source' => 'random',
+            'receipt' => UploadedFile::fake()->create('comprobante.pdf', 100, 'application/pdf'),
+        ])
+            ->assertRedirect()
+            ->assertSessionHasErrors([
+                'purchase' => 'Estamos procesando muchas compras. Intenta enviar el comprobante nuevamente en unos segundos.',
+            ]);
+
+        $errors = session('errors')->get('purchase');
+
+        $this->assertStringNotContainsString('SQLSTATE', implode(' ', $errors));
+        $this->assertSame(0, Order::count());
+        $this->assertCount(0, Storage::disk('public')->files('receipts'));
+    }
+
     public function test_expired_reserved_numbers_can_be_released_by_maintenance(): void
     {
         $raffle = $this->raffle();

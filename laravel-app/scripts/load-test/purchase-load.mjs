@@ -47,6 +47,11 @@ function validationMessages(body) {
 }
 
 function classifyResponseBody(body) {
+    if (body.includes('SQLSTATE') || body.includes('Operation not permitted')) {
+        stats.busy += 1;
+        return 'Servidor ocupado: error transitorio de base de datos';
+    }
+
     if (body.includes('Estamos procesando muchas compras')) {
         stats.busy += 1;
         return 'Servidor ocupado: reintentar en segundos';
