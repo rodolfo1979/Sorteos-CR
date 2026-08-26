@@ -5,7 +5,7 @@
         $queueState = ($failedJobs ?? 0) > 0 ? 'Atencion' : (($pendingJobs ?? 0) > 20 ? 'Cola alta' : 'Normal');
         $queueClass = $queueState === 'Normal' ? 'bg-emerald-50 text-emerald-700' : ($queueState === 'Cola alta' ? 'bg-amber-50 text-amber-800' : 'bg-red-50 text-red-700');
         $statusClasses = [
-            'pending_payment' => 'bg-amber-50 text-amber-800',
+            'pending' => 'bg-amber-50 text-amber-800',
             'reserved' => 'bg-cyan-50 text-cyan-800',
             'approved' => 'bg-emerald-50 text-emerald-700',
             'rejected' => 'bg-red-50 text-red-700',
@@ -59,7 +59,7 @@
                                 <th class="py-2 pr-4">Sorteo</th>
                                 <th class="py-2 pr-4">Estado</th>
                                 <th class="py-2 pr-4">Numeros</th>
-                                <th class="py-2">Accion</th>
+                                <th class="py-2">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 font-bold">
@@ -71,9 +71,21 @@
                                         <div class="text-xs text-slate-500">{{ $order['buyer_email'] }}</div>
                                     </td>
                                     <td class="py-3 pr-4 text-slate-600">{{ $order['raffle'] }}</td>
-                                    <td class="py-3 pr-4"><span class="rounded-full px-3 py-1 text-xs font-black {{ $statusClasses[$order['status']] ?? 'bg-slate-100 text-slate-700' }}">{{ $order['status'] }}</span></td>
+                                    <td class="py-3 pr-4"><span class="rounded-full px-3 py-1 text-xs font-black {{ $statusClasses[$order['status']] ?? 'bg-slate-100 text-slate-700' }}">{{ $order['status_label'] }}</span></td>
                                     <td class="py-3 pr-4 text-slate-600">{{ $order['numbers'] === [] ? 'Sin numeros' : implode(', ', array_slice($order['numbers'], 0, 6)) }}{{ count($order['numbers']) > 6 ? ' +' . (count($order['numbers']) - 6) : '' }}</td>
-                                    <td class="py-3"><a class="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-black text-indigo-700 transition hover:bg-indigo-100" href="{{ $order['detail_url'] }}">Detalle</a></td>
+                                    <td class="py-3">
+                                        <div class="flex flex-wrap gap-2">
+                                            <a class="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-black text-indigo-700 transition hover:bg-indigo-100" href="{{ $order['detail_url'] }}">Detalle</a>
+                                            @if ($order['whatsapp_url'])
+                                                <a class="rounded-lg bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 transition hover:bg-emerald-100" href="{{ $order['whatsapp_url'] }}" target="_blank" rel="noopener">WhatsApp</a>
+                                            @endif
+                                            <form method="post" action="{{ $order['resend_url'] }}">
+                                                @csrf
+                                                <input type="hidden" name="type" value="{{ $order['email_type'] }}">
+                                                <button class="rounded-lg bg-amber-50 px-3 py-2 text-xs font-black text-amber-800 transition hover:bg-amber-100" type="submit">{{ $order['email_label'] }}</button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr><td class="py-4 text-slate-500" colspan="6">Sin compras recientes.</td></tr>

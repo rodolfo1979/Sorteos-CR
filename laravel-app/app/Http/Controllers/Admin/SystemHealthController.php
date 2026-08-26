@@ -71,30 +71,63 @@ class SystemHealthController extends Controller
                 ->latest()
                 ->limit(8)
                 ->get()
-                ->map(fn (Order $order) => [
-                    'id' => $order->id,
-                    'buyer_name' => $order->buyer_name,
-                    'buyer_email' => $order->buyer_email,
-                    'buyer_phone' => $order->buyer_phone,
-                    'raffle' => $order->raffle?->name ?? 'Sin sorteo',
-                    'status' => $order->status,
-                    'amount_total' => $order->amount_total,
-                    'numbers' => $order->numbers
-                        ->pluck('pivot.number')
+                ->map(function (Order $order) {
+                    $numbers = $order->numbers
+                        ->pluck('number')
                         ->filter(fn ($number) => $number !== null)
                         ->map(fn ($number) => str_pad((string) $number, $order->raffle?->effectiveNumberWidth() ?? 5, '0', STR_PAD_LEFT))
                         ->values()
-                        ->all(),
-                    'created_at' => $order->created_at?->timezone('America/Costa_Rica')->format('d/m/Y H:i:s'),
-                    'updated_at' => $order->updated_at?->timezone('America/Costa_Rica')->format('d/m/Y H:i:s'),
-                    'detail_url' => route('admin.payments.show', $order),
-                ])
+                        ->all();
+                    $statusLabel = match ($order->status) {
+                        'approved' => 'Aprobada',
+                        'rejected' => 'Rechazada',
+                        default => 'Pendiente',
+                    };
+                    $emailType = match ($order->status) {
+                        'approved' => 'approved',
+                        'rejected' => 'rejected',
+                        default => 'reserved',
+                    };
+                    $emailLabel = match ($emailType) {
+                        'approved' => 'Reenviar aprobacion',
+                        'rejected' => 'Reenviar rechazo',
+                        default => 'Reenviar reserva',
+                    };
+                    $summary = implode("\n", array_filter([
+                        'Sorteos CR',
+                        'Orden: '.strtoupper(substr($order->public_uuid, 0, 8)),
+                        'Cliente: '.$order->buyer_name,
+                        'Sorteo: '.($order->raffle?->name ?? 'Sorteo eliminado'),
+                        'Numeros: '.implode(', ', $numbers),
+                        'Monto: ₡'.number_format($order->amount_total, 0, ',', ' '),
+                        'Estado: '.$statusLabel,
+                    ]));
+                    $whatsappPhone = preg_replace('/\D+/', '', $order->buyer_phone ?? '');
+
+                    return [
+                        'id' => $order->id,
+                        'buyer_name' => $order->buyer_name,
+                        'buyer_email' => $order->buyer_email,
+                        'buyer_phone' => $order->buyer_phone,
+                        'raffle' => $order->raffle?->name ?? 'Sin sorteo',
+                        'status' => $order->status,
+                        'status_label' => $statusLabel,
+                        'amount_total' => $order->amount_total,
+                        'numbers' => $numbers,
+                        'created_at' => $order->created_at?->timezone('America/Costa_Rica')->format('d/m/Y H:i:s'),
+                        'updated_at' => $order->updated_at?->timezone('America/Costa_Rica')->format('d/m/Y H:i:s'),
+                        'detail_url' => route('admin.payments.show', $order),
+                        'resend_url' => route('admin.payments.resend-email', $order),
+                        'email_type' => $emailType,
+                        'email_label' => $emailLabel,
+                        'whatsapp_url' => $whatsappPhone !== '' ? 'https://wa.me/'.$whatsappPhone.'?text='.rawurlencode($summary) : null,
+                    ];
+                })
                 ->all();
         } catch (Throwable $exception) {
             return [];
         }
     }
-
     private function safeCount(string $table): int|string
     {
         try {
