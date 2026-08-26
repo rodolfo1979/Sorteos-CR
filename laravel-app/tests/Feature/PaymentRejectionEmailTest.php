@@ -67,5 +67,13 @@ class PaymentRejectionEmailTest extends TestCase
         $this->assertTrue($order->fresh()->rejected_at !== null);
         $this->assertSame(2, RaffleNumber::where('raffle_id', $raffle->id)->where('status', 'available')->count());
         Mail::assertSent(OrderStatusMail::class, fn (OrderStatusMail $message) => $message->hasTo('cliente@example.com'));
+        $this->assertDatabaseHas('order_events', [
+            'order_id' => $order->id,
+            'action' => 'payment_rejected',
+        ]);
+        $this->assertDatabaseHas('order_events', [
+            'order_id' => $order->id,
+            'action' => 'buyer_email_sent',
+        ]);
     }
 }

@@ -40,7 +40,7 @@ class PaymentController extends Controller
 
     public function show(Order $order): View
     {
-        $order->load('raffle', 'numbers');
+        $order->load('raffle', 'numbers', 'activityEvents');
         $numbers = $order->numbers->pluck('number')->join(', ');
         $statusLabel = match ($order->status) {
             'approved' => 'Aprobada',
@@ -71,13 +71,13 @@ class PaymentController extends Controller
             'type' => ['required', 'in:reserved,approved,rejected,admin'],
         ]);
 
-        $order->load('raffle', 'numbers');
+        $order->load('raffle', 'numbers', 'activityEvents');
 
         $sent = match ($validated['type']) {
-            'reserved' => $mailService->sendReserved($order),
-            'approved' => $mailService->sendApproved($order),
-            'rejected' => $mailService->sendRejected($order),
-            'admin' => tap(true, fn () => $mailService->notifyAdminNewOrder($order)),
+            'reserved' => $mailService->sendReserved($order, 'admin_resend'),
+            'approved' => $mailService->sendApproved($order, 'admin_resend'),
+            'rejected' => $mailService->sendRejected($order, 'admin_resend'),
+            'admin' => tap(true, fn () => $mailService->notifyAdminNewOrder($order, 'admin_resend')),
         };
 
         return back()->with('status', $sent
@@ -109,6 +109,10 @@ class PaymentController extends Controller
 
         $freshOrder = $order->fresh(['raffle', 'numbers']);
         $snapshotService->adjustCounts($freshOrder->raffle, reservedDelta: -$freshOrder->numbers->count(), soldDelta: $freshOrder->numbers->count());
+        app(\App\Services\OrderActivityService::class)->record($freshOrder, 'payment_approved', 'Pago aprobado desde el admin.', [
+            'numbers_count' => $freshOrder->numbers->count(),
+            'amount_total' => $freshOrder->amount_total,
+        ]);
         $mailSent = $mailService->sendApproved($freshOrder);
 
         return back()->with('status', $mailSent
@@ -140,6 +144,10 @@ class PaymentController extends Controller
 
         $freshOrder = $order->fresh(['raffle', 'numbers']);
         $snapshotService->adjustCounts($freshOrder->raffle, availableDelta: $freshOrder->numbers->count(), reservedDelta: -$freshOrder->numbers->count());
+        app(\App\Services\OrderActivityService::class)->record($freshOrder, 'payment_rejected', 'Pago rechazado desde el admin.', [
+            'numbers_count' => $freshOrder->numbers->count(),
+            'amount_total' => $freshOrder->amount_total,
+        ]);
         $mailSent = $mailService->sendRejected($freshOrder);
 
         return back()->with('status', $mailSent

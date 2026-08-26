@@ -91,6 +91,37 @@
 
         <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-700">Historial administrativo</p>
+                    <h3 class="mt-1 text-xl font-black">Actividad de la orden</h3>
+                </div>
+                <span class="rounded-full bg-slate-100 px-3 py-2 text-sm font-black text-slate-600">{{ $order->activityEvents->count() }} evento(s)</span>
+            </div>
+
+            <div class="mt-4 grid gap-3">
+                @forelse ($order->activityEvents as $event)
+                    <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-black text-indigo-700">{{ $event->action }}</span>
+                                    <span class="text-xs font-black text-slate-500">{{ $event->created_at->timezone('America/Costa_Rica')->format('d/m/Y H:i:s') }}</span>
+                                </div>
+                                <p class="mt-2 font-black text-slate-800">{{ $event->description }}</p>
+                                <p class="mt-1 text-sm font-bold text-slate-500">Actor: {{ $event->actor }}</p>
+                            </div>
+                            @if ($event->metadata)
+                                <pre class="max-w-full overflow-auto rounded-xl bg-white p-3 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{{ json_encode($event->metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+                            @endif
+                        </div>
+                    </article>
+                @empty
+                    <div class="rounded-2xl bg-slate-50 p-4 font-bold text-slate-500">Esta orden todavia no tiene eventos registrados.</div>
+                @endforelse
+            </div>
+        </section>
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3">
                 <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-700">Resumen WhatsApp</p>
                 <div class="flex flex-wrap gap-2">
                     <button class="rounded-xl bg-slate-950 px-4 py-2 font-black text-white transition hover:bg-indigo-700" type="button" data-copy-summary>Copiar resumen</button>

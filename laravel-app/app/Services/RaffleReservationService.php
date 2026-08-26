@@ -119,7 +119,17 @@ class RaffleReservationService
                 $order->numbers()->attach($raffleNumber->id, ['number' => $raffleNumber->number]);
             }
 
-            return $order->load('numbers', 'raffle');
+            $order->load('numbers', 'raffle');
+
+            app(OrderActivityService::class)->record($order, 'order_created', 'Compra creada con comprobante recibido.', [
+                'selection_source' => $selectionSource,
+                'package_count' => $packageCount,
+                'numbers_count' => $order->numbers->count(),
+                'amount_total' => $order->amount_total,
+                'receipt_original_name' => $order->receipt_original_name,
+            ]);
+
+            return $order;
         }, 5);
 
         app(PublicRaffleSnapshotService::class)->adjustCounts($order->raffle, availableDelta: -$order->numbers->count(), reservedDelta: $order->numbers->count());
