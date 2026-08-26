@@ -106,6 +106,36 @@
             </article>
         </section>
 
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-700">Actividad administrativa</p>
+                    <h3 class="mt-1 text-xl font-black">Eventos recientes de ordenes</h3>
+                </div>
+                <span class="rounded-full bg-slate-100 px-3 py-2 text-sm font-black text-slate-600">{{ count($recentActivity) }} evento(s)</span>
+            </div>
+
+            <div class="mt-4 grid gap-3 lg:grid-cols-2">
+                @forelse ($recentActivity as $event)
+                    <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="rounded-full bg-indigo-50 px-3 py-1 text-xs font-black text-indigo-700">{{ $event['action'] }}</span>
+                            <span class="text-xs font-black text-slate-500">{{ $event['created_at'] }}</span>
+                        </div>
+                        <p class="mt-2 font-black text-slate-800">{{ $event['description'] }}</p>
+                        <p class="mt-1 text-sm font-bold text-slate-500">{{ $event['buyer_name'] }} · {{ $event['raffle'] }}</p>
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-black text-slate-500">{{ $event['actor'] }}</span>
+                            @if ($event['detail_url'])
+                                <a class="rounded-lg bg-white px-3 py-2 text-xs font-black text-indigo-700 ring-1 ring-slate-200 transition hover:bg-indigo-50" href="{{ $event['detail_url'] }}">Detalle</a>
+                            @endif
+                        </div>
+                    </article>
+                @empty
+                    <div class="rounded-2xl bg-slate-50 p-4 font-bold text-slate-500">Sin actividad administrativa registrada.</div>
+                @endforelse
+            </div>
+        </section>
         <section class="grid gap-5 xl:grid-cols-2">
             <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex flex-wrap items-center justify-between gap-3">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderEvent;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -19,6 +20,7 @@ class SystemHealthController extends Controller
             'mail' => $this->mailSnapshot(),
             'schedule' => $this->scheduleSnapshot(),
             'recentOrders' => $this->recentOrders(),
+            'recentActivity' => $this->recentActivity(),
             'mailEvents' => $this->recentMailLines(),
             'errors' => $this->recentErrorLines(),
         ]);
@@ -128,6 +130,31 @@ class SystemHealthController extends Controller
             return [];
         }
     }
+
+    private function recentActivity(): array
+    {
+        try {
+            return OrderEvent::query()
+                ->with(['order.raffle'])
+                ->latest()
+                ->limit(12)
+                ->get()
+                ->map(fn (OrderEvent $event) => [
+                    'action' => $event->action,
+                    'description' => $event->description,
+                    'actor' => $event->actor,
+                    'created_at' => $event->created_at?->timezone('America/Costa_Rica')->format('d/m/Y H:i:s'),
+                    'order_id' => $event->order_id,
+                    'buyer_name' => $event->order?->buyer_name ?? 'Orden eliminada',
+                    'raffle' => $event->order?->raffle?->name ?? 'Sin sorteo',
+                    'detail_url' => $event->order ? route('admin.payments.show', $event->order) : null,
+                ])
+                ->all();
+        } catch (Throwable $exception) {
+            return [];
+        }
+    }
+
     private function safeCount(string $table): int|string
     {
         try {
