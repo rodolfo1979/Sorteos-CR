@@ -28,6 +28,8 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
     Route::patch('/rifas/{raffle}/venta', [AdminRaffleController::class, 'toggleSale'])->name('raffles.toggle-sale');
     Route::delete('/rifas/{raffle}', [AdminRaffleController::class, 'destroy'])->name('raffles.destroy');
     Route::get('/pagos', [PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/pagos/{order}', [PaymentController::class, 'show'])->name('payments.show');
+    Route::post('/pagos/{order}/reenviar-correo', [PaymentController::class, 'resendEmail'])->name('payments.resend-email');
     Route::get('/pagos/{order}/aprobar', fn () => redirect()->route('admin.payments.index')->with('status', 'Para aprobar una compra usa el boton Aprobar desde el panel de pagos.'))->name('payments.approve.get');
     Route::post('/pagos/{order}/aprobar', [PaymentController::class, 'approve'])->name('payments.approve');
     Route::get('/pagos/{order}/rechazar', fn () => redirect()->route('admin.payments.index')->with('status', 'Para rechazar una compra usa el boton Rechazar desde el panel de pagos.'))->name('payments.reject.get');

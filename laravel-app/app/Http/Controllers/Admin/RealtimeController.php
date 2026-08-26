@@ -53,6 +53,7 @@ class RealtimeController extends Controller
                 'buyer_email' => $order->buyer_email ?: 'Sin correo',
                 'raffle_name' => $order->raffle?->name ?? 'Sorteo eliminado',
                 'order_code' => strtoupper(substr($order->public_uuid, 0, 8)),
+                'detail_url' => route('admin.payments.show', $order),
                 'created_at' => $order->created_at->timezone('America/Costa_Rica')->format('d/m/Y H:i'),
                 'amount' => '₡'.number_format($order->amount_total, 0, ',', ' '),
                 'numbers' => $order->numbers->pluck('number')->values(),

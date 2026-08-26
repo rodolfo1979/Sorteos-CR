@@ -38,6 +38,53 @@ class PaymentController extends Controller
         ]);
     }
 
+    public function show(Order $order): View
+    {
+        $order->load('raffle', 'numbers');
+        $numbers = $order->numbers->pluck('number')->join(', ');
+        $statusLabel = match ($order->status) {
+            'approved' => 'Aprobada',
+            'rejected' => 'Rechazada',
+            default => 'Pendiente',
+        };
+        $whatsappSummary = implode("\n", array_filter([
+            'Sorteos CR',
+            'Orden: '.strtoupper(substr($order->public_uuid, 0, 8)),
+            'Cliente: '.$order->buyer_name,
+            'Sorteo: '.($order->raffle?->name ?? 'Sorteo eliminado'),
+            'Numeros: '.$numbers,
+            'Monto: ₡'.number_format($order->amount_total, 0, ',', ' '),
+            'Estado: '.$statusLabel,
+        ]));
+
+        return view('admin.payments.show', [
+            'order' => $order,
+            'numbers' => $numbers,
+            'statusLabel' => $statusLabel,
+            'whatsappSummary' => $whatsappSummary,
+        ]);
+    }
+
+    public function resendEmail(Order $order, Request $request, OrderMailService $mailService): RedirectResponse
+    {
+        $validated = $request->validate([
+            'type' => ['required', 'in:reserved,approved,rejected,admin'],
+        ]);
+
+        $order->load('raffle', 'numbers');
+
+        $sent = match ($validated['type']) {
+            'reserved' => $mailService->sendReserved($order),
+            'approved' => $mailService->sendApproved($order),
+            'rejected' => $mailService->sendRejected($order),
+            'admin' => tap(true, fn () => $mailService->notifyAdminNewOrder($order)),
+        };
+
+        return back()->with('status', $sent
+            ? 'Correo reenviado correctamente.'
+            : 'No se pudo reenviar el correo. Revisa el correo del comprador o la configuracion SMTP.');
+    }
+
     public function approve(Order $order, OrderMailService $mailService, PublicRaffleSnapshotService $snapshotService): RedirectResponse
     {
         $processed = DB::transaction(function () use ($order) {

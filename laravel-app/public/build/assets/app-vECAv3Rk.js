@@ -20,6 +20,7 @@ function e(e){return e+.5|0}var t=(e,t,n)=>Math.max(Math.min(e,n),t);function n(
             </div>
             <p class="mt-3 text-sm text-slate-700">Numeros: <strong>${$(t)}</strong></p>
             <div class="mt-4 flex flex-wrap gap-2">
+                <a class="inline-flex rounded-xl bg-white px-4 py-2 font-black text-indigo-700 ring-1 ring-indigo-100 transition hover:bg-indigo-50" href="${$(e.detail_url)}">Detalle</a>
                 ${n}
                 <form method="post" action="${$(e.approve_url)}">
                     <input type="hidden" name="_token" value="${$(vs)}">

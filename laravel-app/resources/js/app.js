@@ -86,6 +86,7 @@ function renderPendingOrder(order) {
             </div>
             <p class="mt-3 text-sm text-slate-700">Numeros: <strong>${escapeHtml(numbers)}</strong></p>
             <div class="mt-4 flex flex-wrap gap-2">
+                <a class="inline-flex rounded-xl bg-white px-4 py-2 font-black text-indigo-700 ring-1 ring-indigo-100 transition hover:bg-indigo-50" href="${escapeHtml(order.detail_url)}">Detalle</a>
                 ${receipt}
                 <form method="post" action="${escapeHtml(order.approve_url)}">
                     <input type="hidden" name="_token" value="${escapeHtml(csrfToken)}">
@@ -453,4 +454,3 @@ document.querySelectorAll('[data-raffle-purchase]').forEach((form) => {
     render();
     loadNumberPage(1);
 });
-

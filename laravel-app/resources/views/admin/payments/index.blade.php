@@ -14,7 +14,7 @@
                     <article class="rounded-2xl border border-slate-200 p-4 shadow-sm">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                                <h3 class="font-black">{{ $order->buyer_name }} - {{ $order->raffle->name }}</h3>
+                                <h3 class="font-black"><a class="transition hover:text-indigo-700" href="{{ route('admin.payments.show', $order) }}">{{ $order->buyer_name }} - {{ $order->raffle->name }}</a></h3>
                                 <p class="text-sm text-slate-500">{{ $order->buyer_phone }} · {{ $order->buyer_email ?: 'Sin correo' }}</p>
                                 <p class="mt-1 text-xs font-bold text-slate-400">Orden {{ strtoupper(substr($order->public_uuid, 0, 8)) }} · {{ $order->created_at->timezone('America/Costa_Rica')->format('d/m/Y H:i') }}</p>
                             </div>
@@ -22,6 +22,7 @@
                         </div>
                         <p class="mt-3 text-sm text-slate-700">Numeros: <strong>{{ $order->numbers->pluck('number')->join(', ') }}</strong></p>
                         <div class="mt-4 flex flex-wrap gap-2">
+                            <a class="inline-flex rounded-xl bg-white px-4 py-2 font-black text-indigo-700 ring-1 ring-indigo-100 transition hover:bg-indigo-50" href="{{ route('admin.payments.show', $order) }}">Detalle</a>
                             @if ($order->receipt_path)
                                 <a class="inline-flex rounded-xl bg-slate-100 px-4 py-2 font-black text-slate-800 transition hover:bg-slate-200" href="{{ Storage::url($order->receipt_path) }}" target="_blank" rel="noopener">Ver comprobante</a>
                             @else
@@ -67,7 +68,7 @@
                             <th class="px-4 py-3">Monto</th>
                             <th class="px-4 py-3">Estado</th>
                             <th class="px-4 py-3">Fecha</th>
-                            <th class="px-4 py-3">Comprobante</th>
+                            <th class="px-4 py-3">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 bg-white">
@@ -86,6 +87,7 @@
                                 </td>
                                 <td class="px-4 py-3 align-top text-slate-500">{{ $order->updated_at->timezone('America/Costa_Rica')->format('d/m/Y H:i') }}</td>
                                 <td class="px-4 py-3 align-top">
+                                    <a class="inline-flex rounded-lg bg-white px-3 py-2 font-black text-indigo-700 ring-1 ring-indigo-100 transition hover:bg-indigo-50" href="{{ route('admin.payments.show', $order) }}">Detalle</a>
                                     @if ($order->receipt_path)
                                         <a class="inline-flex rounded-lg bg-slate-100 px-3 py-2 font-black text-slate-800 transition hover:bg-slate-200" href="{{ Storage::url($order->receipt_path) }}" target="_blank" rel="noopener">Ver</a>
                                     @else
@@ -123,4 +125,3 @@
         </section>
     </div>
 </x-layouts.app>
-
