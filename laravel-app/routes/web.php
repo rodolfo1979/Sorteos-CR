@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\RaffleController as AdminRaffleController;
 use App\Http\Controllers\Admin\RealtimeController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SystemHealthController;
 use App\Http\Controllers\Public\ConfirmationController;
 use App\Http\Controllers\Public\PurchaseController;
 use App\Http\Controllers\Public\RaffleController;
@@ -35,5 +36,6 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
     Route::get('/pagos/{order}/rechazar', fn () => redirect()->route('admin.payments.index')->with('status', 'Para rechazar una compra usa el boton Rechazar desde el panel de pagos.'))->name('payments.reject.get');
     Route::post('/pagos/{order}/rechazar', [PaymentController::class, 'reject'])->name('payments.reject');
     Route::get('/reportes', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/salud', SystemHealthController::class)->name('health.index');
     Route::get('/numeros', [NumberController::class, 'index'])->name('numbers.index');
 });
