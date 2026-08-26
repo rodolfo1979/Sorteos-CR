@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -17,7 +18,9 @@ class SystemHealthController extends Controller
             'queue' => $this->queueSnapshot(),
             'mail' => $this->mailSnapshot(),
             'schedule' => $this->scheduleSnapshot(),
-            'errors' => $this->recentLogLines(),
+            'recentOrders' => $this->recentOrders(),
+            'mailEvents' => $this->recentMailLines(),
+            'errors' => $this->recentErrorLines(),
         ]);
     }
 
@@ -60,6 +63,38 @@ class SystemHealthController extends Controller
         }
     }
 
+    private function recentOrders(): array
+    {
+        try {
+            return Order::query()
+                ->with(['raffle', 'numbers'])
+                ->latest()
+                ->limit(8)
+                ->get()
+                ->map(fn (Order $order) => [
+                    'id' => $order->id,
+                    'buyer_name' => $order->buyer_name,
+                    'buyer_email' => $order->buyer_email,
+                    'buyer_phone' => $order->buyer_phone,
+                    'raffle' => $order->raffle?->name ?? 'Sin sorteo',
+                    'status' => $order->status,
+                    'amount_total' => $order->amount_total,
+                    'numbers' => $order->numbers
+                        ->pluck('pivot.number')
+                        ->filter(fn ($number) => $number !== null)
+                        ->map(fn ($number) => str_pad((string) $number, $order->raffle?->effectiveNumberWidth() ?? 5, '0', STR_PAD_LEFT))
+                        ->values()
+                        ->all(),
+                    'created_at' => $order->created_at?->timezone('America/Costa_Rica')->format('d/m/Y H:i:s'),
+                    'updated_at' => $order->updated_at?->timezone('America/Costa_Rica')->format('d/m/Y H:i:s'),
+                    'detail_url' => route('admin.payments.show', $order),
+                ])
+                ->all();
+        } catch (Throwable $exception) {
+            return [];
+        }
+    }
+
     private function safeCount(string $table): int|string
     {
         try {
@@ -69,7 +104,19 @@ class SystemHealthController extends Controller
         }
     }
 
-    private function recentLogLines(): array
+    private function recentMailLines(): array
+    {
+        return array_slice(array_values(array_filter($this->logLines(), fn (string $line) => str_contains($line, 'Correo')
+            || str_contains($line, 'Laravel iniciando envio')
+            || str_contains($line, 'Laravel completo envio'))), -20);
+    }
+
+    private function recentErrorLines(): array
+    {
+        return array_slice(array_values(array_filter($this->logLines(), fn (string $line) => str_contains($line, 'production.ERROR'))), -20);
+    }
+
+    private function logLines(): array
     {
         $path = storage_path('logs/laravel.log');
 
@@ -77,12 +124,6 @@ class SystemHealthController extends Controller
             return [];
         }
 
-        $lines = preg_split('/\r\n|\r|\n/', File::get($path)) ?: [];
-        $matches = array_values(array_filter($lines, fn (string $line) => str_contains($line, 'production.ERROR')
-            || str_contains($line, 'production.WARNING')
-            || str_contains($line, 'Correo')
-            || str_contains($line, 'Laravel completo envio')));
-
-        return array_slice($matches, -30);
+        return preg_split('/\r\n|\r|\n/', File::get($path)) ?: [];
     }
 }
