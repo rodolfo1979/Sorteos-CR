@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Order;
+use App\Models\OrderEvent;
 use App\Models\Raffle;
 use App\Services\OrderMailService;
 use App\Services\PublicRaffleSnapshotService;
@@ -137,6 +138,67 @@ Artisan::command('mail:order {order_id} {type=approved}', function (OrderMailSer
 
     return 0;
 })->purpose('Reenvia manualmente un correo de una orden: reserved, approved, rejected o admin.');
+Artisan::command('orders:backfill-events {--limit=500}', function (): int {
+    $limit = max(1, (int) $this->option('limit'));
+    $created = 0;
+    $record = function (Order $order, string $action, string $description, array $metadata, $createdAt): int {
+        $exists = OrderEvent::query()
+            ->where('order_id', $order->id)
+            ->where('action', $action)
+            ->exists();
+
+        if ($exists) {
+            return 0;
+        }
+
+        OrderEvent::create([
+            'order_id' => $order->id,
+            'action' => $action,
+            'actor' => 'system:backfill',
+            'description' => $description,
+            'metadata' => $metadata,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+        ]);
+
+        return 1;
+    };
+
+    Order::query()
+        ->with('numbers')
+        ->latest()
+        ->limit($limit)
+        ->get()
+        ->each(function (Order $order) use (&$created, $record) {
+            $created += $record($order, 'order_created', 'Compra existente importada al historial administrativo.', [
+                'source' => 'backfill',
+                'status' => $order->status,
+                'numbers_count' => $order->numbers->count(),
+                'amount_total' => $order->amount_total,
+                'receipt_original_name' => $order->receipt_original_name,
+            ], $order->created_at);
+
+            if ($order->approved_at) {
+                $created += $record($order, 'payment_approved', 'Pago aprobado antes de activar historial administrativo.', [
+                    'source' => 'backfill',
+                    'numbers_count' => $order->numbers->count(),
+                    'amount_total' => $order->amount_total,
+                ], $order->approved_at);
+            }
+
+            if ($order->rejected_at) {
+                $created += $record($order, 'payment_rejected', 'Pago rechazado antes de activar historial administrativo.', [
+                    'source' => 'backfill',
+                    'numbers_count' => $order->numbers->count(),
+                    'amount_total' => $order->amount_total,
+                ], $order->rejected_at);
+            }
+        });
+
+    $this->info("Eventos administrativos reconstruidos: {$created}.");
+
+    return 0;
+})->purpose('Reconstruye eventos administrativos basicos para ordenes antiguas sin duplicarlos.');
 Artisan::command('raffles:release-expired-reservations', function (RaffleReservationService $reservationService): int {
     $released = 0;
 
