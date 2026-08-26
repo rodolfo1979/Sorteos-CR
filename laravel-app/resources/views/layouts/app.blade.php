@@ -25,7 +25,8 @@
                     <a class="nav-link" href="{{ route('admin.raffles.create') }}">Crear sorteo</a>
                     <a class="nav-link" href="{{ route('admin.payments.index') }}">Pagos</a>
                     <a class="nav-link" href="{{ route('admin.reports.index') }}">Reportes</a>
-                    <a class="nav-link" href="{{ route('admin.numbers.index') }}">Numeros</a>`r`n                    <a class="nav-link" href="{{ route('admin.health.index') }}">Salud</a>
+                    <a class="nav-link" href="{{ route('admin.numbers.index') }}">Numeros</a>
+                    <a class="nav-link" href="{{ route('admin.health.index') }}">Salud</a>
                     <a class="nav-link" href="{{ route('raffles.show') }}">Ver venta</a>
                 </nav>
 
