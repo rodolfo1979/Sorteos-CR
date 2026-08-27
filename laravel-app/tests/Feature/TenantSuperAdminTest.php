@@ -12,7 +12,7 @@ class TenantSuperAdminTest extends TestCase
 
     public function test_superadmin_tenants_requires_its_own_basic_auth(): void
     {
-        $this->get('/superadmin/tenants')->assertStatus(401);
+        $this->get('/superadmin')->assertStatus(401);
     }
 
     public function test_superadmin_tenants_is_not_available_inside_admin_routes(): void
@@ -34,14 +34,14 @@ class TenantSuperAdminTest extends TestCase
         ]);
 
         $this->withBasicAuth('admin-test', 'secure-test-password')
-            ->get('/superadmin/tenants')
+            ->get('/superadmin')
             ->assertStatus(401);
     }
 
     public function test_superadmin_shows_tenant_list_with_superadmin_credentials(): void
     {
         $this->actingAsSuperAdmin()
-            ->get('/superadmin/tenants')
+            ->get('/superadmin')
             ->assertOk()
             ->assertSee('Tenants')
             ->assertSee('Sorteos CR')
@@ -63,7 +63,7 @@ class TenantSuperAdminTest extends TestCase
                 'primary_color' => '#0f172a',
                 'accent_color' => '#0891b2',
             ])
-            ->assertRedirect('/superadmin/tenants');
+            ->assertRedirect('/superadmin');
 
         $tenant = Tenant::query()->where('slug', 'cliente-demo')->firstOrFail();
         $this->assertDatabaseHas('tenant_domains', ['tenant_id' => $tenant->id, 'domain' => 'demo.example.com']);
@@ -81,7 +81,7 @@ class TenantSuperAdminTest extends TestCase
                 'primary_color' => '#111827',
                 'accent_color' => '#0e7490',
             ])
-            ->assertRedirect('/superadmin/tenants');
+            ->assertRedirect('/superadmin');
 
         $this->assertDatabaseHas('tenants', [
             'id' => $tenant->id,
@@ -92,7 +92,7 @@ class TenantSuperAdminTest extends TestCase
 
         $this->actingAsSuperAdmin()
             ->delete("/superadmin/tenants/{$tenant->id}")
-            ->assertRedirect('/superadmin/tenants');
+            ->assertRedirect('/superadmin');
 
         $this->assertDatabaseMissing('tenants', ['id' => $tenant->id]);
     }
@@ -107,3 +107,5 @@ class TenantSuperAdminTest extends TestCase
         return $this->withBasicAuth('owner-test', 'owner-secure-password');
     }
 }
+
+

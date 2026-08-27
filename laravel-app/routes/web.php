@@ -42,8 +42,14 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
 });
 
 Route::prefix('superadmin')->name('superadmin.')->middleware('superadmin.basic')->group(function () {
-    Route::redirect('/', '/superadmin/tenants');
-    Route::resource('tenants', TenantController::class)->except(['show']);
+    Route::get('/', [TenantController::class, 'index'])->name('tenants.index');
+    Route::get('/tenants/create', [TenantController::class, 'create'])->name('tenants.create');
+    Route::post('/tenants', [TenantController::class, 'store'])->name('tenants.store');
+    Route::get('/tenants/{tenant}/edit', [TenantController::class, 'edit'])->name('tenants.edit');
+    Route::put('/tenants/{tenant}', [TenantController::class, 'update'])->name('tenants.update');
+    Route::patch('/tenants/{tenant}', [TenantController::class, 'update']);
+    Route::delete('/tenants/{tenant}', [TenantController::class, 'destroy'])->name('tenants.destroy');
 });
+
 
 

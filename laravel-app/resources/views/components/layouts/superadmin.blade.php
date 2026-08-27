@@ -14,7 +14,7 @@
                 <div class="grid h-12 w-12 place-items-center rounded-xl bg-cyan-100 text-lg font-black text-slate-950 shadow-lg">SA</div>
                 <div>
                     <p class="text-[0.68rem] font-black uppercase tracking-[0.18em] text-cyan-200">Super admin</p>
-                    <h1 class="text-2xl font-black tracking-tight">Plataforma</h1>
+                    <h1 class="text-2xl font-black tracking-tight">Super Admin</h1>
                 </div>
             </div>
 
@@ -49,3 +49,4 @@
     </div>
 </body>
 </html>
+
