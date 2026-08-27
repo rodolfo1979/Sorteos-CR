@@ -2,6 +2,7 @@
 
 use App\Models\Order;
 use App\Models\OrderEvent;
+use App\Models\Tenant;
 use App\Models\Raffle;
 use App\Services\OrderMailService;
 use App\Services\PublicRaffleSnapshotService;
@@ -203,6 +204,34 @@ Artisan::command('orders:backfill-events {--limit=500}', function (): int {
 
     return 0;
 })->purpose('Reconstruye eventos administrativos basicos para ordenes antiguas sin duplicarlos.');
+Artisan::command('tenants:diagnose', function (): int {
+    $tenant = Tenant::query()->where('slug', 'sorteos-cr')->first();
+    $unassigned = [
+        'raffles' => DB::table('raffles')->whereNull('tenant_id')->count(),
+        'raffle_numbers' => DB::table('raffle_numbers')->whereNull('tenant_id')->count(),
+        'orders' => DB::table('orders')->whereNull('tenant_id')->count(),
+        'order_events' => DB::table('order_events')->whereNull('tenant_id')->count(),
+    ];
+
+    $this->line('TENANT='.($tenant?->name ?? 'no_encontrado'));
+    $this->line('TENANT_DOMAIN='.($tenant?->primary_domain ?? 'sin_dominio'));
+    $this->line('TENANTS_COUNT='.Tenant::query()->count());
+    $this->line('DOMAINS_COUNT='.DB::table('tenant_domains')->count());
+
+    foreach ($unassigned as $table => $count) {
+        $this->line('UNASSIGNED_'.strtoupper($table).'='.$count);
+    }
+
+    if (! $tenant || array_sum($unassigned) > 0) {
+        $this->error('Integridad multitenant requiere revision.');
+
+        return 1;
+    }
+
+    $this->info('Integridad multitenant correcta.');
+
+    return 0;
+})->purpose('Diagnostica tenant principal y registros sin tenant_id.');
 Artisan::command('raffles:release-expired-reservations', function (RaffleReservationService $reservationService): int {
     $released = 0;
 

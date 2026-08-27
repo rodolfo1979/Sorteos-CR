@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderEvent;
+use App\Models\Tenant;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -19,6 +20,7 @@ class SystemHealthController extends Controller
             'queue' => $this->queueSnapshot(),
             'mail' => $this->mailSnapshot(),
             'schedule' => $this->scheduleSnapshot(),
+            'tenancy' => $this->tenancySnapshot(),
             'recentOrders' => $this->recentOrders(),
             'recentActivity' => $this->recentActivity(),
             'mailEvents' => $this->recentMailLines(),
@@ -48,6 +50,36 @@ class SystemHealthController extends Controller
         ];
     }
 
+    private function tenancySnapshot(): array
+    {
+        try {
+            $tenant = Tenant::query()->where('slug', 'sorteos-cr')->first();
+            $unassigned = [
+                'raffles' => DB::table('raffles')->whereNull('tenant_id')->count(),
+                'raffle_numbers' => DB::table('raffle_numbers')->whereNull('tenant_id')->count(),
+                'orders' => DB::table('orders')->whereNull('tenant_id')->count(),
+                'order_events' => DB::table('order_events')->whereNull('tenant_id')->count(),
+            ];
+
+            return [
+                'ok' => $tenant !== null && array_sum($unassigned) === 0,
+                'tenant_name' => $tenant?->name ?? 'No encontrado',
+                'tenant_domain' => $tenant?->primary_domain ?? 'Sin dominio',
+                'tenants_count' => Tenant::query()->count(),
+                'domains_count' => DB::table('tenant_domains')->count(),
+                'unassigned' => $unassigned,
+            ];
+        } catch (Throwable $exception) {
+            return [
+                'ok' => false,
+                'tenant_name' => 'No disponible',
+                'tenant_domain' => 'No disponible',
+                'tenants_count' => 'No disponible',
+                'domains_count' => 'No disponible',
+                'unassigned' => [],
+            ];
+        }
+    }
     private function scheduleSnapshot(): array
     {
         try {

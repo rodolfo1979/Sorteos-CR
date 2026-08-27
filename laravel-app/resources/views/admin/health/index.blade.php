@@ -22,7 +22,7 @@
             <span class="rounded-full px-4 py-2 text-sm font-black {{ $queueClass }}">{{ $queueState }}</span>
         </div>
 
-        <section class="grid gap-4 md:grid-cols-3">
+        <section class="grid gap-4 md:grid-cols-4">
             <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Cola pendiente</p>
                 <strong class="mt-2 block text-4xl font-black">{{ $queue['pending_jobs'] }}</strong>
@@ -38,6 +38,36 @@
                 <strong class="mt-2 block text-2xl font-black">{{ $mail['mailer'] }} · {{ $mail['host'] }}</strong>
                 <p class="mt-2 text-sm font-bold text-slate-500">Usuario {{ $mail['username'] }} · clave {{ $mail['password'] }}</p>
             </article>
+            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Multitenant</p>
+                <strong class="mt-2 block text-2xl font-black {{ $tenancy['ok'] ? 'text-emerald-700' : 'text-red-700' }}">{{ $tenancy['ok'] ? 'Integro' : 'Revisar' }}</strong>
+                <p class="mt-2 text-sm font-bold text-slate-500">{{ $tenancy['tenant_name'] }} · {{ $tenancy['tenant_domain'] }}</p>
+            </article>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-700">Integridad multitenant</p>
+                    <h3 class="mt-1 text-xl font-black">Tenant principal y datos asignados</h3>
+                </div>
+                <span class="rounded-full {{ $tenancy['ok'] ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700' }} px-3 py-2 text-sm font-black">{{ $tenancy['ok'] ? 'Sin pendientes' : 'Hay datos sin tenant' }}</span>
+            </div>
+            <dl class="mt-4 grid gap-3 text-sm md:grid-cols-3">
+                <div class="rounded-xl bg-slate-50 p-3"><dt class="font-black text-slate-500">Tenants</dt><dd class="mt-1 text-xl font-black">{{ $tenancy['tenants_count'] }}</dd></div>
+                <div class="rounded-xl bg-slate-50 p-3"><dt class="font-black text-slate-500">Dominios</dt><dd class="mt-1 text-xl font-black">{{ $tenancy['domains_count'] }}</dd></div>
+                <div class="rounded-xl bg-slate-50 p-3"><dt class="font-black text-slate-500">Tenant actual</dt><dd class="mt-1 font-black">{{ $tenancy['tenant_name'] }}</dd></div>
+            </dl>
+            <div class="mt-4 grid gap-3 md:grid-cols-4">
+                @forelse ($tenancy['unassigned'] as $table => $count)
+                    <div class="rounded-xl {{ $count > 0 ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700' }} p-3">
+                        <p class="text-xs font-black uppercase tracking-wide">{{ $table }}</p>
+                        <strong class="mt-1 block text-2xl font-black">{{ $count }}</strong>
+                    </div>
+                @empty
+                    <div class="rounded-xl bg-red-50 p-3 font-black text-red-700">No se pudo leer integridad multitenant.</div>
+                @endforelse
+            </div>
         </section>
 
         <section class="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
