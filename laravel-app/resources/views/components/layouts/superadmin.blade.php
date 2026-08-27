@@ -19,9 +19,7 @@
             </div>
 
             <nav class="mt-5 grid grid-cols-2 gap-2 text-sm font-black lg:mt-8 lg:grid-cols-1">
-                <a class="nav-link" href="{{ route('superadmin.platform.index') }}">Tenants</a>
-                <a class="nav-link" href="{{ route('admin.dashboard') }}">Admin sorteos</a>
-                <a class="nav-link" href="{{ route('raffles.show') }}">Ver venta</a>
+                <a class="nav-link" href="{{ route('superadmin.tenants.index') }}">Tenants</a>
             </nav>
 
             <div class="mt-6 hidden rounded-xl border border-white/10 bg-white/10 p-4 text-sm text-cyan-50 lg:block">

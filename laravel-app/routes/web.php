@@ -7,7 +7,7 @@ use App\Http\Controllers\Admin\RaffleController as AdminRaffleController;
 use App\Http\Controllers\Admin\RealtimeController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SystemHealthController;
-use App\Http\Controllers\SuperAdmin\PlatformController;
+use App\Http\Controllers\SuperAdmin\TenantController;
 use App\Http\Controllers\Public\ConfirmationController;
 use App\Http\Controllers\Public\PurchaseController;
 use App\Http\Controllers\Public\RaffleController;
@@ -42,7 +42,8 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
 });
 
 Route::prefix('superadmin')->name('superadmin.')->middleware('superadmin.basic')->group(function () {
-    Route::get('/', PlatformController::class)->name('platform.index');
-    Route::get('/plataforma', PlatformController::class)->name('platform.alias');
+    Route::redirect('/', '/superadmin/tenants');
+    Route::resource('tenants', TenantController::class)->except(['show']);
 });
+
 
