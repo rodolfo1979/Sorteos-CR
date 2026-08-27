@@ -28,10 +28,7 @@ class TenantSuperAdminTest extends TestCase
 
     public function test_superadmin_tenants_is_not_available_inside_admin_routes(): void
     {
-        config(['admin.username' => 'admin-test', 'admin.password' => 'secure-test-password']);
-
-        $this->withBasicAuth('admin-test', 'secure-test-password')
-            ->get('/admin/plataforma')
+        $this->get('/admin/plataforma')
             ->assertNotFound();
     }
 
@@ -139,4 +136,5 @@ class TenantSuperAdminTest extends TestCase
         ])->assertRedirect('/superadmin');
     }
 }
+
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NumberController;
 use App\Http\Controllers\Admin\PaymentController;
@@ -21,7 +22,11 @@ Route::post('/rifas/{raffleId}/random', [PurchaseController::class, 'random'])->
 Route::post('/rifas/{raffleId}/comprar', [PurchaseController::class, 'store'])->name('purchases.store');
 Route::get('/confirmacion/{uuid}', [ConfirmationController::class, 'show'])->name('purchase.confirmation');
 
-Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(function () {
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.store');
+
+    Route::middleware('admin.session')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('/tiempo-real', RealtimeController::class)->name('realtime');
     Route::get('/rifas/crear', [AdminRaffleController::class, 'create'])->name('raffles.create');
@@ -39,7 +44,9 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
     Route::post('/pagos/{order}/rechazar', [PaymentController::class, 'reject'])->name('payments.reject');
     Route::get('/reportes', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/salud', SystemHealthController::class)->name('health.index');
-    Route::get('/numeros', [NumberController::class, 'index'])->name('numbers.index');
+        Route::get('/numeros', [NumberController::class, 'index'])->name('numbers.index');
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    });
 });
 
 Route::prefix('superadmin')->name('superadmin.')->group(function () {

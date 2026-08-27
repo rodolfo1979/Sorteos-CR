@@ -29,6 +29,10 @@
                     <a class="nav-link" href="{{ route('admin.numbers.index') }}">Numeros</a>
                     <a class="nav-link" href="{{ route('admin.health.index') }}">Salud</a>
                     <a class="nav-link" href="{{ route('raffles.show') }}">Ver venta</a>
+                    <form method="post" action="{{ route('admin.logout') }}">
+                        @csrf
+                        <button class="nav-link w-full text-left" type="submit">Salir</button>
+                    </form>
                 </nav>
 
                 <div class="mt-6 hidden rounded-xl border border-white/10 bg-white/10 p-4 text-sm text-cyan-50 lg:block">

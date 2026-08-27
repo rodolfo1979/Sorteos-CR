@@ -20,8 +20,6 @@ class AdminRealtimeTest extends TestCase
 
     public function test_admin_realtime_endpoint_returns_pending_orders_and_stats(): void
     {
-        config(['admin.username' => 'admin-test', 'admin.password' => 'secure-test-password']);
-
         $raffle = Raffle::create([
             'name' => 'Rifa en vivo',
             'slug' => 'rifa-en-vivo',
@@ -61,7 +59,7 @@ class AdminRealtimeTest extends TestCase
             $order->numbers()->attach($number->id, ['number' => $number->number]);
         }
 
-        $this->withBasicAuth('admin-test', 'secure-test-password')
+        $this->withSession(['admin_authenticated' => true])
             ->getJson(route('admin.realtime'))
             ->assertOk()
             ->assertJsonPath('stats.pending_payments', 1)

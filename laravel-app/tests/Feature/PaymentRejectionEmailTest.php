@@ -18,8 +18,6 @@ class PaymentRejectionEmailTest extends TestCase
     public function test_rejecting_a_payment_sends_rejection_email_and_releases_numbers(): void
     {
         Mail::fake();
-        config(['admin.username' => 'admin-test', 'admin.password' => 'secure-test-password']);
-
         $raffle = Raffle::create([
             'name' => 'Rifa de prueba',
             'slug' => 'rifa-de-prueba',
@@ -58,7 +56,7 @@ class PaymentRejectionEmailTest extends TestCase
             $order->numbers()->attach($number->id, ['number' => $number->number]);
         }
 
-        $this->withBasicAuth('admin-test', 'secure-test-password')
+        $this->withSession(['admin_authenticated' => true])
             ->post(route('admin.payments.reject', $order))
             ->assertRedirect()
             ->assertSessionHas('status', 'Pago rechazado. Los numeros volvieron a estar disponibles y el correo fue enviado al cliente.');
