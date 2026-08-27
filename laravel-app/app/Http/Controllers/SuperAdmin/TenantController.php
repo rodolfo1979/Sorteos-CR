@@ -48,7 +48,6 @@ class TenantController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateTenant($request)->validate();
-        $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
         $data['admin_password_hash'] = Hash::make($data['admin_password']);
         unset($data['admin_password'], $data['admin_password_confirmation']);
 
@@ -87,7 +86,6 @@ class TenantController extends Controller
     public function update(Request $request, Tenant $tenant): RedirectResponse
     {
         $data = $this->validateTenant($request, $tenant)->validate();
-        $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
 
         if (filled($data['admin_password'] ?? null)) {
             $data['admin_password_hash'] = Hash::make($data['admin_password']);
@@ -132,10 +130,11 @@ class TenantController extends Controller
     private function validateTenant(Request $request, ?Tenant $tenant = null): \Illuminate\Validation\Validator
     {
         $creating = ! $tenant?->exists;
+        $input = $this->normalizedTenantInput($request);
 
-        return Validator::make($request->all(), [
+        return Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', Rule::unique('tenants', 'slug')->ignore($tenant)],
+            'slug' => ['required', 'string', 'max:255', Rule::unique('tenants', 'slug')->ignore($tenant)],
             'status' => ['required', Rule::in(['active', 'suspended'])],
             'primary_domain' => ['nullable', 'string', 'max:255', Rule::unique('tenants', 'primary_domain')->ignore($tenant)],
             'admin_email' => ['nullable', 'email', 'max:255'],
@@ -146,6 +145,48 @@ class TenantController extends Controller
             'currency' => ['required', 'string', 'max:8'],
             'primary_color' => ['nullable', 'string', 'max:24'],
             'accent_color' => ['nullable', 'string', 'max:24'],
+        ], [
+            'slug.unique' => 'Ya existe un tenant con ese slug. Usa otro slug o cambia el nombre.',
+            'primary_domain.unique' => 'Ese dominio principal ya esta asignado a otro tenant.',
+            'admin_username.unique' => 'Ese usuario admin ya existe. Usa otro usuario para este tenant.',
+            'admin_password.confirmed' => 'La confirmacion de clave no coincide.',
+            'admin_password.min' => 'La clave admin debe tener al menos 8 caracteres.',
+            'admin_password.required' => 'La clave admin es obligatoria al crear un tenant.',
+        ], [
+            'name' => 'nombre',
+            'slug' => 'slug',
+            'primary_domain' => 'dominio principal',
+            'admin_email' => 'correo admin',
+            'admin_username' => 'usuario admin',
+            'admin_password' => 'clave admin',
+            'notification_email' => 'correo notificaciones',
+            'timezone' => 'zona horaria',
+            'currency' => 'moneda',
         ]);
+    }
+
+    private function normalizedTenantInput(Request $request): array
+    {
+        $input = $request->all();
+        $input['name'] = trim((string) ($input['name'] ?? ''));
+        $input['slug'] = filled($input['slug'] ?? null) ? Str::slug((string) $input['slug']) : Str::slug($input['name']);
+        $input['primary_domain'] = $this->normalizeDomain($input['primary_domain'] ?? null);
+        $input['admin_username'] = Str::lower(trim((string) ($input['admin_username'] ?? '')));
+        $input['currency'] = Str::upper(trim((string) ($input['currency'] ?? 'CRC')));
+
+        return $input;
+    }
+
+    private function normalizeDomain(?string $domain): ?string
+    {
+        $domain = Str::lower(trim((string) $domain));
+
+        if ($domain === '') {
+            return null;
+        }
+
+        $host = parse_url(Str::contains($domain, '://') ? $domain : 'https://'.$domain, PHP_URL_HOST);
+
+        return $host ? preg_replace('/^www\./', '', $host) : $domain;
     }
 }

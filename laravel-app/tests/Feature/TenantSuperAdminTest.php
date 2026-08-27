@@ -69,6 +69,38 @@ class TenantSuperAdminTest extends TestCase
         $this->get('/superadmin')->assertRedirect('/superadmin/login');
     }
 
+
+    public function test_superadmin_sees_clear_message_when_tenant_slug_is_duplicated(): void
+    {
+        Tenant::query()->create([
+            'name' => 'Cliente Demo',
+            'slug' => 'cliente-demo',
+            'status' => 'active',
+            'timezone' => 'America/Costa_Rica',
+            'currency' => 'CRC',
+        ]);
+
+        $this->loginAsSuperAdmin();
+
+        $this->post('/superadmin/tenants', [
+            'name' => 'Cliente Demo',
+            'slug' => '',
+            'status' => 'active',
+            'primary_domain' => '',
+            'admin_email' => 'admin2@demo.example.com',
+            'admin_username' => 'cliente-demo-admin-2',
+            'admin_password' => 'tenant-secret-123',
+            'admin_password_confirmation' => 'tenant-secret-123',
+            'notification_email' => 'avisos2@demo.example.com',
+            'timezone' => 'America/Costa_Rica',
+            'currency' => 'crc',
+            'primary_color' => '',
+            'accent_color' => '',
+        ])->assertSessionHasErrors([
+            'slug' => 'Ya existe un tenant con ese slug. Usa otro slug o cambia el nombre.',
+        ]);
+    }
+
     public function test_superadmin_can_create_update_and_delete_empty_tenant(): void
     {
         $this->loginAsSuperAdmin();
