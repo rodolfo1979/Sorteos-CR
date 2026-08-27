@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Raffle;
 use App\Services\PublicRaffleSnapshotService;
+use App\Services\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -21,10 +22,11 @@ class RaffleController extends Controller
         return view('admin.raffles.create');
     }
 
-    public function store(Request $request, PublicRaffleSnapshotService $snapshotService): RedirectResponse
+    public function store(Request $request, PublicRaffleSnapshotService $snapshotService, TenantContext $tenantContext): RedirectResponse
     {
         $data = $this->validatedData($request, true);
         $data['slug'] = $this->uniqueSlug($data['name']);
+        $data['tenant_id'] = $tenantContext->current()?->id;
         $data['sale_enabled'] = $request->boolean('sale_enabled');
         $data['is_featured'] = $request->boolean('is_featured');
         $data = $this->storeMedia($request, $data);
@@ -197,6 +199,7 @@ class RaffleController extends Controller
         $batch = [];
         for ($number = $raffle->numberStart(); $number <= $raffle->numberEnd(); $number++) {
             $batch[] = [
+                'tenant_id' => $raffle->tenant_id,
                 'raffle_id' => $raffle->id,
                 'number' => $raffle->formatNumber($number),
                 'status' => 'available',

@@ -13,7 +13,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'public_uuid', 'raffle_id', 'buyer_name', 'buyer_phone', 'buyer_email',
+        'tenant_id', 'public_uuid', 'raffle_id', 'buyer_name', 'buyer_phone', 'buyer_email',
         'package_count', 'amount_total', 'assignment_mode', 'random_changes_used',
         'status', 'receipt_path', 'receipt_original_name', 'receipt_mime',
         'approved_at', 'rejected_at',
@@ -23,6 +23,11 @@ class Order extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
     ];
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
 
     public function raffle(): BelongsTo
     {

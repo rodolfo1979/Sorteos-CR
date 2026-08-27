@@ -6,6 +6,7 @@ use App\Models\Raffle;
 use App\Services\OrderMailService;
 use App\Services\PublicRaffleSnapshotService;
 use App\Services\RaffleReservationService;
+use App\Services\TenantContext;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Artisan::command('raffles:rebuild-numbers {raffle_id} {--force}', function (): int {
+Artisan::command('raffles:rebuild-numbers {raffle_id} {--force}', function (TenantContext $tenantContext): int {
     $raffleId = (int) $this->argument('raffle_id');
     $raffle = Raffle::find($raffleId);
 
@@ -33,7 +34,8 @@ Artisan::command('raffles:rebuild-numbers {raffle_id} {--force}', function (): i
         return 1;
     }
 
-    DB::transaction(function () use ($raffle) {
+    DB::transaction(function () use ($raffle, $tenantContext) {
+        $tenantId = $raffle->tenant_id ?: $tenantContext->current()?->id;
         $raffle->orders()->delete();
         $raffle->numbers()->delete();
         $raffle->forceFill([
@@ -43,6 +45,7 @@ Artisan::command('raffles:rebuild-numbers {raffle_id} {--force}', function (): i
         $batch = [];
         for ($number = $raffle->numberStart(); $number <= $raffle->numberEnd(); $number++) {
             $batch[] = [
+                'tenant_id' => $tenantId,
                 'raffle_id' => $raffle->id,
                 'number' => $raffle->formatNumber($number),
                 'status' => 'available',
@@ -153,6 +156,7 @@ Artisan::command('orders:backfill-events {--limit=500}', function (): int {
 
         OrderEvent::create([
             'order_id' => $order->id,
+            'tenant_id' => $order->tenant_id,
             'action' => $action,
             'actor' => 'system:backfill',
             'description' => $description,

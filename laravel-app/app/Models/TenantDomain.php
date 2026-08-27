@@ -5,28 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class OrderEvent extends Model
+class TenantDomain extends Model
 {
     protected $fillable = [
         'tenant_id',
-        'order_id',
-        'action',
-        'actor',
-        'description',
-        'metadata',
+        'domain',
+        'type',
+        'is_verified',
     ];
 
     protected $casts = [
-        'metadata' => 'array',
+        'is_verified' => 'boolean',
     ];
 
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
-    }
-
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo(Order::class);
     }
 }

@@ -93,6 +93,7 @@ class RaffleReservationService
             }
 
             $order = Order::create([
+                'tenant_id' => $freshRaffle->tenant_id,
                 'public_uuid' => (string) Str::uuid(),
                 'raffle_id' => $freshRaffle->id,
                 'buyer_name' => $buyer['name'],

@@ -12,6 +12,7 @@ class OrderActivityService
     {
         try {
             $order->activityEvents()->create([
+                'tenant_id' => $order->tenant_id,
                 'action' => $action,
                 'actor' => $actor ?: $this->actor(),
                 'description' => $description,
@@ -20,6 +21,7 @@ class OrderActivityService
         } catch (Throwable $exception) {
             Log::warning('No se pudo registrar evento administrativo de orden.', [
                 'order_id' => $order->id,
+                'tenant_id' => $order->tenant_id,
                 'action' => $action,
                 'error' => $exception->getMessage(),
             ]);

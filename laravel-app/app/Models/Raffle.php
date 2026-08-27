@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Raffle extends Model
@@ -11,7 +12,7 @@ class Raffle extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'slug', 'total_numbers', 'number_width', 'price_per_package',
+        'tenant_id', 'name', 'slug', 'total_numbers', 'number_width', 'price_per_package',
         'numbers_per_package', 'max_random_changes', 'reservation_minutes',
         'assignment_mode', 'sale_enabled', 'is_featured', 'draw_date',
         'prize_title', 'prize_description', 'public_sales_text', 'image_path', 'media_paths', 'organizer_name',
@@ -24,6 +25,11 @@ class Raffle extends Model
         'draw_date' => 'date',
         'media_paths' => 'array',
     ];
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
 
     public function numbers(): HasMany
     {

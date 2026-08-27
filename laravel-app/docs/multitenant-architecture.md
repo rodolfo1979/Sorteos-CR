@@ -184,6 +184,22 @@ Ruta recomendada por tenant:
 
 Esto evita mezclar imagenes y simplifica limpieza/backups.
 
+## Estado actual de implementacion
+
+Implementado en Fase 1:
+- Documento de arquitectura versionado.
+- Tablas base `tenants`, `tenant_domains` y `tenant_settings`.
+- `tenant_id` nullable en `raffles`, `raffle_numbers`, `orders` y `order_events`.
+- Tenant principal `Sorteos CR` con dominio/configuracion inicial.
+- Backfill de datos existentes al tenant principal.
+- Relaciones Eloquent basicas para tenant.
+- Nuevas rifas, numeros, ordenes y eventos quedan asociados al tenant principal.
+
+Pendiente para Fase 2:
+- Resolver tenant real por dominio.
+- Filtrar todas las consultas por tenant actual.
+- Separar caches/snapshots por tenant.
+- Proteger model binding por tenant.
 ## Fases De Implementacion
 
 ### Fase 1 - Base multitenant sin cambiar UX

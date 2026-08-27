@@ -3,17 +3,21 @@
 namespace Database\Seeders;
 
 use App\Models\Raffle;
+use App\Services\TenantContext;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run(): void
+    public function run(TenantContext $tenantContext): void
     {
+        $tenant = $tenantContext->current();
+
         $defaultSalesText = "Rifas CR te da la oportunidad de participar por una moto nueva y casco.\n\nPor cada compra recibes 2 numeros digitales para el sorteo. Puedes escogerlos manualmente o dejar que el sistema los asigne al azar.\n\nLos numeros quedan reservados mientras subes el comprobante y administracion valida el pago.";
 
         $raffle = Raffle::firstOrCreate(
             ['slug' => 'rifa-moto-2026'],
             [
+                'tenant_id' => $tenant?->id,
                 'name' => 'Rifa Moto 2026',
                 'total_numbers' => 10000,
                 'number_width' => 4,
@@ -45,6 +49,7 @@ class DatabaseSeeder extends Seeder
             $batch = [];
             for ($number = $raffle->numberStart(); $number <= $raffle->numberEnd(); $number++) {
                 $batch[] = [
+                    'tenant_id' => $raffle->tenant_id,
                     'raffle_id' => $raffle->id,
                     'number' => $raffle->formatNumber($number),
                     'status' => 'available',
