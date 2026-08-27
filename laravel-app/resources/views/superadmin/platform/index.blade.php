@@ -1,4 +1,4 @@
-<x-layouts.app :title="$title">
+<x-layouts.superadmin :title="$title">
     <div class="space-y-6">
         <section class="overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#0f172a,#1e1b4b_58%,#083344)] p-6 text-white shadow-2xl shadow-slate-950/20">
             <div class="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-end">
@@ -77,4 +77,4 @@
             </div>
         </section>
     </div>
-</x-layouts.app>
+</x-layouts.superadmin>

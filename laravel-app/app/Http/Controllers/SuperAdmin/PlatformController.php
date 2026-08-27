@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
@@ -26,7 +26,7 @@ class PlatformController extends Controller
             ->get()
             ->map(fn (Tenant $tenant) => $this->tenantSummary($tenant));
 
-        return view('admin.platform.index', [
+        return view('superadmin.platform.index', [
             'title' => 'Super admin - Sorteos CR',
             'stats' => $stats,
             'tenants' => $tenants,

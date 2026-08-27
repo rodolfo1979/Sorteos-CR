@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\RequireAdminBasicAuth;
+use App\Http\Middleware\RequireSuperAdminBasicAuth;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin.basic' => RequireAdminBasicAuth::class,
+            'superadmin.basic' => RequireSuperAdminBasicAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
