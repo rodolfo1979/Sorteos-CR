@@ -6,52 +6,104 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background:
+                radial-gradient(circle at top left, rgba(34, 211, 238, 0.18), transparent 34%),
+                linear-gradient(135deg, #020617, #111827 54%, #1e1b4b);
+        }
+
+        .login-card {
+            width: min(100%, 420px);
+            border: 1px solid rgb(226 232 240);
+            border-radius: 18px;
+            background: rgb(255 255 255 / 0.98);
+            box-shadow: 0 28px 70px rgb(0 0 0 / 0.38);
+            padding: 28px;
+        }
+
+        .login-mark {
+            display: grid;
+            height: 44px;
+            width: 44px;
+            place-items: center;
+            border-radius: 14px;
+            background: #cffafe;
+            color: #020617;
+            font-weight: 950;
+        }
+
+        .login-field {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background: #fff;
+            padding: 12px 14px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .login-field:focus {
+            border-color: #0891b2;
+            box-shadow: 0 0 0 4px rgb(34 211 238 / 0.16);
+        }
+
+        .login-button {
+            width: 100%;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #fbbf24, #22d3ee);
+            color: #06111f;
+            font-weight: 950;
+            padding: 13px 16px;
+            transition: 160ms ease;
+        }
+
+        .login-button:hover { transform: translateY(-1px); }
+    </style>
 </head>
-<body class="min-h-screen bg-slate-950 font-sans text-slate-950 antialiased">
-    <main class="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_32%),linear-gradient(135deg,#020617,#111827_54%,#312e81)] p-4">
-        <section class="grid w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl shadow-slate-950/40 lg:grid-cols-[1fr_420px]">
-            <div class="hidden bg-[linear-gradient(145deg,#020617,#0f172a_55%,#164e63)] p-8 text-white lg:block">
-                <div class="flex items-center gap-3">
-                    <div class="grid h-12 w-12 place-items-center rounded-xl bg-cyan-100 text-lg font-black text-slate-950">SA</div>
-                    <div>
-                        <p class="text-xs font-black uppercase tracking-[0.22em] text-cyan-200">Sorteos CR</p>
-                        <h1 class="text-3xl font-black tracking-tight">Super Admin</h1>
-                    </div>
-                </div>
-                <div class="mt-24 max-w-md">
-                    <p class="text-xs font-black uppercase tracking-[0.22em] text-cyan-200">Plataforma</p>
-                    <h2 class="mt-3 text-4xl font-black tracking-tight">Control de tenants separado del admin operativo.</h2>
-                    <p class="mt-4 text-sm font-bold leading-6 text-cyan-100/80">Acceso reservado para administrar clientes, dominios y configuracion global.</p>
+<body class="font-sans antialiased">
+    <main class="login-page">
+        <form class="login-card" method="post" action="{{ route('superadmin.login.store') }}">
+            @csrf
+
+            <div class="flex items-center gap-3">
+                <div class="login-mark">SA</div>
+                <div>
+                    <p class="text-[0.68rem] font-black uppercase tracking-[0.18em] text-cyan-700">Sorteos CR</p>
+                    <h1 class="text-2xl font-black tracking-tight text-slate-950">Super Admin</h1>
                 </div>
             </div>
 
-            <form class="grid gap-5 p-6 sm:p-8" method="post" action="{{ route('superadmin.login.store') }}">
-                @csrf
-                <div>
-                    <p class="text-xs font-black uppercase tracking-[0.22em] text-indigo-700">Acceso seguro</p>
-                    <h2 class="mt-2 text-3xl font-black tracking-tight">Entrar al super admin</h2>
-                    <p class="mt-2 text-sm font-bold text-slate-500">Usa las credenciales configuradas en el servidor.</p>
-                </div>
+            <div class="mt-8">
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-indigo-700">Acceso seguro</p>
+                <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-950">Iniciar sesion</h2>
+                <p class="mt-2 text-sm font-bold leading-6 text-slate-500">Administra tenants, dominios y configuracion global.</p>
+            </div>
 
-                @if (session('status'))
-                    <div class="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-bold text-cyan-900">{{ session('status') }}</div>
-                @endif
+            @if (session('status'))
+                <div class="mt-5 rounded-xl border border-cyan-200 bg-cyan-50 p-3 text-sm font-bold text-cyan-900">{{ session('status') }}</div>
+            @endif
 
-                @if ($errors->any())
-                    <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">{{ $errors->first() }}</div>
-                @endif
+            @if ($errors->any())
+                <div class="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">{{ $errors->first() }}</div>
+            @endif
 
+            <div class="mt-6 grid gap-4">
                 <label class="grid gap-1 text-sm font-black text-slate-600">Usuario
-                    <input class="field" name="username" value="{{ old('username') }}" autocomplete="username" autofocus required>
+                    <input class="login-field" name="username" value="{{ old('username') }}" autocomplete="username" autofocus required>
                 </label>
 
                 <label class="grid gap-1 text-sm font-black text-slate-600">Clave
-                    <input class="field" type="password" name="password" autocomplete="current-password" required>
+                    <input class="login-field" type="password" name="password" autocomplete="current-password" required>
                 </label>
+            </div>
 
-                <button class="primary-action w-full" type="submit">Entrar</button>
-            </form>
-        </section>
+            <button class="login-button mt-6" type="submit">Entrar</button>
+        </form>
     </main>
 </body>
 </html>

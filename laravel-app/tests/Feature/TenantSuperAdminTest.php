@@ -20,7 +20,7 @@ class TenantSuperAdminTest extends TestCase
     {
         $this->get('/superadmin/login')
             ->assertOk()
-            ->assertSee('Entrar al super admin')
+            ->assertSee('Iniciar sesion')
             ->assertSee('Usuario')
             ->assertSee('Clave');
     }
@@ -130,3 +130,4 @@ class TenantSuperAdminTest extends TestCase
         ])->assertRedirect('/superadmin');
     }
 }
+
