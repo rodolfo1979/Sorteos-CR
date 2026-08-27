@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Tenant;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class TenantContext
 {
@@ -13,9 +15,17 @@ class TenantContext
 
     public function principal(): ?Tenant
     {
-        return Tenant::query()
-            ->where('slug', 'sorteos-cr')
-            ->first()
-            ?? Tenant::query()->oldest('id')->first();
+        try {
+            if (! Schema::hasTable('tenants')) {
+                return null;
+            }
+
+            return Tenant::query()
+                ->where('slug', 'sorteos-cr')
+                ->first()
+                ?? Tenant::query()->oldest('id')->first();
+        } catch (Throwable) {
+            return null;
+        }
     }
 }
