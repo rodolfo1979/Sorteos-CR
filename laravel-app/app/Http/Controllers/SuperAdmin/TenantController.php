@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -48,6 +49,8 @@ class TenantController extends Controller
     {
         $data = $this->validateTenant($request)->validate();
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
+        $data['admin_password_hash'] = Hash::make($data['admin_password']);
+        unset($data['admin_password'], $data['admin_password_confirmation']);
 
         DB::transaction(function () use ($data): void {
             $tenant = Tenant::query()->create($data);
@@ -86,6 +89,12 @@ class TenantController extends Controller
         $data = $this->validateTenant($request, $tenant)->validate();
         $data['slug'] = $data['slug'] ?: Str::slug($data['name']);
 
+        if (filled($data['admin_password'] ?? null)) {
+            $data['admin_password_hash'] = Hash::make($data['admin_password']);
+        }
+
+        unset($data['admin_password'], $data['admin_password_confirmation']);
+
         DB::transaction(function () use ($tenant, $data): void {
             $oldDomain = $tenant->primary_domain;
             $tenant->update($data);
@@ -122,12 +131,16 @@ class TenantController extends Controller
 
     private function validateTenant(Request $request, ?Tenant $tenant = null): \Illuminate\Validation\Validator
     {
+        $creating = ! $tenant?->exists;
+
         return Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('tenants', 'slug')->ignore($tenant)],
             'status' => ['required', Rule::in(['active', 'suspended'])],
             'primary_domain' => ['nullable', 'string', 'max:255', Rule::unique('tenants', 'primary_domain')->ignore($tenant)],
             'admin_email' => ['nullable', 'email', 'max:255'],
+            'admin_username' => ['required', 'string', 'max:120', Rule::unique('tenants', 'admin_username')->ignore($tenant)],
+            'admin_password' => [$creating ? 'required' : 'nullable', 'string', 'min:8', 'confirmed'],
             'notification_email' => ['nullable', 'email', 'max:255'],
             'timezone' => ['required', 'string', 'max:64'],
             'currency' => ['required', 'string', 'max:8'],

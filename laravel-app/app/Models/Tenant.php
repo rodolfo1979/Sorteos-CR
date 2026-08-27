@@ -14,12 +14,18 @@ class Tenant extends Model
         'status',
         'primary_domain',
         'admin_email',
+        'admin_username',
+        'admin_password_hash',
         'notification_email',
         'timezone',
         'currency',
         'logo_path',
         'primary_color',
         'accent_color',
+    ];
+
+    protected $hidden = [
+        'admin_password_hash',
     ];
 
     public function domains(): HasMany

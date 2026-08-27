@@ -32,6 +32,7 @@
                             <th class="px-5 py-3">Tenant</th>
                             <th class="px-5 py-3">Estado</th>
                             <th class="px-5 py-3">Dominio principal</th>
+                            <th class="px-5 py-3">Usuario admin</th>
                             <th class="px-5 py-3">Correo admin</th>
                             <th class="px-5 py-3 text-right">Dominios</th>
                             <th class="px-5 py-3 text-right">Datos</th>
@@ -53,6 +54,7 @@
                                     ])>{{ $tenant->status }}</span>
                                 </td>
                                 <td class="px-5 py-4 font-bold text-slate-700">{{ $tenant->primary_domain ?: 'Sin dominio' }}</td>
+                                <td class="px-5 py-4 font-bold text-slate-700">{{ $tenant->admin_username ?: 'Sin usuario' }}</td>
                                 <td class="px-5 py-4 font-bold text-slate-700">{{ $tenant->admin_email ?: 'Sin correo' }}</td>
                                 <td class="px-5 py-4 text-right font-black">{{ $tenant->domains_count }}</td>
                                 <td class="px-5 py-4 text-right font-bold text-slate-600">{{ $tenant->raffles_count }} rifa(s) · {{ $tenant->orders_count }} orden(es)</td>
@@ -69,7 +71,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-5 py-8 text-center font-bold text-slate-500">No hay tenants configurados.</td>
+                                <td colspan="8" class="px-5 py-8 text-center font-bold text-slate-500">No hay tenants configurados.</td>
                             </tr>
                         @endforelse
                     </tbody>

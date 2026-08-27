@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Tenant;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -81,6 +82,9 @@ class TenantSuperAdminTest extends TestCase
             'status' => 'active',
             'primary_domain' => 'demo.example.com',
             'admin_email' => 'admin@demo.example.com',
+            'admin_username' => 'cliente-demo-admin',
+            'admin_password' => 'tenant-secret-123',
+            'admin_password_confirmation' => 'tenant-secret-123',
             'notification_email' => 'avisos@demo.example.com',
             'timezone' => 'America/Costa_Rica',
             'currency' => 'CRC',
@@ -90,6 +94,7 @@ class TenantSuperAdminTest extends TestCase
 
         $tenant = Tenant::query()->where('slug', 'cliente-demo')->firstOrFail();
         $this->assertDatabaseHas('tenant_domains', ['tenant_id' => $tenant->id, 'domain' => 'demo.example.com']);
+        $this->assertTrue(Hash::check('tenant-secret-123', (string) $tenant->admin_password_hash));
 
         $this->put("/superadmin/tenants/{$tenant->id}", [
             'name' => 'Cliente Demo Editado',
@@ -97,6 +102,9 @@ class TenantSuperAdminTest extends TestCase
             'status' => 'suspended',
             'primary_domain' => 'demo.example.com',
             'admin_email' => 'admin@demo.example.com',
+            'admin_username' => 'cliente-demo-admin',
+            'admin_password' => '',
+            'admin_password_confirmation' => '',
             'notification_email' => 'nuevo@demo.example.com',
             'timezone' => 'America/Costa_Rica',
             'currency' => 'CRC',
@@ -108,6 +116,7 @@ class TenantSuperAdminTest extends TestCase
             'id' => $tenant->id,
             'name' => 'Cliente Demo Editado',
             'status' => 'suspended',
+            'admin_username' => 'cliente-demo-admin',
             'notification_email' => 'nuevo@demo.example.com',
         ]);
 

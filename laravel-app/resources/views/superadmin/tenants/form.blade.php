@@ -38,6 +38,25 @@
             </article>
 
             <article class="surface p-5">
+                <p class="text-xs font-black uppercase tracking-wide text-slate-500">Acceso admin del tenant</p>
+                <h3 class="mt-1 text-2xl font-black tracking-tight">Usuario y clave</h3>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <label class="grid gap-1 text-sm font-black text-slate-600 md:col-span-2">Usuario admin
+                        <input class="field" name="admin_username" value="{{ old('admin_username', $tenant->admin_username) }}" placeholder="admin-cliente" autocomplete="off" required>
+                    </label>
+                    <label class="grid gap-1 text-sm font-black text-slate-600">Clave {{ $tenant->exists ? 'nueva' : '' }}
+                        <input class="field" type="password" name="admin_password" autocomplete="new-password" @required(! $tenant->exists)>
+                    </label>
+                    <label class="grid gap-1 text-sm font-black text-slate-600">Confirmar clave
+                        <input class="field" type="password" name="admin_password_confirmation" autocomplete="new-password" @required(! $tenant->exists)>
+                    </label>
+                    @if ($tenant->exists)
+                        <p class="text-xs font-bold leading-5 text-slate-500 md:col-span-2">Deja la clave vacia para conservar la actual.</p>
+                    @endif
+                </div>
+            </article>
+
+            <article class="surface p-5">
                 <p class="text-xs font-black uppercase tracking-wide text-slate-500">Contacto</p>
                 <h3 class="mt-1 text-2xl font-black tracking-tight">Correos del tenant</h3>
                 <div class="mt-5 grid gap-4 md:grid-cols-2">
