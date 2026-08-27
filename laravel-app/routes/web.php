@@ -7,10 +7,11 @@ use App\Http\Controllers\Admin\RaffleController as AdminRaffleController;
 use App\Http\Controllers\Admin\RealtimeController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SystemHealthController;
-use App\Http\Controllers\SuperAdmin\TenantController;
 use App\Http\Controllers\Public\ConfirmationController;
 use App\Http\Controllers\Public\PurchaseController;
 use App\Http\Controllers\Public\RaffleController;
+use App\Http\Controllers\SuperAdmin\AuthController;
+use App\Http\Controllers\SuperAdmin\TenantController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [RaffleController::class, 'show'])->name('raffles.show');
@@ -41,15 +42,18 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
     Route::get('/numeros', [NumberController::class, 'index'])->name('numbers.index');
 });
 
-Route::prefix('superadmin')->name('superadmin.')->middleware('superadmin.basic')->group(function () {
-    Route::get('/', [TenantController::class, 'index'])->name('tenants.index');
-    Route::get('/tenants/create', [TenantController::class, 'create'])->name('tenants.create');
-    Route::post('/tenants', [TenantController::class, 'store'])->name('tenants.store');
-    Route::get('/tenants/{tenant}/edit', [TenantController::class, 'edit'])->name('tenants.edit');
-    Route::put('/tenants/{tenant}', [TenantController::class, 'update'])->name('tenants.update');
-    Route::patch('/tenants/{tenant}', [TenantController::class, 'update']);
-    Route::delete('/tenants/{tenant}', [TenantController::class, 'destroy'])->name('tenants.destroy');
+Route::prefix('superadmin')->name('superadmin.')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+
+    Route::middleware('superadmin.session')->group(function () {
+        Route::get('/', [TenantController::class, 'index'])->name('tenants.index');
+        Route::get('/tenants/create', [TenantController::class, 'create'])->name('tenants.create');
+        Route::post('/tenants', [TenantController::class, 'store'])->name('tenants.store');
+        Route::get('/tenants/{tenant}/edit', [TenantController::class, 'edit'])->name('tenants.edit');
+        Route::put('/tenants/{tenant}', [TenantController::class, 'update'])->name('tenants.update');
+        Route::patch('/tenants/{tenant}', [TenantController::class, 'update']);
+        Route::delete('/tenants/{tenant}', [TenantController::class, 'destroy'])->name('tenants.destroy');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
 });
-
-
-
