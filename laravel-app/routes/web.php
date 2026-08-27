@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NumberController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\PlatformController;
 use App\Http\Controllers\Admin\RaffleController as AdminRaffleController;
 use App\Http\Controllers\Admin\RealtimeController;
 use App\Http\Controllers\Admin\ReportController;
@@ -37,5 +38,6 @@ Route::prefix('admin')->name('admin.')->middleware('admin.basic')->group(functio
     Route::post('/pagos/{order}/rechazar', [PaymentController::class, 'reject'])->name('payments.reject');
     Route::get('/reportes', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/salud', SystemHealthController::class)->name('health.index');
+    Route::get('/plataforma', PlatformController::class)->name('platform.index');
     Route::get('/numeros', [NumberController::class, 'index'])->name('numbers.index');
 });
