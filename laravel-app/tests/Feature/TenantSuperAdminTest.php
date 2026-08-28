@@ -115,6 +115,8 @@ class TenantSuperAdminTest extends TestCase
             'admin_password' => 'tenant-secret-123',
             'admin_password_confirmation' => 'tenant-secret-123',
             'notification_email' => 'avisos@demo.example.com',
+            'mail_from_address' => 'ventas@demo.example.com',
+            'mail_from_name' => 'Demo Sorteos',
             'timezone' => 'America/Costa_Rica',
             'currency' => 'CRC',
             'primary_color' => '#0f172a',
@@ -124,6 +126,12 @@ class TenantSuperAdminTest extends TestCase
         $tenant = Tenant::query()->where('slug', 'cliente-demo')->firstOrFail();
         $this->assertDatabaseHas('tenant_domains', ['tenant_id' => $tenant->id, 'domain' => 'demo.example.com']);
         $this->assertTrue(Hash::check('tenant-secret-123', (string) $tenant->admin_password_hash));
+        $this->assertDatabaseHas('tenant_settings', [
+            'tenant_id' => $tenant->id,
+            'mail_from_address' => 'ventas@demo.example.com',
+            'mail_from_name' => 'Demo Sorteos',
+            'notification_email' => 'avisos@demo.example.com',
+        ]);
 
         $this->put("/superadmin/tenants/{$tenant->id}", [
             'name' => 'Cliente Demo Editado',
@@ -135,6 +143,8 @@ class TenantSuperAdminTest extends TestCase
             'admin_password' => '',
             'admin_password_confirmation' => '',
             'notification_email' => 'nuevo@demo.example.com',
+            'mail_from_address' => 'ventas2@demo.example.com',
+            'mail_from_name' => 'Demo Editado',
             'timezone' => 'America/Costa_Rica',
             'currency' => 'CRC',
             'primary_color' => '#111827',
@@ -146,6 +156,13 @@ class TenantSuperAdminTest extends TestCase
             'name' => 'Cliente Demo Editado',
             'status' => 'suspended',
             'admin_username' => 'cliente-demo-admin',
+            'notification_email' => 'nuevo@demo.example.com',
+        ]);
+
+        $this->assertDatabaseHas('tenant_settings', [
+            'tenant_id' => $tenant->id,
+            'mail_from_address' => 'ventas2@demo.example.com',
+            'mail_from_name' => 'Demo Editado',
             'notification_email' => 'nuevo@demo.example.com',
         ]);
 
@@ -168,5 +185,4 @@ class TenantSuperAdminTest extends TestCase
         ])->assertRedirect('/superadmin');
     }
 }
-
 

@@ -48,10 +48,11 @@ class TenantController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateTenant($request)->validate();
+        $settings = $this->settingsData($data);
         $data['admin_password_hash'] = Hash::make($data['admin_password']);
         unset($data['admin_password'], $data['admin_password_confirmation']);
 
-        DB::transaction(function () use ($data): void {
+        DB::transaction(function () use ($data, $settings): void {
             $tenant = Tenant::query()->create($data);
 
             if ($tenant->primary_domain) {
@@ -63,9 +64,9 @@ class TenantController extends Controller
             }
 
             $tenant->settings()->create([
-                'mail_from_address' => config('mail.from.address'),
-                'mail_from_name' => $tenant->name,
-                'notification_email' => $tenant->notification_email,
+                'mail_from_address' => $settings['mail_from_address'] ?: config('mail.from.address'),
+                'mail_from_name' => $settings['mail_from_name'] ?: $tenant->name,
+                'notification_email' => $settings['notification_email'] ?: $tenant->notification_email,
                 'reservation_minutes_default' => 45,
             ]);
         });
@@ -75,6 +76,8 @@ class TenantController extends Controller
 
     public function edit(Tenant $tenant): View
     {
+        $tenant->loadMissing('settings');
+
         return view('superadmin.tenants.form', [
             'title' => 'Editar tenant - Super admin',
             'tenant' => $tenant,
@@ -86,6 +89,7 @@ class TenantController extends Controller
     public function update(Request $request, Tenant $tenant): RedirectResponse
     {
         $data = $this->validateTenant($request, $tenant)->validate();
+        $settings = $this->settingsData($data);
 
         if (filled($data['admin_password'] ?? null)) {
             $data['admin_password_hash'] = Hash::make($data['admin_password']);
@@ -93,7 +97,7 @@ class TenantController extends Controller
 
         unset($data['admin_password'], $data['admin_password_confirmation']);
 
-        DB::transaction(function () use ($tenant, $data): void {
+        DB::transaction(function () use ($tenant, $data, $settings): void {
             $oldDomain = $tenant->primary_domain;
             $tenant->update($data);
 
@@ -107,8 +111,9 @@ class TenantController extends Controller
             $tenant->settings()->updateOrCreate(
                 ['tenant_id' => $tenant->id],
                 [
-                    'mail_from_name' => $tenant->name,
-                    'notification_email' => $tenant->notification_email,
+                    'mail_from_address' => $settings['mail_from_address'] ?: config('mail.from.address'),
+                    'mail_from_name' => $settings['mail_from_name'] ?: $tenant->name,
+                    'notification_email' => $settings['notification_email'] ?: $tenant->notification_email,
                 ]
             );
         });
@@ -141,6 +146,8 @@ class TenantController extends Controller
             'admin_username' => ['required', 'string', 'max:120', Rule::unique('tenants', 'admin_username')->ignore($tenant)],
             'admin_password' => [$creating ? 'required' : 'nullable', 'string', 'min:8', 'confirmed'],
             'notification_email' => ['nullable', 'email', 'max:255'],
+            'mail_from_address' => ['nullable', 'email', 'max:255'],
+            'mail_from_name' => ['nullable', 'string', 'max:255'],
             'timezone' => ['required', 'string', 'max:64'],
             'currency' => ['required', 'string', 'max:8'],
             'primary_color' => ['nullable', 'string', 'max:24'],
@@ -160,6 +167,8 @@ class TenantController extends Controller
             'admin_username' => 'usuario admin',
             'admin_password' => 'clave admin',
             'notification_email' => 'correo notificaciones',
+            'mail_from_address' => 'correo remitente',
+            'mail_from_name' => 'nombre remitente',
             'timezone' => 'zona horaria',
             'currency' => 'moneda',
         ]);
@@ -172,9 +181,24 @@ class TenantController extends Controller
         $input['slug'] = filled($input['slug'] ?? null) ? Str::slug((string) $input['slug']) : Str::slug($input['name']);
         $input['primary_domain'] = $this->normalizeDomain($input['primary_domain'] ?? null);
         $input['admin_username'] = Str::lower(trim((string) ($input['admin_username'] ?? '')));
+        $input['mail_from_address'] = Str::lower(trim((string) ($input['mail_from_address'] ?? '')));
+        $input['mail_from_name'] = trim((string) ($input['mail_from_name'] ?? ''));
         $input['currency'] = Str::upper(trim((string) ($input['currency'] ?? 'CRC')));
 
         return $input;
+    }
+
+    private function settingsData(array &$data): array
+    {
+        $settings = [
+            'mail_from_address' => $data['mail_from_address'] ?? null,
+            'mail_from_name' => $data['mail_from_name'] ?? null,
+            'notification_email' => $data['notification_email'] ?? null,
+        ];
+
+        unset($data['mail_from_address'], $data['mail_from_name']);
+
+        return $settings;
     }
 
     private function normalizeDomain(?string $domain): ?string

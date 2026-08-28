@@ -10,6 +10,8 @@ use Throwable;
 
 class OrderMailService
 {
+    public function __construct(private TenantMailProfile $mailProfile) {}
+
     public function sendReserved(Order $order, string $source = 'automatic'): bool
     {
         $order->loadMissing('raffle', 'numbers');
@@ -51,7 +53,9 @@ class OrderMailService
 
     public function notifyAdminNewOrder(Order $order, string $source = 'automatic'): void
     {
-        $adminEmail = config('admin.notification_email');
+        $order->loadMissing('raffle', 'numbers', 'tenant.settings', 'raffle.tenant.settings');
+        $profile = $this->mailProfile->forOrder($order);
+        $adminEmail = $profile['notification_email'];
 
         if (! $adminEmail) {
             app(OrderActivityService::class)->record($order, 'admin_email_skipped', 'No se envio aviso admin porque no hay correo configurado.', [
@@ -61,15 +65,15 @@ class OrderMailService
             return;
         }
 
-        $order->loadMissing('raffle', 'numbers');
-
         $subject = 'Nuevo comprobante pendiente - '.$order->raffle->name;
 
         try {
             Mail::to($adminEmail)->queue(new OrderStatusMail(
                 $order,
                 'emails.admin-new-order',
-                $subject
+                $subject,
+                $profile['from_address'],
+                $profile['from_name']
             ));
 
             Log::warning('Correo encolado para administracion.', [
@@ -118,7 +122,15 @@ class OrderMailService
         }
 
         try {
-            Mail::to($order->buyer_email, $order->buyer_name)->queue(new OrderStatusMail($order, $view, $subject));
+            $profile = $this->mailProfile->forOrder($order);
+
+            Mail::to($order->buyer_email, $order->buyer_name)->queue(new OrderStatusMail(
+                $order,
+                $view,
+                $subject,
+                $profile['from_address'],
+                $profile['from_name']
+            ));
 
             Log::warning("Correo encolado para comprador: {$type}.", [
                 'type' => $type,
@@ -172,7 +184,15 @@ class OrderMailService
         }
 
         try {
-            Mail::to($order->buyer_email, $order->buyer_name)->send(new OrderStatusMail($order, $view, $subject));
+            $profile = $this->mailProfile->forOrder($order);
+
+            Mail::to($order->buyer_email, $order->buyer_name)->send(new OrderStatusMail(
+                $order,
+                $view,
+                $subject,
+                $profile['from_address'],
+                $profile['from_name']
+            ));
 
             Log::warning("Correo enviado directamente para comprador: {$type}.", [
                 'type' => $type,

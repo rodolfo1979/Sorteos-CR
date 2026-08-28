@@ -1,9 +1,11 @@
 <x-layouts.superadmin :title="$title">
+    @php($settings = $tenant->settings)
+
     <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <p class="text-xs font-black uppercase tracking-[0.22em] text-indigo-700">Super admin</p>
             <h2 class="mt-2 text-4xl font-black tracking-tight">{{ $tenant->exists ? 'Editar tenant' : 'Crear tenant' }}</h2>
-            <p class="mt-2 max-w-2xl text-slate-600">Define identidad, dominio principal y estado del tenant dentro de la plataforma.</p>
+            <p class="mt-2 max-w-2xl text-slate-600">Define identidad, dominio principal, acceso y correos propios del tenant.</p>
         </div>
         <a class="rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white transition hover:bg-slate-700" href="{{ route('superadmin.tenants.index') }}">Volver</a>
     </div>
@@ -65,6 +67,12 @@
                     </label>
                     <label class="grid gap-1 text-sm font-black text-slate-600">Correo notificaciones
                         <input class="field" type="email" name="notification_email" value="{{ old('notification_email', $tenant->notification_email) }}" placeholder="avisos@cliente.com">
+                    </label>
+                    <label class="grid gap-1 text-sm font-black text-slate-600">Correo remitente
+                        <input class="field" type="email" name="mail_from_address" value="{{ old('mail_from_address', $settings?->mail_from_address) }}" placeholder="no-reply@cliente.com">
+                    </label>
+                    <label class="grid gap-1 text-sm font-black text-slate-600">Nombre remitente
+                        <input class="field" name="mail_from_name" value="{{ old('mail_from_name', $settings?->mail_from_name ?: $tenant->name) }}" placeholder="Sorteos Cliente">
                     </label>
                 </div>
             </article>
